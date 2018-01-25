@@ -1,0 +1,25 @@
+{
+  "manifest_version": 2,
+  "name": "My crx",
+  "description": "This extension shows a Google Image search result for the current page",
+  "version": "1.0",
+  "browser_action": {
+    "default_icon": "icon.png",
+    "default_title": "这是一个示例Chrome插件",
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "scripts": [
+      "popup.js"
+    ]
+  },
+  "permissions": [
+    "http://bgm.tv/*",
+    "https://bgm.tv/*",
+    "https://www.bilibili.com/*",
+    "https://httpbin.org/*",
+    "management",
+    "contentSettings",
+    "cookies"
+  ]
+}
