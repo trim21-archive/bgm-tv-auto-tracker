@@ -16,10 +16,24 @@
   "permissions": [
     "http://bgm.tv/*",
     "https://bgm.tv/*",
-    "https://www.bilibili.com/*",
+    "https://www.bilibili.com/bangumi/play/*",
     "https://httpbin.org/*",
     "management",
     "contentSettings",
-    "cookies"
+    "cookies",
+    "storage",
+    "webRequest"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.bilibili.com/bangumi/play/*"
+      ],
+      "js": [
+        "lib/jquery/jquery-3.3.1.min.js",
+        "js/get_bangumi_info.js"
+      ],
+      "run_at": "document_end"
+    }
   ]
 }
