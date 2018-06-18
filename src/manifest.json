@@ -6,18 +6,16 @@
   "browser_action": {
     "default_icon": "icon.png",
     "default_title": "这是一个示例Chrome插件",
-    "default_popup": "popup.html"
+    "default_popup": "popup/popup.html"
   },
   "background": {
-    "scripts": [
-      "popup.js"
-    ]
+    "page": "background/background.html"
   },
   "permissions": [
     "http://bgm.tv/*",
     "https://bgm.tv/*",
-    "https://www.bilibili.com/bangumi/play/*",
-    "https://httpbin.org/*",
+    "https://api.bgm.tv/*",
+    "http://localhost:6001/*",
     "management",
     "contentSettings",
     "cookies",
@@ -27,13 +25,29 @@
   "content_scripts": [
     {
       "matches": [
+        "https://www.bilibili.com/bangumi/play/*/21332131"
+      ],
+      "run_at": "document_start",
+      "js": [
+        "lib/axios/axios.min.js",
+        "lib/jquery/jquery-3.3.1.min.js",
+        "inject/common.js"
+      ]
+    },
+    {
+      "matches": [
         "https://www.bilibili.com/bangumi/play/*"
       ],
+      "run_at": "document_end",
       "js": [
-        "lib/jquery/jquery-3.3.1.min.js",
-        "js/get_bangumi_info.js"
-      ],
-      "run_at": "document_end"
+        "inject/bilibili.js"
+      ]
     }
-  ]
+  ],
+  "externally_connectable": {
+    "matches": [
+      "http://localhost:*/*",
+      "https://www.bilibili.com/bangumi/play/*"
+    ]
+  }
 }

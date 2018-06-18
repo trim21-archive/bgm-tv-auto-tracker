@@ -1,0 +1,7 @@
+beautifulsoup4
+pymongo
+pytz
+requests
+motor
+aiohttp
+aiohttp_cors
