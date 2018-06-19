@@ -11,7 +11,8 @@ function injectBilibili () {
     'type': 'watch_episode',
     'website': 'bilibili',
     'bangumi_id': id,
-    episode
+    'title': status.mediaInfo.alias,
+    episode,
   }, function (res) {
     console.log(res)
   })
@@ -23,6 +24,7 @@ injectBilibili()
 let url = location.href
 
 function detectHrefChange () {
+  console.log('check href')
   if (location.href !== url) {
     injectBilibili()
     url = location.href
@@ -30,7 +32,7 @@ function detectHrefChange () {
 
 }
 
-setInterval(detectHrefChange, 100 * 1000)
+setInterval(detectHrefChange, 10 * 1000)
  `
 document.body.appendChild(script)
 //`

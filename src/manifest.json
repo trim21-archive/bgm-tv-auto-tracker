@@ -16,11 +16,13 @@
     "https://bgm.tv/*",
     "https://api.bgm.tv/*",
     "http://localhost:6001/*",
+    "https://bangumi-auto-tracker.trim21.cn/*",
     "management",
     "contentSettings",
     "cookies",
     "storage",
-    "webRequest"
+    "webRequest",
+    "notifications"
   ],
   "content_scripts": [
     {
@@ -47,6 +49,7 @@
   "externally_connectable": {
     "matches": [
       "http://localhost:*/*",
+      "https://bangumi-auto-tracker.trim21.cn/*",
       "https://www.bilibili.com/bangumi/play/*"
     ]
   }

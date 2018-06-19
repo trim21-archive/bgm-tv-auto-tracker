@@ -1,63 +1,53 @@
+const serverApi = axios.create({
+  baseURL: `${VARS.serverURL}/`,
+  timeout: 10000
+})
+
+chrome.runtime.onMessageExternal.addListener(function (message, sender, sendResponse) {
+  console.log(message)
+  if (message.type === 'auth') {
+    setData(message)
+    sendResponse('Successfully authorized')
+  } else if (message.type === 'watch_episode') {
+    const opt = {
+      type: 'basic',
+      title: 'bgm.tv auto tracker',
+      message: `Find you watching ${message.title} ${message.episode}`,
+      priority: 1,
+      iconUrl: '../icon.png'
+    }
+    chrome.notifications.create('id', opt, function (id) {
+      let timer = setTimeout(function () {chrome.notifications.clear(id)}, 2000)
+    })
+    watchEpisode(bgmApi, message)
+  }
+})
+
 function init () {
   const axios = window.axios
-  const serverApi = axios.create({
-    baseURL: 'http://localhost:6001/',
-    timeout: 10000
-  })
   console.log('init')
   const data = getData()
-  if (!data) { return }
+  if (!data) {
+    chrome.tabs.create({ url: `https://bgm.tv/oauth/authorize?client_id=bgm2775b2797b4d958b&response_type=code&redirect_uri=${VARS.serverURL}/oauth_callback` })
+    return
+  }
   if (data.authTime + data.expiresIn - parseInt(new Date().getTime() / 1000) < 24 * 60 * 60) {
-    refreshToken(data.userID, data.refreshToken)
-    return null
+    refreshToken(data.userID, data.refreshToken, function (err) {
+      if (err) {
+        alert(err)
+      } else {
+        init()
+      }
+
+    })
   }
 
-  const bgmApi = axios.create({
+  window.bgmApi = axios.create({
     baseURL: 'https://api.bgm.tv/',
-    timeout: 1000,
+    timeout: 10000,
     headers: { 'Authorization': 'Bearer ' + data.accessToken }
   })
 
-  const chrome = window.chrome
-  chrome.runtime.onMessageExternal.addListener(function (message, sender, sendResponse) {
-    console.log(message)
-    if (message.type === 'auth') {
-      setData(message)
-      sendResponse('Successfully authorized')
-    } else if (message.type === 'watch_episode') {
-      serverApi.get('/query/bilibili', {
-        params: { bangumi_id: message.bangumi_id }
-      }).then(
-        function (response) {
-          console.log(response.data)
-          const subjectID = response.data.subject_id
-          var fd = new FormData()
-          fd.append('status', 'do')
-          bgmApi.post(`/collection/${subjectID}/update`,
-            // null,
-            // querystring
-            `status=do`,
-            // fd,
-            {
-              headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-              }
-              //   params: {
-              //     status: 'do'
-              //   }
-            }
-          ).then(function (res) {
-            return bgmApi.get(`/subject/${subjectID}/ep`).then(
-              function (res) {
-                let ep = res.data.eps[parseInt(message.episode) - 1].id
-                return bgmApi.post(`/ep/${ep}/status/watched`)
-              }
-            )
-          })
-        }
-      )
-    }
-  })
 }
 
 function getData () {
@@ -93,7 +83,7 @@ function setData (message) {
   localStorage.setItem('refresh_token', message.refresh_token)
 }
 
-function refreshToken (userID, refreshToken) {
+function refreshToken (userID, refreshToken, cb) {
   console.log('refresh token')
   const axios = window.axios
   axios.post('http://localhost:6001/refresh_token', {
@@ -101,11 +91,41 @@ function refreshToken (userID, refreshToken) {
     user_id: userID
   }).then(function (response) {
     setData(response.data)
-    init()
+    cb()
   }, function (err) {
     alert('can\'t refresh token')
     console.log(err)
+    cb(err)
   })
+}
+
+function watchEpisode (bgmApi, message) {
+
+  serverApi.get('/query/bilibili', {
+    params: { bangumi_id: message.bangumi_id }
+  }).then(
+    function (response) {
+      console.log(response.data)
+      const subjectID = response.data.subject_id
+      var fd = new FormData()
+      fd.append('status', 'do')
+      bgmApi.post(`/collection/${subjectID}/update`,
+        `status=do`,
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          }
+        }
+      ).then(function (res) {
+        return bgmApi.get(`/subject/${subjectID}/ep`).then(
+          function (res) {
+            let ep = res.data.eps[parseInt(message.episode) - 1].id
+            return bgmApi.post(`/ep/${ep}/status/watched`)
+          }
+        )
+      })
+    }
+  )
 }
 
 init()
