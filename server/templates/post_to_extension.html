@@ -10,10 +10,11 @@
 <script>
   const data = JSON.parse('{{ data|safe }}')
   data.type = 'auth'
-  chrome.runtime.sendMessage({{ extension_id }}, data, function (res) {
-    alert(res)
-    close()
-  })
+
+  //chrome.runtime.sendMessage({{ extension_id }}, data, function (res) {
+  // alert(res)
+  //close()
+  //})
 
 </script>
 </body>

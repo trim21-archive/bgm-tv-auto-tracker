@@ -44,6 +44,15 @@
       "js": [
         "inject/bilibili.js"
       ]
+    },
+    {
+      "matches": [
+        "https://bangumi-auto-tracker.trim21.cn/oauth_callback*"
+      ],
+      "run_at": "document_end",
+      "js": [
+        "inject/oauth.js"
+      ]
     }
   ],
   "externally_connectable": {

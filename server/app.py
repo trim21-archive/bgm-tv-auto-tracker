@@ -46,7 +46,6 @@ async def error_middleware(request: web.Request, handler):
 
 async def getToken(request: web.Request, ):
     code = request.query.get('code', None)
-    extension_id = request.match_info.get('extension_id', 'gdifpeefpjjmkgcpiaplkhemifadigmp')
 
     if not code:
         return web.Response()
@@ -64,7 +63,7 @@ async def getToken(request: web.Request, ):
         r['auth_time'] = int(parser.parse(resp.headers['Date']).timestamp())
 
         get_mongo_collection(request).update({'_id': r['_id']}, r, upsert=True)
-        return aiohttp_jinja2.render_template('post_to_extension.html', request, {'data': json.dumps(r), 'extension_id': extension_id})
+        return aiohttp_jinja2.render_template('post_to_extension.html', request, {'data': json.dumps(r), })
 
 
 async def fromPlayerUrlToBangumiSubjectID(request: web.Request):
@@ -120,7 +119,7 @@ def create_app(io_loop=None):
     app.add_routes([
         web.get('/', lambda request: aiohttp_jinja2.render_template('index.html', request, {})),
         web.get('/version', lambda request: web.Response(text='0.0.1')),
-        web.get('/oauth_callback/{extension_id}', getToken),
+        web.get('/oauth_callback', getToken),
         web.post('/refresh_token', refreshToken),
         web.get('/query/{website}', fromPlayerUrlToBangumiSubjectID)
     ])
