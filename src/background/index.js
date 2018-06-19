@@ -86,7 +86,7 @@ function setData (message) {
 function refreshToken (userID, refreshToken, cb) {
   console.log('refresh token')
   const axios = window.axios
-  axios.post('http://localhost:6001/refresh_token', {
+  serverApi.post('/refresh_token', {
     refresh_token: refreshToken,
     user_id: userID
   }).then(function (response) {
