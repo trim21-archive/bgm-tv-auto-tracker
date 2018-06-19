@@ -64,10 +64,7 @@ async def getToken(request: web.Request, ):
         r['auth_time'] = int(parser.parse(resp.headers['Date']).timestamp())
 
         get_mongo_collection(request).update({'_id': r['_id']}, r, upsert=True)
-        return aiohttp_jinja2.render_template('post_to_extension.html', request, {'data': json.dumps(r), {'extension_id': extension_id}})
-
-
-from utils import fromIDToSubject
+        return aiohttp_jinja2.render_template('post_to_extension.html', request, {'data': json.dumps(r), 'extension_id': extension_id})
 
 
 async def fromPlayerUrlToBangumiSubjectID(request: web.Request):
