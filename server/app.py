@@ -120,6 +120,7 @@ def create_app(io_loop=None):
     cors = aiohttp_cors.setup(app)
     app.add_routes([
         web.get('/', lambda request: aiohttp_jinja2.render_template('index.html', request, {})),
+        web.get('/version', lambda request: web.Response(text='0.0.1')),
         web.get('/oauth_callback', getToken),
         web.post('/refresh_token', refreshToken),
         web.get('/query/{website}', fromPlayerUrlToBangumiSubjectID)
