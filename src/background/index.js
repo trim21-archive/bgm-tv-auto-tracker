@@ -28,7 +28,7 @@ function init () {
   console.log('init')
   const data = getData()
   if (!data) {
-    chrome.tabs.create({ url: `https://bgm.tv/oauth/authorize?client_id=bgm2775b2797b4d958b&response_type=code&redirect_uri=${VARS.serverURL}/oauth_callback/${chrome.runtime.id}` })
+    chrome.tabs.create({ url: `https://bgm.tv/oauth/authorize?client_id=bgm2775b2797b4d958b&response_type=code&redirect_uri=${VARS.serverURL}/oauth_callback` })
     return
   }
   if (data.authTime + data.expiresIn - parseInt(new Date().getTime() / 1000) < 24 * 60 * 60) {
