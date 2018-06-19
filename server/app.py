@@ -7,7 +7,9 @@ import aiohttp_jinja2
 import jinja2
 from aiohttp import web
 
-from config import APP_ID, APP_SECRET
+from config import APP_ID, APP_SECRET, HOST, PROTOCOL
+
+callback_url = f'{PROTOCOL}://{HOST}/oauth_callback'
 from db import mongo
 from dateutil import parser
 
@@ -52,7 +54,7 @@ async def getToken(request: web.Request, ):
                                       'client_id'    : APP_ID,
                                       'client_secret': APP_SECRET,
                                       'code'         : code,
-                                      'redirect_uri' : f'http://{host}/oauth_callback'}) as resp:
+                                      'redirect_uri' : callback_url}) as resp:
             r = await resp.json()
         if 'error' in r:
             return web.json_response(r)
@@ -70,7 +72,15 @@ async def fromPlayerUrlToBangumiSubjectID(request: web.Request):
     data = request.query
     bangumi_id = request.query.get('bangumi_id', None)
     website = request.match_info.get('website', None)
-    return web.json_response({'subject_id': fromIDToSubject(website, bangumi_id)})
+    if bangumi_id and website:
+        r = await request.app.mongo.bilibili_bangumi.bilibili.find_one({'_id': bangumi_id})
+        print(r)
+        if r:
+            return web.json_response({'subject_id': r['bangumi_id']})
+        else:
+            raise web.HTTPNotFound()
+    else:
+        raise web.HTTPBadRequest()
 
 
 async def refreshToken(request: web.Request, ):
@@ -86,7 +96,7 @@ async def refreshToken(request: web.Request, ):
                                       'client_id'    : APP_ID,
                                       'client_secret': APP_SECRET,
                                       'refresh_token': refresh_token,
-                                      'redirect_uri' : f'http://{host}/oauth_callback'}) as resp:
+                                      'redirect_uri' : callback_url}) as resp:
             r = await resp.json()
         if 'error' in r:
             return web.json_response(r)
@@ -120,4 +130,4 @@ def create_app(io_loop=None):
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
-    web.run_app(create_app(io_loop=loop), port=6001)
+    web.run_app(create_app(io_loop=loop), port=6003)

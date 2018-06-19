@@ -1,4 +1,3 @@
 .idea
 .vscode
-env
-config.py
+server/env

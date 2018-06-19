@@ -17,10 +17,6 @@ def find(url: str):
 
 def fromIDToSubject(type: str, bangumi_id: str):
     for item in bangumi_data['items']:
-        print(item)
         for site in item['sites']:
             if site['site'] == type and site.get('id', '') == bangumi_id:
                 return [s for s in item['sites'] if s["site"] == "bangumi"][0]['id']
-
-
-print(fromIDToSubject('bilibili', '21781'))
