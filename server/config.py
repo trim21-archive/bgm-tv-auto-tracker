@@ -12,6 +12,3 @@ if not HOST:
 PROTOCOL = os.environ.get('PROTOCOL')
 if not PROTOCOL:
     PROTOCOL = 'http'
-
-if os.environ.get('HOST'):
-    HOST = os.environ.get('HOST')

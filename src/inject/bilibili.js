@@ -35,4 +35,3 @@ function detectHrefChange () {
 setInterval(detectHrefChange, 10 * 1000)
  `
 document.body.appendChild(script)
-//`

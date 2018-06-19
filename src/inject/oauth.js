@@ -9,5 +9,3 @@ chrome.runtime.sendMessage('${chrome.runtime.id}', data, function (res) {
 
 `
 document.body.appendChild(script)
-
-//`

@@ -27,17 +27,6 @@
   "content_scripts": [
     {
       "matches": [
-        "https://www.bilibili.com/bangumi/play/*/21332131"
-      ],
-      "run_at": "document_start",
-      "js": [
-        "lib/axios/axios.min.js",
-        "lib/jquery/jquery-3.3.1.min.js",
-        "inject/common.js"
-      ]
-    },
-    {
-      "matches": [
         "https://www.bilibili.com/bangumi/play/*"
       ],
       "run_at": "document_end",

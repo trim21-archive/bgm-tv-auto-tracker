@@ -1,24 +1,9 @@
-const serverApi = axios.create({
-  baseURL: `${VARS.serverURL}/`,
-  timeout: 10000
-})
-
 chrome.runtime.onMessageExternal.addListener(function (message, sender, sendResponse) {
   console.log(message)
   if (message.type === 'auth') {
     setData(message)
     sendResponse('Successfully authorized')
   } else if (message.type === 'watch_episode') {
-    const opt = {
-      type: 'basic',
-      title: 'bgm.tv auto tracker',
-      message: `Find you watching ${message.title} ${message.episode}`,
-      priority: 1,
-      iconUrl: '../icon.png'
-    }
-    chrome.notifications.create('id', opt, function (id) {
-      let timer = setTimeout(function () {chrome.notifications.clear(id)}, 2000)
-    })
     watchEpisode(bgmApi, message)
   }
 })
@@ -86,6 +71,11 @@ function setData (message) {
 function refreshToken (userID, refreshToken, cb) {
   console.log('refresh token')
   const axios = window.axios
+  const serverApi = axios.create({
+    baseURL: `${VARS.serverURL}/`,
+    timeout: 10000
+  })
+
   serverApi.post('/refresh_token', {
     refresh_token: refreshToken,
     user_id: userID
@@ -100,6 +90,10 @@ function refreshToken (userID, refreshToken, cb) {
 }
 
 function watchEpisode (bgmApi, message) {
+  const serverApi = axios.create({
+    baseURL: `${VARS.serverURL}/`,
+    timeout: 10000
+  })
 
   serverApi.get('/query/bilibili', {
     params: { bangumi_id: message.bangumi_id }
@@ -119,13 +113,33 @@ function watchEpisode (bgmApi, message) {
       ).then(function (res) {
         return bgmApi.get(`/subject/${subjectID}/ep`).then(
           function (res) {
+            chrome.notifications.create('id', {
+              type: 'basic',
+              title: 'bgm.tv auto tracker',
+              message: `Find you watching ${message.title} ${message.episode}`,
+              priority: 1,
+              iconUrl: '../icon.png'
+            }, function (id) {
+              let timer = setTimeout(function () {chrome.notifications.clear(id)}, 2000)
+            })
             let ep = res.data.eps[parseInt(message.episode) - 1].id
             return bgmApi.post(`/ep/${ep}/status/watched`)
           }
         )
       })
     }
-  )
+  ).catch(function (err) {
+    chrome.notifications.create('id', {
+      type: 'basic',
+      title: 'bgm.tv auto tracker',
+      message: err.toString(),
+      priority: 1,
+      iconUrl: '../icon.png'
+    }, function (id) {
+      let timer = setTimeout(function () {chrome.notifications.clear(id)}, 2000)
+    })
+
+  })
 }
 
 init()
