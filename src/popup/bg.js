@@ -5,7 +5,7 @@ if (user_id) {
   $('#btn').hide()
 } else {
   $('#btn').click(function (event) {
-    chrome.tabs.create({ url: `https://bgm.tv/oauth/authorize?client_id=bgm2775b2797b4d958b&response_type=code&redirect_uri=${VARS.serverURL}/oauth_callback` })
+    chrome.tabs.create({ url: `https://bgm.tv/oauth/authorize?client_id=bgm2775b2797b4d958b&response_type=code&redirect_uri=${VARS.serverURL}/oauth_callback/${chrome.runtime.id}` })
   })
 
 }
