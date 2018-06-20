@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bgm.tv auto tracker
 // @namespace    https://trim21.me/
-// @version      0.1.7
+// @version      0.1.8
 // @description  auto tracker your bangumi progress
 // @author       Trim21
 // @match        https://www.bilibili.com/bangumi/play/*
@@ -82,7 +82,7 @@
       const status = __INITIAL_STATE__
       const episode = status.epInfo.index
       const id = status.mediaInfo.season_id
-      notify(`Find you watching ${message.title} ${message.episode}, try to mark your status`.toString(), 2)
+      notify(`Find you watching ${status.mediaInfo.alias} ${episode}, try to mark your status`.toString(), 2)
 
       watchEpisode({
         'type': 'watch_episode',
