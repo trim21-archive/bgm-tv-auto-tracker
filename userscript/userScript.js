@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bgm.tv auto tracker
 // @namespace    https://trim21.me/
-// @version      0.1.6
+// @version      0.1.7
 // @description  auto tracker your bangumi progress
 // @author       Trim21
 // @match        https://www.bilibili.com/bangumi/play/*
@@ -42,6 +42,7 @@
     ).then(
       function (response) {
         console.log(response.data)
+        notify(`mark your status successfully`.toString(), 2)
       },
       function (error) {
         notify(error.response.data.message)
@@ -81,6 +82,7 @@
       const status = __INITIAL_STATE__
       const episode = status.epInfo.index
       const id = status.mediaInfo.season_id
+      notify(`Find you watching ${message.title} ${message.episode}, try to mark your status`.toString(), 2)
 
       watchEpisode({
         'type': 'watch_episode',
