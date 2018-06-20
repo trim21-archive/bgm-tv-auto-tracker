@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bgm.tv auto tracker
 // @namespace    https://trim21.me/
-// @version      0.1.3
+// @version      0.1.4
 // @description  auto tracker your bangumi progress
 // @author       Trim21
 // @match        https://www.bilibili.com/bangumi/play/*
@@ -17,8 +17,8 @@
   'use strict'
   const VARS = {
     authURL: 'https://bgm.tv/oauth/authorize?client_id=bgm2775b2797b4d958b&response_type=code&redirect_uri=https://bangumi-auto-tracker.trim21.cn/oauth_callback',
-    //serverURL: 'https://bangumi-auto-tracker.trim21.cn',
-    serverURL: 'http://localhost:6001',
+    serverURL: 'https://bangumi-auto-tracker.trim21.cn',
+    // serverURL: 'http://localhost:6001',
   }
 
   const serverApi = axios.create({
