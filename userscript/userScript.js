@@ -1,14 +1,13 @@
 // ==UserScript==
 // @name         Bgm.tv auto tracker
 // @namespace    https://trim21.me/
-// @version      0.2.1
+// @version      0.2.2
 // @description  auto tracker your bangumi progress
 // @author       Trim21
 // @match        https://www.bilibili.com/bangumi/play/*
 // @match        https://bangumi-auto-tracker.trim21.cn/oauth_callback*
 // @match        https://bangumi-auto-tracker.trim21.cn/userscript/options*
 // @require      https://cdn.bootcss.com/axios/0.18.0/axios.js
-// @require      https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.min.js
 // @grant        GM_addStyle
 // @grant        GM_setValue
 // @grant        GM_openInTab
@@ -25,7 +24,7 @@
   }
   VARS.authURL = 'https://bgm.tv/oauth/authorize?client_id=bgm2775b2797b4d958b&response_type=code&redirect_uri=' + VARS.callBackUrl
 
-  if (TM_ENV === 'dev') {
+  if (window.TM_ENV === 'dev') {
     VARS.apiServerURL = 'http://localhost:6001'
   }
 
