@@ -1,12 +1,15 @@
 // ==UserScript==
 // @name         Bgm.tv auto tracker
 // @namespace    https://trim21.me/
-// @version      0.2.0
+// @version      0.2.1
 // @description  auto tracker your bangumi progress
 // @author       Trim21
 // @match        https://www.bilibili.com/bangumi/play/*
 // @match        https://bangumi-auto-tracker.trim21.cn/oauth_callback*
+// @match        https://bangumi-auto-tracker.trim21.cn/userscript/options*
 // @require      https://cdn.bootcss.com/axios/0.18.0/axios.js
+// @require      https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.min.js
+// @grant        GM_addStyle
 // @grant        GM_setValue
 // @grant        GM_openInTab
 // @grant        GM_getValue
@@ -16,13 +19,18 @@
 (function () {
   'use strict'
   const VARS = {
-    authURL: 'https://bgm.tv/oauth/authorize?client_id=bgm2775b2797b4d958b&response_type=code&redirect_uri=https://bangumi-auto-tracker.trim21.cn/oauth_callback',
-    serverURL: 'https://bangumi-auto-tracker.trim21.cn',
-    // serverURL: 'http://localhost:6001',
+    apiServerURL: 'https://bangumi-auto-tracker.trim21.cn',
+    callBackUrl: 'https://bangumi-auto-tracker.trim21.cn/oauth_callback',
+    authURL: '',
+  }
+  VARS.authURL = 'https://bgm.tv/oauth/authorize?client_id=bgm2775b2797b4d958b&response_type=code&redirect_uri=' + VARS.callBackUrl
+
+  if (TM_ENV === 'dev') {
+    VARS.apiServerURL = 'http://localhost:6001'
   }
 
   const serverApi = axios.create({
-    baseURL: `${VARS.serverURL}/`,
+    baseURL: `${VARS.apiServerURL}/`,
     timeout: 10000
   })
 
@@ -36,7 +44,13 @@
   }
 
   function watchEpisode (message) {
-    serverApi.post('/watch_episode', { website: 'bilibili', episode: message.episode, bangumi_id: message.bangumi_id, access_token: auth.access_token },
+    serverApi.post('/watch_episode', {
+        website: 'bilibili',
+        episode: message.episode,
+        bangumi_id: message.bangumi_id,
+        user_id: auth.user_id,
+        access_token: auth.access_token
+      },
     ).then(
       function (response) {
         console.log(response.data)
@@ -52,7 +66,7 @@
 
   // auth
   let auth
-  if (location.href.startsWith('https://bangumi-auto-tracker.trim21.cn/oauth_callback')) {
+  if (location.href.startsWith(VARS.callBackUrl)) {
     console.log('try auth')
     if (data) {
       GM_setValue('auth', JSON.stringify(data))
@@ -60,7 +74,6 @@
     }
   } else {
     auth = GM_getValue('auth', false)
-    console.log(auth)
     if (auth) {
       auth = JSON.parse(auth)
     } else {
@@ -79,13 +92,9 @@
     function injectBilibili () {
       const status = __INITIAL_STATE__
       const episode = status.epInfo.index
-      const id = status.mediaInfo.season_id
-      serverApi.get('/query/bilibili', { params: { bangumi_id: id } }).then(
-        (response) => {
-          let subject_id = response.data.subject_id
-          let div =
-            `<span id="bgm_tv_tracker" class="disable" data-id="${id}">
-    <div class="bgm_tv_tracker_btn bgm_tv_tracker">tracker</div>
+      const bangumi_id = status.mediaInfo.season_id
+      let div = `<div id="bgm_tv_tracker" class=" disable" data-id="${bangumi_id}">
+    <div class="bgm_tv_tracker_btn bgm_tv_tracker bgm_tv_tracker_radius">bgm.tv</div>
     <div class="bgm_tv_tracker_info">
     <br>
         <div>
@@ -93,96 +102,122 @@
             <p>第<span id="bgm_tv_tracker_episode">${episode}</span>集</p>
         </div>
         <br>
-        <a href="http://bgm.tv/subject/${subject_id}" target="_blank" rel="noopener noreferrer">http://bgm.tv/subject/${subject_id}</a>
+        <div id="bgm_tv_tracker_link"></div>
         <br>
-        <button id="bgm_tv_tracker_mark_watch">标记为看过</button>
-
+        <button class="bgm_tv_tracker_radius" id="bgm_tv_tracker_mark_watch">标记为看过</button>
+        <br>
+        <a href="https://github.com/Trim21/bilibili-bangumi-tv-auto-tracker/issues" target="_blank" rel="noopener noreferrer">报告问题</a>
     </div>
-</span>
+</div>
 <style>
-    #bgm_tv_tracker {
-        display: inline-block;
-        position: relative;
-        float: left;
-        margin-right: 20px;
+#bgm_tv_tracker {
+    display: inline-block;
+    position: relative;
+    float: left;
+    margin-right: 20px;
+    user-select: none;
+}
+
+.bgm_tv_tracker_radius {
+    border-radius: 4px;
+    border: 1px solid #e5e9ef;
+}
+
+.bgm_tv_tracker_btn.bgm_tv_tracker {
+    color: #6d757a;
+    float: left;
+    cursor: pointer;
+    font-size: 14px;
+    height: 28px;
+    line-height: 28px;
+    text-align: center;
+    width: 80px !important;
+    transition: all .1s ease-in;
+
+}
+
+.bangumi-info .info-right .info-title.clearfix h2 {
+    width: 380px;
+}
+
+@media screen and (max-width: 1400px) {
+    .arc-toolbar .block {
+        padding: 0 12px;
+        margin-left: -12px;
     }
 
-    .bgm_tv_tracker_btn.bgm_tv_tracker {
-        border-radius: 4px;
-        border: 1px solid #e5e9ef;
-        color: #6d757a;
-        float: left;
-        cursor: pointer;
-        font-size: 14px;
-        height: 28px;
-        line-height: 28px;
-        text-align: center;
-        width: 80px !important;
-        transition: all .1s ease-in;
+    .video-toolbar-module .btn-item {
+        padding: 0 0 0 60px !important;
+        margin-left: -12px;
     }
 
     .bangumi-info .info-right .info-title.clearfix h2 {
-        width: 380px;
+        width: 200px !important;
     }
+}
 
-    @media screen and (max-width: 1400px) {
-        .arc-toolbar .block {
-            padding: 0 12px;
-            margin-left: -12px;
-        }
+#bgm_tv_tracker.disable .bgm_tv_tracker_info {
+    display: none;
+}
 
-        .video-toolbar-module .btn-item {
-            padding: 0 0 0 60px !important;
-            margin-left: -12px;
-        }
+.bgm_tv_tracker_info {
+    margin-top: 5px;
+    background: #fff;
+    border-radius: 0 0 4px 4px;
+    border: 1px solid #e5e9ef;
+    box-shadow: rgba(0, 0, 0, .16) 0 2px 4px;
+    cursor: default;
+    height: auto;
+    left: -1px;
+    line-height: normal;
+    opacity: 0;
+    pointer-events: none;
+    position: absolute;
+    text-align: left;
+    top: 70px;
+    white-space: normal;
+    width: 200px;
+    z-index: 1000;
 
-        .bangumi-info .info-right .info-title.clearfix h2 {
-            width: 200px !important;
-        }
-    }
+}
 
-    #bgm_tv_tracker.disable .bgm_tv_tracker_info {
-        display: none;
-    }
- 
-    #bgm_tv_tracker .bgm_tv_tracker_info {
-        background: #fff;
-        border-radius: 0 0 4px 4px;
-        border: 1px solid #e5e9ef;
-        border-top: none;
-        box-shadow: rgba(0,0,0,.16) 0 2px 4px;
-        cursor: default;
-        height: auto;
-        left: -1px;
-        line-height: normal;
-        opacity: 0;
-        pointer-events: none;
-        position: absolute;
-        text-align: left;
-        top: 70px;
-        transition: .2s all ease-in;
-        white-space: normal;
-        width: 310px;
-        z-index: 1000;
-    }
- 
-    #bgm_tv_tracker .bgm_tv_tracker_info {
-        opacity: 1;
-        pointer-events: auto;
-        top: 100%;
-    }
-    .bgm_tv_tracker_info button {
-        padding: 4px 6px;
-        line-height: 14px;
-        display: inline-block;
-        margin: 4px;
-    }
-    
-</style>`
-          $('#bangumi_detail > div > div.info-right > div.info-title.clearfix > div.func-module.clearfix').prepend(div)
+.bgm_tv_tracker_info *{
+max-width: 100%;
+}
+
+#bgm_tv_tracker .bgm_tv_tracker_info {
+    opacity: 1;
+    pointer-events: auto;
+    top: 100%;
+}
+
+.bgm_tv_tracker_info button {
+    padding: 4px 6px;
+    line-height: 14px;
+    display: inline-block;
+    margin: 4px;
+}
+</style>
+`
+      $('#bangumi_detail > div > div.info-right > div.info-title.clearfix > div.func-module.clearfix').prepend(div)
+      let info = $('.bgm_tv_tracker_info')
+      $('.bgm_tv_tracker_btn.bgm_tv_tracker').click(() => {
+        info.toggle('fast')
+      }).hover(function () {
+        $(this).css('background-color', '#00A1D6')
+        $(this).css('color', 'white')
+      }, function () {
+        $(this).css('background-color', 'white')
+        $(this).css('color', 'black')
+      })
+      $('#bgm_tv_tracker_title').html(status.mediaInfo.alias)
+
+      serverApi.get('/query/bilibili', { params: { bangumi_id } }).then(
+        (response) => {
+          let subject_id = response.data.subject_id
+
+          $('#bgm_tv_tracker_link').html(`<a href="http://bgm.tv/subject/${subject_id}" target="_blank" rel="noopener noreferrer">subject/${subject_id}</a>`)
           $('#bgm_tv_tracker_mark_watch').click(() => {
-              const status = window.__INITIAL_STATE__
-              console.log(window)
               watchEpisode({
                 'type': 'watch_episode',
                 'website': 'bilibili',
@@ -192,23 +227,13 @@
               })
             }
           )
-          $('#bgm_tv_tracker_title').html(status.mediaInfo.alias)
-          $('.bgm_tv_tracker_btn.bgm_tv_tracker').click(() => {
-            let el = $('#bgm_tv_tracker')
-            if (el.hasClass('disable')) {
-              el.removeClass('disable')
-            } else {
-              el.addClass('disable')
-            }
-          }).hover(function () {
-            $(this).css('background-color', '#00A1D6')
-            $(this).css('color', 'white')
-          }, function () {
-            $(this).css('background-color', 'white')
-            $(this).css('color', 'black')
-          })
-        })
-
+        },
+        (err) => {
+          if (err.response.status === 404) {
+            $('.bgm_tv_tracker_info').html('没找到你在看的番剧')
+          }
+        }
+      )
       // Your code here...
     }
 
@@ -219,8 +244,16 @@
     function onHrefChange () {
       const status = __INITIAL_STATE__
       const episode = status.epInfo.index
-      const id = status.mediaInfo.season_id
       $('#bgm_tv_tracker_episode').html(episode)
+      if (GM_getValue('auto_mark', false) === 'true') {
+        watchEpisode({
+          'type': 'watch_episode',
+          'website': 'bilibili',
+          'bangumi_id': status.mediaInfo.season_id,
+          'title': $('#bgm_tv_tracker_title').html(),
+          episode,
+        })
+      }
     }
 
     // noinspection JSAnnotator
@@ -235,5 +268,4 @@
     setInterval(detectHrefChange, 10 * 1000)
   }
 
-  // Your code here...
 })()

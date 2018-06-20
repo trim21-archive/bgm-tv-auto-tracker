@@ -1,10 +1,14 @@
 import asyncio
 import pathlib
+import time
 from os import path
+from typing import List
+
 import aiohttp_cors
 import aiohttp
 import aiohttp_jinja2
 import jinja2
+import aiofiles
 from aiohttp import web
 
 from config import APP_ID, APP_SECRET, HOST, PROTOCOL
@@ -20,6 +24,17 @@ import json
 
 def get_mongo_collection(request):
     return request.app.mongo.bilibili_bangumi.token
+
+
+async def devUserScript(request):
+    async with aiofiles.open(base_dir.parent / 'userscript' / 'userScript.js', 'r', encoding='utf-8') as f:
+        lines = await f.readlines()  # type: List[str]
+    for i, u in enumerate(lines):
+        if not u.startswith('// @'):
+            lines[i] = u.replace('https://bangumi-auto-tracker.trim21.cn', 'http://localhost:6001')
+    # for line in us:
+    #     if line.startswith('@')
+    return web.Response(text=''.join(lines), content_type='text/javascript')
 
 
 @web.middleware
@@ -125,11 +140,31 @@ async def aio_post(url, data=None, headers=None):
             return await resp.json()
 
 
+async def getSubject(request, subject_id):
+    eps = request.app.mongo.bilibili_bangumi.bangumi_eps
+    response = await eps.find_one({'_id': subject_id})
+    if not response or int(time.time()) - response['time'] < 60 * 60 * 3:
+        response = await aio_get(f'https://api.bgm.tv/subject/{subject_id}/ep')
+        c = {'_id': subject_id}
+        c.update(response)
+        c['time'] = int(time.time())
+        await eps.update({'_id': subject_id}, c, upsert=True)
+    return response
+
+
+async def collectSubject(request, subject_id, user_id, access_token):
+    r = await request.app.mongo.bilibili_bangumi.user_collection.find_one({'_id': user_id, 'subject_id': subject_id})
+    if not r:
+        await aio_post(f'https://api.bgm.tv/collection/{subject_id}/update', data='status=do', headers={'Content-Type': 'application/x-www-form-urlencoded', 'authorization': f'Bearer {access_token}'})
+        await request.app.mongo.bilibili_bangumi.user_collection.insert({'_id': user_id, 'subject_id': subject_id})
+
+
 async def watchEpisode(request: web.Request):
     body = await request.json()
     website = body.get('website', None)
     episode = body.get('episode', None)
     bangumi_id = body.get('bangumi_id', None)
+    user_id = body.get('user_id', None)
     access_token = body.get('access_token', None)
 
     if not (website and episode and bangumi_id and access_token) and website != 'bilibili':
@@ -141,14 +176,23 @@ async def watchEpisode(request: web.Request):
         return web.HTTPNotFound(reason='bangumi not found')
 
     subject_id = r['bangumi_id']
-    response = await aio_get(f'https://api.bgm.tv/subject/{subject_id}/ep')
-    r2 = await aio_post(f'https://api.bgm.tv/collection/{subject_id}/update', data='status=do', headers={'Content-Type': 'application/x-www-form-urlencoded', 'authorization': f'Bearer {access_token}'})
-    # print(r2)
+
+    response = await getSubject(request, subject_id)
+
     ep = response['eps'][int(episode) - 1]['id']
+
+    if user_id:
+        r2 = await collectSubject(request, subject_id, user_id, access_token)
+    else:
+        # r2 = await aio_post(f'https://api.bgm.tv/collection/{subject_id}/update', data='status=do', headers={'Content-Type': 'application/x-www-form-urlencoded', 'authorization': f'Bearer {access_token}'})
+        return web.json_response({'status': 'error', 'message': 'please upgrade userscript'}, status=400)
+
     r3 = await aio_post(f'https://api.bgm.tv/ep/{ep}/status/watched', headers={'authorization': f'Bearer {access_token}'})
+
     print(r3)
     if r3['error'] != 'OK':
         return web.json_response({'status': 'error', 'message': r3['error']}, status=400)
+
     return web.json_response({'status': 'success'})
 
 
@@ -170,6 +214,9 @@ def create_app(io_loop=None):
         web.post('/refresh_token', refreshToken),
         web.get('/query/{website}', fromPlayerUrlToBangumiSubjectID),
         web.post('/watch_episode', watchEpisode),
+        web.get('/userscript/options', lambda request: web.FileResponse(str(base_dir / 'templates' / 'userscript_options.html'))),
+        web.static('/static/', path='static'),
+        web.get('/userscript.js', devUserScript)
     ])
     cors = aiohttp_cors.setup(app, defaults={
         "*": aiohttp_cors.ResourceOptions(
