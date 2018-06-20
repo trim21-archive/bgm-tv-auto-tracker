@@ -121,7 +121,7 @@ async def aio_get(url, headers=None):
 
 async def aio_post(url, data=None, headers=None):
     async with aiohttp.ClientSession(headers=headers) as session:
-        async with session.get(url, data=data) as resp:
+        async with session.post(url, data=data) as resp:
             return await resp.json()
 
 
@@ -146,7 +146,8 @@ async def watchEpisode(request: web.Request):
     print(r2)
     ep = response['eps'][int(episode) - 1]['id']
     r3 = await aio_post(f'https://api.bgm.tv/ep/{ep}/status/watched', headers={'authorization': f'Bearer {access_token}'})
-    print(r3)
+    if (r3['code'] != '200'):
+        return web.json_response({'status': 'error', 'message': 'try auth again'}, status=400)
     return web.json_response({'status': 'success'})
 
 
