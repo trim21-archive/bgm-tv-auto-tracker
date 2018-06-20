@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bgm.tv auto tracker
 // @namespace    https://trim21.me/
-// @version      0.1.8
+// @version      0.1.9
 // @description  auto tracker your bangumi progress
 // @author       Trim21
 // @match        https://www.bilibili.com/bangumi/play/*
@@ -31,8 +31,6 @@
       if (permission !== 'denied') {
         let n = new Notification(message, {})
         setTimeout(n.close.bind(n), timeout * 1000)
-      } else {
-        alert(message)
       }
     })
   }
