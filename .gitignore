@@ -2,3 +2,4 @@
 .vscode
 server/env
 __pycache__
+tmp
