@@ -1,6 +1,7 @@
 // ==UserScript==
 // @name         Bgm.tv auto tracker
 // @namespace    https://trim21.me/
+// @description
 // @version      0.1
 // @description  try to take over the world!
 // @author       Trim21
@@ -11,7 +12,6 @@
 // @grant        GM_openInTab
 // @grant        GM_getValue
 // @run-at       document-end
-// @grant        none
 // ==/UserScript==
 
 (function () {
