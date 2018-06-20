@@ -7,7 +7,7 @@ function injectBilibili () {
   const id = status.mediaInfo.season_id
   console.log('inject bilibili')
 
-  chrome.runtime.sendMessage('gdifpeefpjjmkgcpiaplkhemifadigmp', {
+  chrome.runtime.sendMessage('${chrome.runtime.id}', {
     'type': 'watch_episode',
     'website': 'bilibili',
     'bangumi_id': id,
