@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bgm.tv auto tracker
 // @namespace    https://trim21.me/
-// @version      0.1.1
+// @version      0.1.2
 // @description  auto tracker your bangumi progress
 // @author       Trim21
 // @match        https://www.bilibili.com/bangumi/play/*
