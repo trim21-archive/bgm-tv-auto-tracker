@@ -143,11 +143,12 @@ async def watchEpisode(request: web.Request):
     subject_id = r['bangumi_id']
     response = await aio_get(f'https://api.bgm.tv/subject/{subject_id}/ep')
     r2 = await aio_post(f'https://api.bgm.tv/collection/{subject_id}/update', data='status=do', headers={'Content-Type': 'application/x-www-form-urlencoded', 'authorization': f'Bearer {access_token}'})
-    print(r2)
+    # print(r2)
     ep = response['eps'][int(episode) - 1]['id']
     r3 = await aio_post(f'https://api.bgm.tv/ep/{ep}/status/watched', headers={'authorization': f'Bearer {access_token}'})
-    if 'error' in r3:
-        return web.json_response({'status': 'error', 'message': 'try auth again'}, status=400)
+    print(r3)
+    if r3['error'] != 'OK':
+        return web.json_response({'status': 'error', 'message': r3['error']}, status=400)
     return web.json_response({'status': 'success'})
 
 
