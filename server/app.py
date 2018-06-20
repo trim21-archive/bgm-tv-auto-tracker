@@ -113,6 +113,43 @@ async def refreshToken(request: web.Request, ):
         return web.json_response(r)
 
 
+async def aio_get(url, headers=None):
+    async with aiohttp.ClientSession(headers=headers) as session:
+        async with session.get(url) as resp:
+            return await resp.json()
+
+
+async def aio_post(url, data=None, headers=None):
+    async with aiohttp.ClientSession(headers=headers) as session:
+        async with session.get(url, data=data) as resp:
+            return await resp.json()
+
+
+async def watchEpisode(request: web.Request):
+    body = await request.json()
+    website = body.get('website', None)
+    episode = body.get('episode', None)
+    bangumi_id = body.get('bangumi_id', None)
+    access_token = body.get('access_token', None)
+
+    if not (website and episode and bangumi_id and access_token) and website != 'bilibili':
+        return web.HTTPBadRequest()
+
+    r = await request.app.mongo.bilibili_bangumi.bilibili.find_one({'_id': str(bangumi_id)})
+
+    if not r:
+        return web.HTTPNotFound(reason='bangumi not found')
+
+    subject_id = r['bangumi_id']
+    response = await aio_get(f'https://api.bgm.tv/subject/{subject_id}/ep')
+    r2 = await aio_post(f'https://api.bgm.tv/collection/{subject_id}/update', data='status=do', headers={'Content-Type': 'application/x-www-form-urlencoded', 'authorization': f'Bearer {access_token}'})
+    print(r2)
+    ep = response['eps'][int(episode) - 1]['id']
+    r3 = await aio_post(f'https://api.bgm.tv/ep/{ep}/status/watched', headers={'authorization': f'Bearer {access_token}'})
+    print(r3)
+    return web.json_response({'status': 'success'})
+
+
 def _raise(exception: Exception):
     raise exception
 
@@ -129,8 +166,18 @@ def create_app(io_loop=None):
         web.get('/version', lambda request: web.Response(text='0.0.1')),
         web.get('/oauth_callback', getToken),
         web.post('/refresh_token', refreshToken),
-        web.get('/query/{website}', fromPlayerUrlToBangumiSubjectID)
+        web.get('/query/{website}', fromPlayerUrlToBangumiSubjectID),
+        web.post('/watch_episode', watchEpisode),
     ])
+    cors = aiohttp_cors.setup(app, defaults={
+        "*": aiohttp_cors.ResourceOptions(
+                allow_credentials=True,
+                expose_headers="*",
+                allow_headers="*",
+        )
+    })
+    for route in list(app.router.routes()):
+        cors.add(route)
     print('create app', flush=True)
     return app
 
