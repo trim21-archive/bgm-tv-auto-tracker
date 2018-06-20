@@ -156,7 +156,7 @@ async def collectSubject(request, subject_id, user_id, access_token):
     r = await request.app.mongo.bilibili_bangumi.user_collection.find_one({'_id': user_id, 'subject_id': subject_id})
     if not r:
         await aio_post(f'https://api.bgm.tv/collection/{subject_id}/update', data='status=do', headers={'Content-Type': 'application/x-www-form-urlencoded', 'authorization': f'Bearer {access_token}'})
-        await request.app.mongo.bilibili_bangumi.user_collection.insert({'_id': user_id, 'subject_id': subject_id})
+        await request.app.mongo.bilibili_bangumi.user_collection.update({'_id': user_id}, {'_id': user_id, 'subject_id': subject_id}, upsert=True)
 
 
 async def watchEpisode(request: web.Request):
@@ -214,9 +214,6 @@ def create_app(io_loop=None):
         web.post('/refresh_token', refreshToken),
         web.get('/query/{website}', fromPlayerUrlToBangumiSubjectID),
         web.post('/watch_episode', watchEpisode),
-        web.get('/userscript/options', lambda request: web.FileResponse(str(base_dir / 'templates' / 'userscript_options.html'))),
-        web.static('/static/', path='static'),
-        web.get('/userscript.js', devUserScript)
     ])
     cors = aiohttp_cors.setup(app, defaults={
         "*": aiohttp_cors.ResourceOptions(
