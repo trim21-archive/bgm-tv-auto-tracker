@@ -19,11 +19,10 @@ function init () {
   if (data.authTime + data.expiresIn - parseInt(new Date().getTime() / 1000) < 24 * 60 * 60) {
     refreshToken(data.userID, data.refreshToken, function (err) {
       if (err) {
-        alert(err)
+        notify(err.toString(), 4)
       } else {
         init()
       }
-
     })
   }
 
@@ -113,15 +112,7 @@ function watchEpisode (bgmApi, message) {
       ).then(function (res) {
         return bgmApi.get(`/subject/${subjectID}/ep`).then(
           function (res) {
-            chrome.notifications.create('id', {
-              type: 'basic',
-              title: 'bgm.tv auto tracker',
-              message: `Find you watching ${message.title} ${message.episode}`,
-              priority: 1,
-              iconUrl: '../icon.png'
-            }, function (id) {
-              let timer = setTimeout(function () {chrome.notifications.clear(id)}, 2000)
-            })
+            notify(`Find you watching ${message.title} ${message.episode}`.toString(), 2)
             let ep = res.data.eps[parseInt(message.episode) - 1].id
             return bgmApi.post(`/ep/${ep}/status/watched`)
           }
@@ -129,16 +120,19 @@ function watchEpisode (bgmApi, message) {
       })
     }
   ).catch(function (err) {
-    chrome.notifications.create('id', {
-      type: 'basic',
-      title: 'bgm.tv auto tracker',
-      message: err.toString(),
-      priority: 1,
-      iconUrl: '../icon.png'
-    }, function (id) {
-      let timer = setTimeout(function () {chrome.notifications.clear(id)}, 2000)
-    })
+    notify(err.toString(), 2)
+  })
+}
 
+function notify (message, timeout = 4) {
+  chrome.notifications.create('id', {
+    type: 'basic',
+    title: 'bgm.tv auto tracker',
+    message: message,
+    priority: 1,
+    iconUrl: '../icon.png'
+  }, function (id) {
+    let timer = setTimeout(function () {chrome.notifications.clear(id)}, timeout * 1000)
   })
 }
 

@@ -46,9 +46,17 @@ async def error_middleware(request: web.Request, handler):
 
 async def getToken(request: web.Request, ):
     code = request.query.get('code', None)
-
     if not code:
-        return web.Response()
+        return aiohttp_jinja2.render_template('post_to_extension.html', request, {'data': json.dumps({
+            "_id"          : 1,
+            "access_token" : "example_access_token",
+            "expires_in"   : 604800,
+            "token_type"   : "Bearer",
+            "scope"        : None,
+            "user_id"      : 1,
+            "refresh_token": "example_refresh_token",
+            "auth_time"    : 1529418738
+        }), })
     async with aiohttp.ClientSession() as session:
         async with session.post('https://bgm.tv/oauth/access_token',
                                 data={'grant_type'   : 'authorization_code',
