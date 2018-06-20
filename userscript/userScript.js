@@ -1,9 +1,8 @@
 // ==UserScript==
 // @name         Bgm.tv auto tracker
 // @namespace    https://trim21.me/
-// @description
-// @version      0.1
-// @description  try to take over the world!
+// @version      0.1.1
+// @description  Bgm.tv auto tracker
 // @author       Trim21
 // @match        https://www.bilibili.com/bangumi/play/*
 // @match        https://bangumi-auto-tracker.trim21.cn/oauth_callback*
