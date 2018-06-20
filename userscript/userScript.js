@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bgm.tv auto tracker
 // @namespace    https://trim21.me/
-// @version      0.1.5
+// @version      0.1.6
 // @description  auto tracker your bangumi progress
 // @author       Trim21
 // @match        https://www.bilibili.com/bangumi/play/*
@@ -45,7 +45,6 @@
       },
       function (error) {
         notify(error.response.data.message)
-        GM_openInTab(VARS.authURL, { active: true })
       }
     ).catch(function (err) {
       notify(err.toString(), 2)
@@ -62,6 +61,7 @@
     }
   } else {
     auth = GM_getValue('auth', false)
+    console.log(auth)
     if (auth) {
       auth = JSON.parse(auth)
     } else {
