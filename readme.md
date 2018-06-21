@@ -9,7 +9,17 @@
 
 ## 使用
 
-使用chrome的开发者模式直接加载src文件夹即可
+https://greasyfork.org/zh-CN/scripts/369643-bgm-tv-auto-tracker 
+
+安装后去 
+https://bgm.tv/oauth/authorize?client_id=bgm2775b2797b4d958b&response_type=code&redirect_uri=https://bangumi-auto-tracker.trim21.cn/oauth_callback
+进行授权 
+
+效果图 
+
+![](https://ww1.sinaimg.cn/large/bd69bf14ly1fsi8ir7ivtj20a805lt8y.jpg) 
+
+PS: 有添加 271 和优酷支持的计划, 但是具体什么时候能加上就看心情了...(
 
 ## 开发
 
