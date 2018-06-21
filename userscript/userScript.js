@@ -1,22 +1,20 @@
 // ==UserScript==
 // @name         Bgm.tv auto tracker
 // @namespace    https://trim21.me/
-// @version      0.2.2
+// @version      0.3.0
 // @description  auto tracker your bangumi progress
 // @author       Trim21
 // @match        https://www.bilibili.com/bangumi/play/*
 // @match        https://bangumi-auto-tracker.trim21.cn/oauth_callback*
 // @match        https://bangumi-auto-tracker.trim21.cn/userscript/options*
-
 // @require      https://cdn.bootcss.com/axios/0.18.0/axios.js
-
 // @grant        GM_addStyle
 // @grant        GM_setValue
 // @grant        unsafeWindow
 // @grant        GM_openInTab
 // @grant        GM_xmlhttpRequest
 // @grant        GM_getValue
-// @connect      localhost:6001
+// @connect      localhost
 // @connect      api.bgm.tv
 // @connect      bangumi-auto-tracker.trim21.cn
 // @run-at       document-end
@@ -24,22 +22,82 @@
 
 (function () {
   'use strict'
-  const ONLOAD = (resolve, reject) => (response) => {
-    if (response.status >= 300) {
-      reject(response)
-    } else {
+
+  function notify (message, options = {}) {
+    let now = new Date()
+    $('#bgm_tv_tracker_notification').prepend(`<hr><p>${now.getHours()}:${now.getMinutes()}:${now.getSeconds()} ${message}</p>`)
+  }
+
+  const parseHeader = function (lines) {
+    let headers = {}
+    for (let line of lines.trim().split('\r')) {
+      line = line.trim()
+      if (line) {
+        Object.assign(headers, parseHeaderLine(line))
+      }
+    }
+    return headers
+  }
+
+  const parseHeaderLine = function (line) {
+    let headers = {}
+    if (line.indexOf('\r') !== -1) {
+      throw parseErrorCode('HPE_LF_EXPECTED')
+    }
+    var headerExp = /^([^: \t]+):[ \t]*((?:.*[^ \t])|)/
+    var headerContinueExp = /^[ \t]+(.*[^ \t])/
+    var match = headerExp.exec(line)
+    var k = match && match[1]
+    k = k.toLowerCase()
+    headers[k] = match[2]
+    return headers
+  }
+  const BGM_ONLOAD = (resolve, reject) => (response) => {
+    // response.headers = parseHeader(response.responseHeaders)
+    response.headers = parseHeader(response.responseHeaders)
+
+    // console.log(response)
+    if (response.status < 300) {
+      if (response.headers['content-type'].startsWith('application/json')) {
+        response.data = JSON.parse(response.responseText)
+      }
+      if (response.data.code >= 300) {
+        let error = { response }
+        reject(error)
+      }
       resolve(response)
+    } else {
+      if (response.response.headers['content-type'].startsWith('application/json')) {
+        response.response.data = JSON.parse(response.responseText)
+      }
+      reject(response)
     }
   }
-  const requests = {
+  const NORMAL_ONLOAD = (resolve, reject) => (response) => {
+    // response.headers = parseHeader(response.responseHeaders)
+    response.headers = parseHeader(response.responseHeaders)
+
+    // console.log(response)
+    if (response.status < 300) {
+      if (response.headers['content-type'].startsWith('application/json')) {
+        response.data = JSON.parse(response.responseText)
+      }
+      resolve(response)
+    } else {
+      if (response.response.headers['content-type'].startsWith('application/json')) {
+        response.response.data = JSON.parse(response.responseText)
+      }
+      reject(response)
+    }
+  }
+  const bgmApi = {
     get (url, headers = {}) {
       return new Promise((resolve, reject) => {
         var ret = GM_xmlhttpRequest({
           method: 'GET',
-          responseType: 'json',
           url,
           headers,
-          onload: ONLOAD(resolve, reject)
+          onload: BGM_ONLOAD(resolve, reject)
         })
       },)
     },
@@ -51,11 +109,38 @@
       return new Promise((resolve, reject) => {
         var ret = GM_xmlhttpRequest({
           method: 'POST',
-          responseType: 'json',
           data,
           url,
           headers,
-          onload: ONLOAD(resolve, reject)
+          onload: BGM_ONLOAD(resolve, reject)
+        })
+      })
+    }
+  }
+
+  const requests = {
+    get (url, headers = {}) {
+      return new Promise((resolve, reject) => {
+        var ret = GM_xmlhttpRequest({
+          method: 'GET',
+          url,
+          headers,
+          onload: NORMAL_ONLOAD(resolve, reject)
+        })
+      },)
+    },
+    post (url, data = {}, headers = {},) {
+      if (data !== null && typeof data === 'object') {
+        data = JSON.stringify(data)
+        headers['content-Type'] = 'application/json'
+      }
+      return new Promise((resolve, reject) => {
+        var ret = GM_xmlhttpRequest({
+          method: 'POST',
+          data,
+          url,
+          headers,
+          onload: NORMAL_ONLOAD(resolve, reject)
         })
       })
     }
@@ -64,6 +149,7 @@
   const VARS = {
     apiServerURL: 'https://bangumi-auto-tracker.trim21.cn',
     callBackUrl: 'https://bangumi-auto-tracker.trim21.cn/oauth_callback',
+    apiBgmUrl: 'https://api.bgm.tv',
     authURL: '',
   }
   VARS.authURL = 'https://bgm.tv/oauth/authorize?client_id=bgm2775b2797b4d958b&response_type=code&redirect_uri=' + VARS.callBackUrl
@@ -73,35 +159,101 @@
     console.log('dev')
   }
 
-  const serverApi = axios.create({
-    baseURL: `${VARS.apiServerURL}/`,
-    timeout: 10000
-  })
+  function getEps (subject_id) {
+    return new Promise(
+      (resolve, reject) => {
 
-  function notify (message, timeout = 4) {
-    Notification.requestPermission(function (permission) {
-      if (permission !== 'denied') {
-        let n = new Notification(message, {})
-        setTimeout(n.close.bind(n), timeout * 1000)
+        let eps = GM_getValue(`eps_${subject_id}`, false)
+        if (!eps) {
+
+          bgmApi.get(`${VARS.apiBgmUrl}/subject/${subject_id}/ep`,).then(
+            (response) => {
+              console.log(response)
+              response.data.time = Number(new Date().getTime() / 1000)
+              GM_setValue(`eps_${subject_id}`, JSON.stringify(response.data))
+              resolve(response.data)
+            },
+            (error) => {
+              reject(error)
+              notify('get bgm eps error', 2)
+            }
+          )
+
+        } else {
+          eps = JSON.parse(eps)
+          if (Number(new Date().getTime() / 1000) - eps.time > 60 * 60 * 2) {
+
+            requests.get(`${VARS.apiBgmUrl}/subject/${subject_id}/ep`,).then(
+              (response) => {
+                response.data.time = Number(new Date().getTime() / 1000)
+                GM_setValue(`eps_${subject_id}`, JSON.stringify(response.data))
+                resolve(response.data)
+              },
+              (error) => {
+                reject(error)
+                notify('get bgm eps error', 2)
+              }
+            )
+
+          } else {
+            resolve(eps)
+          }
+        }
       }
-    })
+    )
+  }
+
+  let collection = GM_getValue('collection', false) // @type {Array}
+  if (!collection) {
+    collection = {}
+  } else {
+    collection = JSON.parse(collection)
   }
 
   function watchEpisode (message) {
-    requests.post(`${VARS.apiServerURL}/watch_episode`, {
-      website: 'bilibili',
-      episode: message.episode,
-      bangumi_id: message.bangumi_id,
-      user_id: auth.user_id,
-      access_token: auth.access_token
-    }).then(
-      (response) => {
-        notify(`mark your status successfully`.toString(), 2)
+    console.log(collection)
+    console.log(collection[message.subject_id])
+    if (!collection[message.subject_id]) {
+      requests.post(`${VARS.apiBgmUrl}/collection/${message.subject_id}/update`, 'status=do',
+        {
+          'content-type': 'application/x-www-form-urlencoded',
+          'Authorization': 'Bearer ' + auth.access_token,
+        }).then(
+        response => {
+          if (response.data.code === 401) {
+            notify(response.data.error)
+
+          } else {
+
+            notify('add this bangumi to your collection', 2)
+            collection[message.subject_id] = true
+            GM_setValue('collection', JSON.stringify(collection))
+          }
+        },
+        error => notify(error.response.data.error_description)
+      )
+    }
+
+    getEps(message.subject_id).then(
+      // requests.post(`${VARS.apiServerURL}/watch_episode`, {
+      //   website: 'bilibili',
+      //   episode: message.episode,
+      //   bangumi_id: message.bangumi_id,
+      //   user_id: auth.user_id,
+      //   access_token: auth.access_token
+      // })
+      (data) => {
+        console.log('1', data)
+        let ep = data.eps[parseInt(message.episode) - 1].id
+        requests.post(`${VARS.apiBgmUrl}/ep/${ep}/status/watched`, null, { 'Authorization': 'Bearer ' + auth.access_token }).then(
+          response => notify(`mark your status successfully`.toString(), 2),
+          error => notify(error.response.data.message)
+        )
       },
       (error) => {
-        console.log(error.response.message)
         console.log(error)
-        notify(error.response.message)
+        console.log(error.response.data.message)
+        notify(error.response.data.message)
       }
     ).catch(function (err) {
       notify(err.toString(), 2)
@@ -146,11 +298,13 @@
             <p>第<span id="bgm_tv_tracker_episode">${episode}</span>集</p>
         </div>
         <br>
+        <button id="notify">notify</button>
         <div id="bgm_tv_tracker_link"></div>
         <br>
         <button class="bgm_tv_tracker_radius" id="bgm_tv_tracker_mark_watch">标记为看过</button>
         <br>
         <a href="https://github.com/Trim21/bilibili-bangumi-tv-auto-tracker/issues" target="_blank" rel="noopener noreferrer">报告问题</a>
+        <div id="bgm_tv_tracker_notification"></div>
     </div>
 </div>
 <style>
@@ -220,7 +374,7 @@
     text-align: left;
     top: 70px;
     white-space: normal;
-    width: 200px;
+    width: 300px;
     z-index: 1000;
 
 }
@@ -244,6 +398,9 @@ max-width: 100%;
 </style>
 `
       $('#bangumi_detail > div > div.info-right > div.info-title.clearfix > div.func-module.clearfix').prepend(div)
+      $('#notify').click(() => {
+        notify(new Date().getTime().toString())
+      })
       let info = $('.bgm_tv_tracker_info')
       $('.bgm_tv_tracker_btn.bgm_tv_tracker').click(() => {
         info.toggle('fast')
@@ -254,15 +411,17 @@ max-width: 100%;
         $(this).css('background-color', 'white')
         $(this).css('color', 'black')
       })
-      $('#bgm_tv_tracker_title').html(status.mediaInfo.alias)
-
-      serverApi.get('/query/bilibili', { params: { bangumi_id } }).then(
+      $('#bgm_tv_tracker_title').html(status.mediaInfo.title)
+      console.log(' query bangumi ')
+      requests.get(`${VARS.apiServerURL}/query/bilibili?bangumi_id=${bangumi_id}`).then(
         (response) => {
-          let subject_id = response.data.subject_id
+          console.log(response)
+          let subject_id = response.data.bangumi_id
 
           $('#bgm_tv_tracker_link').html(`<a href="http://bgm.tv/subject/${subject_id}" target="_blank" rel="noopener noreferrer">subject/${subject_id}</a>`)
           $('#bgm_tv_tracker_mark_watch').click(() => {
               watchEpisode({
+                subject_id,
                 'type': 'watch_episode',
                 'website': 'bilibili',
                 'bangumi_id': $('#bgm_tv_tracker').data('id'),
@@ -292,15 +451,6 @@ max-width: 100%;
       const status = __INITIAL_STATE__
       const episode = status.epInfo.index
       $('#bgm_tv_tracker_episode').html(episode)
-      if (GM_getValue('auto_mark', false) === 'true') {
-        watchEpisode({
-          'type': 'watch_episode',
-          'website': 'bilibili',
-          'bangumi_id': status.mediaInfo.season_id,
-          'title': $('#bgm_tv_tracker_title').html(),
-          episode,
-        })
-      }
     }
 
     // noinspection JSAnnotator
