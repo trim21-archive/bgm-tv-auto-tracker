@@ -7,16 +7,60 @@
 // @match        https://www.bilibili.com/bangumi/play/*
 // @match        https://bangumi-auto-tracker.trim21.cn/oauth_callback*
 // @match        https://bangumi-auto-tracker.trim21.cn/userscript/options*
+
 // @require      https://cdn.bootcss.com/axios/0.18.0/axios.js
+
 // @grant        GM_addStyle
 // @grant        GM_setValue
+// @grant        unsafeWindow
 // @grant        GM_openInTab
+// @grant        GM_xmlhttpRequest
 // @grant        GM_getValue
+// @connect      localhost:6001
+// @connect      api.bgm.tv
+// @connect      bangumi-auto-tracker.trim21.cn
 // @run-at       document-end
 // ==/UserScript==
 
 (function () {
   'use strict'
+  const ONLOAD = (resolve, reject) => (response) => {
+    if (response.status >= 300) {
+      reject(response)
+    } else {
+      resolve(response)
+    }
+  }
+  const requests = {
+    get (url, headers = {}) {
+      return new Promise((resolve, reject) => {
+        var ret = GM_xmlhttpRequest({
+          method: 'GET',
+          responseType: 'json',
+          url,
+          headers,
+          onload: ONLOAD(resolve, reject)
+        })
+      },)
+    },
+    post (url, data = {}, headers = {},) {
+      if (data !== null && typeof data === 'object') {
+        data = JSON.stringify(data)
+        headers['content-Type'] = 'application/json'
+      }
+      return new Promise((resolve, reject) => {
+        var ret = GM_xmlhttpRequest({
+          method: 'POST',
+          responseType: 'json',
+          data,
+          url,
+          headers,
+          onload: ONLOAD(resolve, reject)
+        })
+      })
+    }
+  }
+
   const VARS = {
     apiServerURL: 'https://bangumi-auto-tracker.trim21.cn',
     callBackUrl: 'https://bangumi-auto-tracker.trim21.cn/oauth_callback',
@@ -26,6 +70,7 @@
 
   if (window.TM_ENV === 'dev') {
     VARS.apiServerURL = 'http://localhost:6001'
+    console.log('dev')
   }
 
   const serverApi = axios.create({
@@ -43,20 +88,20 @@
   }
 
   function watchEpisode (message) {
-    serverApi.post('/watch_episode', {
-        website: 'bilibili',
-        episode: message.episode,
-        bangumi_id: message.bangumi_id,
-        user_id: auth.user_id,
-        access_token: auth.access_token
-      },
-    ).then(
-      function (response) {
-        console.log(response.data)
+    requests.post(`${VARS.apiServerURL}/watch_episode`, {
+      website: 'bilibili',
+      episode: message.episode,
+      bangumi_id: message.bangumi_id,
+      user_id: auth.user_id,
+      access_token: auth.access_token
+    }).then(
+      (response) => {
         notify(`mark your status successfully`.toString(), 2)
       },
-      function (error) {
-        notify(error.response.data.message)
+      (error) => {
+        console.log(error.response.message)
+        console.log(error)
+        notify(error.response.message)
       }
     ).catch(function (err) {
       notify(err.toString(), 2)
@@ -236,8 +281,11 @@ max-width: 100%;
       // Your code here...
     }
 
+    // setTimeout(injectBilibili, 1000)
     injectBilibili()
+
     let url = location.href
+    let INNER_EPISODE = __INITIAL_STATE__.epInfo.index
 
     // noinspection JSAnnotator
     function onHrefChange () {
@@ -258,13 +306,15 @@ max-width: 100%;
     // noinspection JSAnnotator
     function detectHrefChange () {
       console.log('check href')
-      if (location.href !== url) {
+      if (INNER_EPISODE !== __INITIAL_STATE__.epInfo.index) {
         onHrefChange()
-        url = location.href
+        INNER_EPISODE = __INITIAL_STATE__.epInfo.index
+        // url = location.href
       }
     }
 
     setInterval(detectHrefChange, 10 * 1000)
+    setTimeout(detectHrefChange, 2000)
   }
 
 })()

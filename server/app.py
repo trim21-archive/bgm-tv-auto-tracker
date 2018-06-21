@@ -90,14 +90,13 @@ async def getToken(request: web.Request, ):
 
 
 async def fromPlayerUrlToBangumiSubjectID(request: web.Request):
-    data = request.query
     bangumi_id = request.query.get('bangumi_id', None)
     website = request.match_info.get('website', None)
     if bangumi_id and website:
         r = await request.app.mongo.bilibili_bangumi.bilibili.find_one({'_id': bangumi_id})
         print(r)
         if r:
-            return web.json_response({'subject_id': r['bangumi_id']})
+            return web.json_response(r)
         else:
             raise web.HTTPNotFound()
     else:

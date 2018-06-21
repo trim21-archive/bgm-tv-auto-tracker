@@ -1,1 +1,1 @@
-var TM_ENV = 'dev';
+window.TM_ENV = 'dev';
