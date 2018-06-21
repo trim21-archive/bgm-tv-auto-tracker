@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Bgm.tv auto tracker
 // @namespace    https://trim21.me/
-// @version      0.3.0
+// @version      0.3.1
 // @description  auto tracker your bangumi progress
 // @author       Trim21
 // @match        https://www.bilibili.com/bangumi/play/*
@@ -298,7 +298,6 @@
             <p>第<span id="bgm_tv_tracker_episode">${episode}</span>集</p>
         </div>
         <br>
-        <button id="notify">notify</button>
         <div id="bgm_tv_tracker_link"></div>
         <br>
         <button class="bgm_tv_tracker_radius" id="bgm_tv_tracker_mark_watch">标记为看过</button>
@@ -398,9 +397,6 @@ max-width: 100%;
 </style>
 `
       $('#bangumi_detail > div > div.info-right > div.info-title.clearfix > div.func-module.clearfix').prepend(div)
-      $('#notify').click(() => {
-        notify(new Date().getTime().toString())
-      })
       let info = $('.bgm_tv_tracker_info')
       $('.bgm_tv_tracker_btn.bgm_tv_tracker').click(() => {
         info.toggle('fast')
