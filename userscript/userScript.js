@@ -10,10 +10,10 @@
 // @require      https://cdn.bootcss.com/axios/0.18.0/axios.js
 // @grant        GM_addStyle
 // @grant        GM_setValue
-// @grant        unsafeWindow
 // @grant        GM_openInTab
 // @grant        GM_xmlhttpRequest
 // @grant        GM_getValue
+// @grant        unsafeWindow
 // @connect      localhost
 // @connect      api.bgm.tv
 // @connect      bangumi-auto-tracker.trim21.cn
@@ -22,10 +22,26 @@
 
 (function () {
   'use strict'
+  // eslint-disable-next-line no-undef, camelcase
+  let TM_unsafeWindow = unsafeWindow
+  // eslint-disable-next-line no-undef, camelcase
+  let TM_xmlHttpRequest = GM_xmlhttpRequest
+  // eslint-disable-next-line no-undef, camelcase
+  let TM_setValue = GM_setValue
+  // eslint-disable-next-line no-undef, camelcase
+  let TM_getValue = GM_getValue
+  // eslint-disable-next-line no-undef, camelcase
+  let TM_openInTab = GM_openInTab
+
+  let $ = TM_unsafeWindow.jQuery
+  // eslint-disable-next-line no-undef
+  console.log(TM_unsafeWindow)
 
   function notify (message, options = {}) {
     let now = new Date()
-    $('#bgm_tv_tracker_notification').prepend(`<hr><p>${now.getHours()}:${now.getMinutes()}:${now.getSeconds()} ${message}</p>`)
+
+    $('#bgm_tv_tracker_notification')
+      .prepend(`<hr><p>${now.getHours()}:${now.getMinutes()}:${now.getSeconds()} ${message}</p>`)
   }
 
   const parseHeader = function (lines) {
@@ -41,13 +57,9 @@
 
   const parseHeaderLine = function (line) {
     let headers = {}
-    if (line.indexOf('\r') !== -1) {
-      throw parseErrorCode('HPE_LF_EXPECTED')
-    }
-    var headerExp = /^([^: \t]+):[ \t]*((?:.*[^ \t])|)/
-    var headerContinueExp = /^[ \t]+(.*[^ \t])/
-    var match = headerExp.exec(line)
-    var k = match && match[1]
+    let headerExp = /^([^: \t]+):[ \t]*((?:.*[^ \t])|)/
+    let match = headerExp.exec(line)
+    let k = match && match[1]
     k = k.toLowerCase()
     headers[k] = match[2]
     return headers
@@ -93,21 +105,21 @@
   const bgmApi = {
     get (url, headers = {}) {
       return new Promise((resolve, reject) => {
-        var ret = GM_xmlhttpRequest({
+        TM_xmlHttpRequest({
           method: 'GET',
           url,
           headers,
           onload: BGM_ONLOAD(resolve, reject)
         })
-      },)
+      })
     },
-    post (url, data = {}, headers = {},) {
+    post (url, data = {}, headers = {}) {
       if (data !== null && typeof data === 'object') {
         data = JSON.stringify(data)
         headers['content-Type'] = 'application/json'
       }
       return new Promise((resolve, reject) => {
-        var ret = GM_xmlhttpRequest({
+        TM_xmlHttpRequest({
           method: 'POST',
           data,
           url,
@@ -121,21 +133,21 @@
   const requests = {
     get (url, headers = {}) {
       return new Promise((resolve, reject) => {
-        var ret = GM_xmlhttpRequest({
+        TM_xmlHttpRequest({
           method: 'GET',
           url,
           headers,
           onload: NORMAL_ONLOAD(resolve, reject)
         })
-      },)
+      })
     },
-    post (url, data = {}, headers = {},) {
+    post (url, data = {}, headers = {}) {
       if (data !== null && typeof data === 'object') {
         data = JSON.stringify(data)
         headers['content-Type'] = 'application/json'
       }
       return new Promise((resolve, reject) => {
-        var ret = GM_xmlhttpRequest({
+        TM_xmlHttpRequest({
           method: 'POST',
           data,
           url,
@@ -150,7 +162,7 @@
     apiServerURL: 'https://bangumi-auto-tracker.trim21.cn',
     callBackUrl: 'https://bangumi-auto-tracker.trim21.cn/oauth_callback',
     apiBgmUrl: 'https://api.bgm.tv',
-    authURL: '',
+    authURL: ''
   }
   VARS.authURL = 'https://bgm.tv/oauth/authorize?client_id=bgm2775b2797b4d958b&response_type=code&redirect_uri=' + VARS.callBackUrl
 
@@ -159,18 +171,16 @@
     console.log('dev')
   }
 
-  function getEps (subject_id) {
+  function getEps (subjectID) {
     return new Promise(
       (resolve, reject) => {
-
-        let eps = GM_getValue(`eps_${subject_id}`, false)
+        let eps = TM_getValue(`eps_${subjectID}`, false)
         if (!eps) {
-
-          bgmApi.get(`${VARS.apiBgmUrl}/subject/${subject_id}/ep`,).then(
+          bgmApi.get(`${VARS.apiBgmUrl}/subject/${subjectID}/ep`).then(
             (response) => {
               console.log(response)
               response.data.time = Number(new Date().getTime() / 1000)
-              GM_setValue(`eps_${subject_id}`, JSON.stringify(response.data))
+              TM_setValue(`eps_${subjectID}`, JSON.stringify(response.data))
               resolve(response.data)
             },
             (error) => {
@@ -178,15 +188,13 @@
               notify('get bgm eps error', 2)
             }
           )
-
         } else {
           eps = JSON.parse(eps)
           if (Number(new Date().getTime() / 1000) - eps.time > 60 * 60 * 2) {
-
-            requests.get(`${VARS.apiBgmUrl}/subject/${subject_id}/ep`,).then(
+            requests.get(`${VARS.apiBgmUrl}/subject/${subjectID}/ep`).then(
               (response) => {
                 response.data.time = Number(new Date().getTime() / 1000)
-                GM_setValue(`eps_${subject_id}`, JSON.stringify(response.data))
+                TM_setValue(`eps_${subjectID}`, JSON.stringify(response.data))
                 resolve(response.data)
               },
               (error) => {
@@ -194,7 +202,6 @@
                 notify('get bgm eps error', 2)
               }
             )
-
           } else {
             resolve(eps)
           }
@@ -203,7 +210,7 @@
     )
   }
 
-  let collection = GM_getValue('collection', false) // @type {Array}
+  let collection = TM_getValue('collection', false) // @type {Array}
   if (!collection) {
     collection = {}
   } else {
@@ -217,17 +224,15 @@
       requests.post(`${VARS.apiBgmUrl}/collection/${message.subject_id}/update`, 'status=do',
         {
           'content-type': 'application/x-www-form-urlencoded',
-          'Authorization': 'Bearer ' + auth.access_token,
+          'Authorization': 'Bearer ' + auth.access_token
         }).then(
         response => {
           if (response.data.code === 401) {
             notify(response.data.error)
-
           } else {
-
             notify('add this bangumi to your collection', 2)
             collection[message.subject_id] = true
-            GM_setValue('collection', JSON.stringify(collection))
+            TM_setValue('collection', JSON.stringify(collection))
           }
         },
         error => notify(error.response.data.error_description)
@@ -235,13 +240,6 @@
     }
 
     getEps(message.subject_id).then(
-      // requests.post(`${VARS.apiServerURL}/watch_episode`, {
-      //   website: 'bilibili',
-      //   episode: message.episode,
-      //   bangumi_id: message.bangumi_id,
-      //   user_id: auth.user_id,
-      //   access_token: auth.access_token
-      // })
       (data) => {
         console.log('1', data)
         let ep = data.eps[parseInt(message.episode) - 1].id
@@ -262,20 +260,23 @@
 
   // auth
   let auth
-  if (location.href.startsWith(VARS.callBackUrl)) {
+  if (TM_unsafeWindow.location.href.startsWith(VARS.callBackUrl)) {
     console.log('try auth')
+    console.log(TM_unsafeWindow)
     if (data) {
-      GM_setValue('auth', JSON.stringify(data))
-      alert('auth success, please close tab')
+      TM_setValue('auth', JSON.stringify(data))
+      let child = TM_unsafeWindow.document.createElement('h1')
+      child.innerText = '成功授权 请关闭网页'
+      TM_unsafeWindow.document.body.appendChild(child)
     }
   } else {
-    auth = GM_getValue('auth', false)
+    auth = TM_getValue('auth', false)
     if (auth) {
       auth = JSON.parse(auth)
     } else {
-      let r = alert('you need to auth bgm.tv_auto_tracker first')
+      let r = TM_unsafeWindow.alert('you need to auth bgm.tv_auto_tracker first')
       if (r) {
-        GM_openInTab(VARS.authURL, { active: true })
+        TM_openInTab(VARS.authURL, { active: true })
       }
     }
   }
@@ -412,17 +413,18 @@ max-width: 100%;
       requests.get(`${VARS.apiServerURL}/query/bilibili?bangumi_id=${bangumi_id}`).then(
         (response) => {
           console.log(response)
-          let subject_id = response.data.bangumi_id
+          let subjectID = response.data.bangumi_id
 
-          $('#bgm_tv_tracker_link').html(`<a href="http://bgm.tv/subject/${subject_id}" target="_blank" rel="noopener noreferrer">subject/${subject_id}</a>`)
-          $('#bgm_tv_tracker_mark_watch').click(() => {
+          $('#bgm_tv_tracker_link').html(`<a href="http://bgm.tv/subject/${subjectID}" target="_blank" rel="noopener noreferrer">subject/${subjectID}</a>`)
+          $('#bgm_tv_tracker_mark_watch').click(
+            () => {
               watchEpisode({
-                subject_id,
+                subject_id: subjectID,
                 'type': 'watch_episode',
                 'website': 'bilibili',
                 'bangumi_id': $('#bgm_tv_tracker').data('id'),
                 'title': $('#bgm_tv_tracker_title').html(),
-                episode: $('#bgm_tv_tracker_episode').html(),
+                episode: $('#bgm_tv_tracker_episode').html()
               })
             }
           )
@@ -439,12 +441,11 @@ max-width: 100%;
     // setTimeout(injectBilibili, 1000)
     injectBilibili()
 
-    let url = location.href
-    let INNER_EPISODE = __INITIAL_STATE__.epInfo.index
+    let INNER_EPISODE = TM_unsafeWindow.__INITIAL_STATE__.epInfo.index
 
     // noinspection JSAnnotator
     function onHrefChange () {
-      const status = __INITIAL_STATE__
+      const status = TM_unsafeWindow.__INITIAL_STATE__
       const episode = status.epInfo.index
       $('#bgm_tv_tracker_episode').html(episode)
     }
@@ -452,9 +453,9 @@ max-width: 100%;
     // noinspection JSAnnotator
     function detectHrefChange () {
       console.log('check href')
-      if (INNER_EPISODE !== __INITIAL_STATE__.epInfo.index) {
+      if (INNER_EPISODE !== TM_unsafeWindow.__INITIAL_STATE__.epInfo.index) {
         onHrefChange()
-        INNER_EPISODE = __INITIAL_STATE__.epInfo.index
+        INNER_EPISODE = TM_unsafeWindow.__INITIAL_STATE__.epInfo.index
         // url = location.href
       }
     }
@@ -462,5 +463,4 @@ max-width: 100%;
     setInterval(detectHrefChange, 10 * 1000)
     setTimeout(detectHrefChange, 2000)
   }
-
 })()
