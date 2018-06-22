@@ -17,7 +17,7 @@ https://bgm.tv/oauth/authorize?client_id=bgm2775b2797b4d958b&response_type=code&
 
 效果图 
 
-![](![](https://ws1.sinaimg.cn/large/bd69bf14ly1fsko1z5beej20aj07f3yw.jpg)) 
+![](./screenshot/bilibili.png) 
 
 PS: 有添加 271 和优酷支持的计划, 但是具体什么时候能加上就看心情了...(
 
