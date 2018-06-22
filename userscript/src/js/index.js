@@ -173,9 +173,9 @@
     collection = JSON.parse(collection)
   }
 
-  function collectSubject (subject_id) {
-    if (!collection[subject_id]) {
-      requests.post(`${VARS.apiBgmUrl}/collection/${subject_id}/update`, 'status=do',
+  function collectSubject (subjectID) {
+    if (!collection[subjectID]) {
+      requests.post(`${VARS.apiBgmUrl}/collection/${subjectID}/update`, 'status=do',
         {
           'content-type': 'application/x-www-form-urlencoded',
           'Authorization': 'Bearer ' + auth.access_token
@@ -185,7 +185,7 @@
             notify(response.data.error)
           } else {
             notify('add this bangumi to your collection', 2)
-            collection[subject_id] = true
+            collection[subjectID] = true
             tm_setValue('collection', JSON.stringify(collection))
           }
         },
@@ -199,7 +199,8 @@
     getEps(message.subject_id).then(
       (data) => {
         let ep = data.eps[parseInt(message.episode) - 1].id
-        requests.post(`${VARS.apiBgmUrl}/ep/${ep}/status/watched`, null, { 'Authorization': 'Bearer ' + auth.access_token }).then(
+        requests.post(`${VARS.apiBgmUrl}/ep/${ep}/status/watched`,
+          null, { 'Authorization': 'Bearer ' + auth.access_token }).then(
           () => notify(`mark your status successfully`.toString(), 2),
           error => notify(JSON.stringify(error.response.data))
         )
@@ -241,7 +242,8 @@
       const episode = status.epInfo.index
       const bangumiID = status.mediaInfo.season_id
 
-      $('#bangumi_detail > div > div.info-right > div.info-title.clearfix > div.func-module.clearfix').prepend('/* @include ../html/bilibili.min.html */')
+      $('#bangumi_detail > div > div.info-right > div.info-title.clearfix > div.func-module.clearfix')
+        .prepend('/* @include ../html/bilibili.min.html */')
       $('#bgm_tv_tracker_episode').html(episode)
       $('#bgm_tv_tracker').data('id', bangumiID)
       tm_addStyle('/* @include ../css/bilibili.min.css */')
@@ -295,7 +297,6 @@
               })
             }
           )
-
         },
         (err) => {
           if (err.response.status === 404) {
@@ -303,7 +304,6 @@
           }
         }
       )
-      // Your code here...
     }
 
     injectBilibili()

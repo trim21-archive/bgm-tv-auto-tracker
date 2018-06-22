@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         bgm-tv-auto-tracker
+// @name         Bgm.tv auto tracker
 // @namespace    https://trim21.me/
 // @description  auto tracker your bangumi progress
 // @version      0.4.0
@@ -196,9 +196,9 @@
     collection = JSON.parse(collection)
   }
 
-  function collectSubject (subject_id) {
-    if (!collection[subject_id]) {
-      requests.post(`${VARS.apiBgmUrl}/collection/${subject_id}/update`, 'status=do',
+  function collectSubject (subjectID) {
+    if (!collection[subjectID]) {
+      requests.post(`${VARS.apiBgmUrl}/collection/${subjectID}/update`, 'status=do',
         {
           'content-type': 'application/x-www-form-urlencoded',
           'Authorization': 'Bearer ' + auth.access_token
@@ -208,7 +208,7 @@
             notify(response.data.error)
           } else {
             notify('add this bangumi to your collection', 2)
-            collection[subject_id] = true
+            collection[subjectID] = true
             tm_setValue('collection', JSON.stringify(collection))
           }
         },
@@ -222,7 +222,8 @@
     getEps(message.subject_id).then(
       (data) => {
         let ep = data.eps[parseInt(message.episode) - 1].id
-        requests.post(`${VARS.apiBgmUrl}/ep/${ep}/status/watched`, null, { 'Authorization': 'Bearer ' + auth.access_token }).then(
+        requests.post(`${VARS.apiBgmUrl}/ep/${ep}/status/watched`,
+          null, { 'Authorization': 'Bearer ' + auth.access_token }).then(
           () => notify(`mark your status successfully`.toString(), 2),
           error => notify(JSON.stringify(error.response.data))
         )
@@ -264,7 +265,8 @@
       const episode = status.epInfo.index
       const bangumiID = status.mediaInfo.season_id
 
-      $('#bangumi_detail > div > div.info-right > div.info-title.clearfix > div.func-module.clearfix').prepend('<div id="bgm_tv_tracker" class="disable" data-id=""><div class="bgm_tv_tracker_btn bgm_tv_tracker bgm_tv_tracker_radius">bgm.tv</div><div class="bgm_tv_tracker_info"><br><div><p>你正在看: <span id="bgm_tv_tracker_title"></span></p><p>第 <span id="bgm_tv_tracker_episode">{episode}</span>集</p></div><br><div id="bgm_tv_tracker_link"></div><br><button class="bgm_tv_tracker_radius" id="bgm_tv_tracker_mark_watch">标记本集为看过</button> <button class="bgm_tv_tracker_radius" id="bgm_tv_tracker_mark_watched">看到本集</button><br><br><a href="https://github.com/Trim21/bilibili-bangumi-tv-auto-tracker/issues" target="_blank" rel="noopener noreferrer">报告问题</a><br><div id="bgm_tv_tracker_notification"></div></div></div>')
+      $('#bangumi_detail > div > div.info-right > div.info-title.clearfix > div.func-module.clearfix')
+        .prepend('<div id="bgm_tv_tracker" class="disable" data-id=""><div class="bgm_tv_tracker_btn bgm_tv_tracker bgm_tv_tracker_radius">bgm.tv</div><div class="bgm_tv_tracker_info"><br><div><p>你正在看: <span id="bgm_tv_tracker_title"></span></p><p>第 <span id="bgm_tv_tracker_episode">{episode}</span>集</p></div><br><div id="bgm_tv_tracker_link"></div><br><button class="bgm_tv_tracker_radius" id="bgm_tv_tracker_mark_watch">标记本集为看过</button> <button class="bgm_tv_tracker_radius" id="bgm_tv_tracker_mark_watched">看到本集</button><br><br><a href="https://github.com/Trim21/bilibili-bangumi-tv-auto-tracker/issues" target="_blank" rel="noopener noreferrer">报告问题</a><br><div id="bgm_tv_tracker_notification"></div></div></div>')
       $('#bgm_tv_tracker_episode').html(episode)
       $('#bgm_tv_tracker').data('id', bangumiID)
       tm_addStyle('#bgm_tv_tracker{display:inline-block;position:relative;float:left;margin-right:20px;user-select:none}.bgm_tv_tracker_radius{border-radius:4px;border:1px solid #e5e9ef}.bgm_tv_tracker_btn.bgm_tv_tracker{color:#6d757a;float:left;cursor:pointer;font-size:14px;height:28px;line-height:28px;text-align:center;width:80px!important;transition:all .1s ease-in}.bangumi-info .info-right .info-title.clearfix h2{width:380px}@media screen and (max-width:1400px){.arc-toolbar .block{padding:0 12px;margin-left:-12px}.video-toolbar-module .btn-item{padding:0 0 0 60px!important;margin-left:-12px}.bangumi-info .info-right .info-title.clearfix h2{width:200px!important}}#bgm_tv_tracker.disable .bgm_tv_tracker_info{display:none}.bgm_tv_tracker_info{padding:8px;margin-top:5px;background:#fff;border-radius:0 0 4px 4px;border:1px solid #e5e9ef;box-shadow:rgba(0,0,0,.16) 0 2px 4px;cursor:default;height:auto;left:-1px;line-height:normal;opacity:0;pointer-events:none;position:absolute;text-align:left;top:70px;white-space:normal;width:300px;z-index:1000}.bgm_tv_tracker_info *{max-width:100%}#bgm_tv_tracker .bgm_tv_tracker_info{opacity:1;pointer-events:auto;top:100%}.bgm_tv_tracker_info button{padding:4px 6px;line-height:14px;display:inline-block;margin:4px}')
@@ -318,7 +320,6 @@
               })
             }
           )
-
         },
         (err) => {
           if (err.response.status === 404) {
@@ -326,7 +327,6 @@
           }
         }
       )
-      // Your code here...
     }
 
     injectBilibili()

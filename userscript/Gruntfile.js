@@ -27,6 +27,7 @@ module.exports = function (grunt) {
         files: [
           {
             expand: true,
+            cwd: 'src',
             src: ['css/*.css'],
             dest: 'tmp',
             ext: '.min.css'
@@ -46,11 +47,13 @@ module.exports = function (grunt) {
       dist: {
         options: {
           removeComments: true,
-          collapseWhitespace: true
+          collapseWhitespace: true,
+          quoteCharacter: '"'
         },
         files: [{
           expand: true,
-          src: ['html/*.html', '*.html'],
+          cwd: 'src',
+          src: ['html/*.html'],
           dest: 'tmp',
           ext: '.min.html'
         }]
@@ -75,7 +78,7 @@ module.exports = function (grunt) {
         stripBanners: false
       },
       js: {
-        src: ['js/**/*.js'],
+        src: ['src/js/**/*.js'],
         dest: 'tmp/js/0-concat.js'
       },
       ferdig: {
@@ -94,12 +97,12 @@ module.exports = function (grunt) {
         spawn: false,
         interval: 500
       },
-      files: ['js/*.js', 'Gruntfile.js', 'css/*.css', 'html/*.html'],
+      files: ['src/js/*.js', 'Gruntfile.js', 'src/css/*.css', 'src/html/*.html', 'package.json'],
       tasks: ['dev']
     },
 
     jshint: {
-      files: ['js/**/*.js', 'Gruntfile.js'],
+      files: ['src/js/**/*.js', 'Gruntfile.js'],
       options: {
         jshintrc: '.jshintrc',
         debug: true
@@ -136,7 +139,8 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-cssmin')
   grunt.loadNpmTasks('grunt-contrib-htmlmin')
   grunt.loadNpmTasks('grunt-contrib-uglify-es')
-  grunt.loadNpmTasks('grunt-userscript-meta')
+  grunt.loadTasks('grunt-userscript-meta')
+  // grunt.loadNpmTasks('grunt-userscript-meta')
   grunt.loadNpmTasks('grunt-preprocess')
 
   grunt.registerTask('default', [

@@ -4,7 +4,7 @@
 
 ## 介绍
 
-在b站看番剧的同时自动在bgm.tv上标记已经看过的集数.
+在b站看番剧的同时一键在bgm.tv上标记已经看过的集数.
 
 
 ## 使用
@@ -17,7 +17,7 @@ https://bgm.tv/oauth/authorize?client_id=bgm2775b2797b4d958b&response_type=code&
 
 效果图 
 
-![](https://ww1.sinaimg.cn/large/bd69bf14ly1fsi8ir7ivtj20a805lt8y.jpg) 
+![](![](https://ws1.sinaimg.cn/large/bd69bf14ly1fsko1z5beej20aj07f3yw.jpg)) 
 
 PS: 有添加 271 和优酷支持的计划, 但是具体什么时候能加上就看心情了...(
 
@@ -27,5 +27,4 @@ PS: 有添加 271 和优酷支持的计划, 但是具体什么时候能加上就
 
 bilibili部分已经完工了
 
-准备上架chrome应用商店, 但是还没搞到visa卡...
-
+欢迎贡献代码

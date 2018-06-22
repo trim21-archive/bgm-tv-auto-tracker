@@ -1,7 +1,7 @@
 {
   "name": "bgm-tv-auto-tracker",
   "description": "auto tracker your bangumi progress",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "author": {
     "name": "Trim21",
     "email": "trim21me@gmail.com"
@@ -13,6 +13,7 @@
     "build": "grunt"
   },
   "userscript": {
+    "name": "Bgm.tv auto tracker",
     "namespace": "https://trim21.me/",
     "other": {
       "match": [
