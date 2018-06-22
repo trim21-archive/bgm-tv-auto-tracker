@@ -93,7 +93,7 @@ async def fromPlayerUrlToBangumiSubjectID(request: web.Request):
     bangumi_id = request.query.get('bangumi_id', None)
     website = request.match_info.get('website', None)
     if bangumi_id and website:
-        r = await request.app.mongo.bilibili_bangumi.bilibili.find_one({'_id': bangumi_id})
+        r = await request.app.mongo.bilibili_bangumi.bilibili.find_one({'_id': bangumi_id}, {'_id': 0, 'title': 0, 'name': 0})
         print(r)
         if r:
             return web.json_response(r)
@@ -139,7 +139,7 @@ async def aio_post(url, data=None, headers=None):
             return await resp.json()
 
 
-async def getSubject(request, subject_id):
+async def getEps(request, subject_id):
     eps = request.app.mongo.bilibili_bangumi.bangumi_eps
     response = await eps.find_one({'_id': subject_id})
     if not response or int(time.time()) - response['time'] < 60 * 60 * 3:
@@ -176,7 +176,7 @@ async def watchEpisode(request: web.Request):
 
     subject_id = r['bangumi_id']
 
-    response = await getSubject(request, subject_id)
+    response = await getEps(request, subject_id)
 
     ep = response['eps'][int(episode) - 1]['id']
 

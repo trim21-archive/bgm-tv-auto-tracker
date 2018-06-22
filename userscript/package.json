@@ -1,0 +1,56 @@
+{
+  "name": "bgm-tv-auto-tracker",
+  "description": "auto tracker your bangumi progress",
+  "version": "0.4.0",
+  "author": {
+    "name": "Trim21",
+    "email": "trim21me@gmail.com"
+  },
+  "scripts": {
+    "postversion": "grunt",
+    "preversion": "grunt dev",
+    "dev": "grunt watch",
+    "build": "grunt"
+  },
+  "userscript": {
+    "namespace": "https://trim21.me/",
+    "other": {
+      "match": [
+        "https://www.bilibili.com/bangumi/play/*",
+        "https://bangumi-auto-tracker.trim21.cn/oauth_callback*",
+        "https://bangumi-auto-tracker.trim21.cn/userscript/options*"
+      ],
+      "require": "https://cdn.bootcss.com/axios/0.18.0/axios.js",
+      "grant": [
+        "GM_addStyle",
+        "GM_setValue",
+        "GM_getValue",
+        "GM_openInTab",
+        "GM_addStyle",
+        "GM_xmlhttpRequest",
+        "unsafeWindow"
+      ],
+      "connect": [
+        "localhost",
+        "api.bgm.tv",
+        "bangumi-auto-tracker.trim21.cn"
+      ],
+      "run-at": "document-end"
+    }
+  },
+  "private": false,
+  "devDependencies": {
+    "grunt": "1.x.x",
+    "grunt-cli": "1.x.x",
+    "grunt-contrib-clean": "1.x.x",
+    "grunt-contrib-concat": "1.x.x",
+    "grunt-contrib-copy": "1.x.x",
+    "grunt-contrib-cssmin": "2.x.x",
+    "grunt-contrib-htmlmin": "^2.4.0",
+    "grunt-contrib-jshint": "1.x.x",
+    "grunt-contrib-uglify-es": "3.x.x",
+    "grunt-contrib-watch": "1.x.x",
+    "grunt-preprocess": "^5.1.0",
+    "grunt-userscript-meta": "^0.1.2"
+  }
+}
