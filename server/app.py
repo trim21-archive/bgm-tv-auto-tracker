@@ -213,6 +213,30 @@ def _raise(exception: Exception):
     raise exception
 
 
+import nameToSubject
+
+
+@cacheFunction('title', 'title_parse_result', expires=60 * 60 * 24 * 365 * 10)
+async def parseTitle(title):
+    return {
+        'episode'   : nameToSubject.parse_episode(title),
+        'subject_id': nameToSubject.fromTitleToSubject(title)
+    }
+
+
+async def nameToSubjectID(request: web.Request):
+    j = await request.json()
+    title = j.get('title', None)
+    title_with_episode = j.get('title_with_episode', None)
+    if title:
+        d = await parseTitle(request, title)
+        if title_with_episode:
+            d['episode'] = (await parseTitle(request, title_with_episode))['episode']
+        return web.json_response(d)
+    else:
+        raise web.HTTPBadRequest()
+
+
 async def w(request):
     return web.json_response(await getEps(request, request.match_info.get('subject_id')))
 
@@ -231,6 +255,7 @@ def create_app(io_loop=None):
         web.get('/query/{website}', fromPlayerUrlToBangumiSubjectID),
         web.post('/watch_episode', watchEpisode),
         web.get('/eps/{subject_id}', w),
+        web.post('/api/v0.1/parser/title', nameToSubjectID)
     ])
     cors = aiohttp_cors.setup(app, defaults={
         "*": aiohttp_cors.ResourceOptions(

@@ -1,0 +1,61 @@
+#bgm_tv_tracker {
+    margin-left: 15px;
+    padding-left: 16px;
+    position: relative;
+    font-size: 15px;
+    float: left;
+    cursor: pointer;
+    display: inline;
+    user-select: none;
+}
+
+.bgm_tv_tracker_btn.bgm_tv_tracker {
+    float: left;
+    cursor: pointer;
+    font-size: 14px;
+    height: 28px;
+    line-height: 18px;
+    text-align: center;
+    width: 80px !important;
+    transition: all .1s ease-in;
+}
+
+#bgm_tv_tracker.disable .bgm_tv_tracker_info {
+    display: none;
+}
+
+.bgm_tv_tracker_info {
+    padding: 8px;
+    margin-top: 5px;
+    background: #fff;
+    border: 1px solid #e5e9ef;
+    cursor: default;
+    height: auto;
+    left: -1px;
+    line-height: normal;
+    opacity: 0;
+    pointer-events: none;
+    position: absolute;
+    text-align: left;
+    top: 70px;
+    white-space: normal;
+    width: 300px;
+    z-index: 1000;
+}
+
+.bgm_tv_tracker_info * {
+    max-width: 100%;
+}
+
+#bgm_tv_tracker .bgm_tv_tracker_info {
+    opacity: 1;
+    pointer-events: auto;
+    top: 100%;
+}
+
+.bgm_tv_tracker_info button {
+    padding: 4px 6px;
+    line-height: 14px;
+    display: inline-block;
+    margin: 4px;
+}

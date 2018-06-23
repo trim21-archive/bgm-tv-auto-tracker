@@ -262,8 +262,6 @@
 
       $('#bangumi_detail > div > div.info-right > div.info-title.clearfix > div.func-module.clearfix')
         .prepend('/* @include ../html/bilibili.min.html */')
-      $('#bgm_tv_tracker_episode').html(episode)
-      $('#bgm_tv_tracker').data('id', bangumiID)
       tm_addStyle('/* @include ../css/bilibili.min.css */')
       let info = $('.bgm_tv_tracker_info')
       $('.bgm_tv_tracker_btn.bgm_tv_tracker').click(() => {
@@ -275,6 +273,9 @@
         $(this).css('background-color', 'white')
         $(this).css('color', 'black')
       })
+
+      $('#bgm_tv_tracker_episode').html(episode)
+      $('#bgm_tv_tracker').data('id', bangumiID)
       $('#bgm_tv_tracker_title').html(status.mediaInfo.title)
       requests.get(`${VARS.apiServerURL}/query/bilibili?bangumi_id=${bangumiID}`).then(
         (response) => {
@@ -363,15 +364,87 @@
 
     const injectIqiyi = function () {
       console.log('inject iqiyi just for collecting animation data now')
-      videoID = tm_unsafeWindow._player._videoid
+      let bangumiName = $('#datainfo-navlist > a:nth-child(3)').html()
+
+      $('#jujiPlayWrap > div:nth-child(2) > div > div > div.funcRight.funcRight1014')
+        .prepend('/* @include ../html/bilibili.min.html */')
+      tm_addStyle('/* @include ../css/iqiyi.min.css */')
+      let info = $('.bgm_tv_tracker_info')
+      $('.bgm_tv_tracker_btn.bgm_tv_tracker').click(() => {
+        info.toggle('fast')
+      }).hover(function () {
+        $(this).css('color', '#5aa700')
+      }, function () {
+        $(this).css('color', '#959799')
+      })
+      console.log(bangumiName)
       title = tm_unsafeWindow.document.title
+
+      requests.post(`${VARS.apiServerURL}/api/v0.1/parser/title`, {
+        title: bangumiName,
+        title_with_episode: title
+      }).then(
+        (response) => {
+          $('#bgm_tv_tracker_title').html(bangumiName)
+          $('#bgm_tv_tracker_episode').html(response.data.episode)
+          $('#bgm_tv_tracker').data('id', response.data.bangumi_id)
+          let subjectID = response.data.bangumi_id || response.data.subject_id
+          bangumiData.subjectID = subjectID
+          $('#bgm_tv_tracker_link').html(`<a href="http://bgm.tv/subject/${subjectID}" target="_blank" rel="noopener noreferrer">subject/${subjectID}</a>`)
+          $('#bgm_tv_tracker_mark_watched').click(
+            () => {
+              let ep = $('#bgm_tv_tracker_episode').html()
+              collectSubject(subjectID)
+              getEps(subjectID).then(data => {
+                let eps = data.eps.findIndex(function (element) {
+                  return element.sort === parseInt(ep)
+                }) + 1
+                bgmApi.post(`https://api.bgm.tv/subject/${subjectID}/update/watched_eps?watched_eps=${eps}`,
+                  `watched_eps=${eps}`, {
+                    'content-type': 'application/x-www-form-urlencoded',
+                    'Authorization': 'Bearer ' + auth.access_token
+                  })
+                  .then(
+                    (response) => {
+                      if (response.data.code === 202) {
+                        notify('mark status successful')
+                      } else {
+                        notify('error: ' + JSON.stringify(response.data))
+                      }
+                    },
+                    error => notify('error: ' + JSON.stringify(error))
+                  )
+              })
+            }
+          )
+
+          $('#bgm_tv_tracker_mark_watch').click(
+            () => {
+              watchEpisode({
+                subject_id: subjectID,
+                'type': 'watch_episode',
+                'website': 'bilibili',
+                'bangumi_id': $('#bgm_tv_tracker').data('id'),
+                'title': $('#bgm_tv_tracker_title').html(),
+                episode: $('#bgm_tv_tracker_episode').html()
+              })
+            }
+          )
+        },
+        (err) => {
+          if (err.response.status === 404) {
+            $('.bgm_tv_tracker_info').html('没找到你在看的番剧')
+          }
+        }
+      )
 
     }
 
     // noinspection JSAnnotator
     const onHrefChange = function () {
       console.log('hash change')
-      if (!(videoID !== tm_unsafeWindow._player._videoid && title !== tm_unsafeWindow.document.title)) {
+      if (!(videoID !== tm_unsafeWindow._player._videoid &&
+        title !== tm_unsafeWindow.document.title)) {
         console.log('video not change')
         setTimeout(onHrefChange, 500)
       }
@@ -380,7 +453,7 @@
     }
 
     if (tm_unsafeWindow.Q.PageInfo.playPageInfo.categoryName === '动漫') {
-      setTimeout(injectIqiyi, 5 * 1000)
+      setTimeout(injectIqiyi, 1 * 1000)
       tm_unsafeWindow.addEventListener('hashchange', function () {
         setTimeout(onHrefChange, 500)
       }, false)

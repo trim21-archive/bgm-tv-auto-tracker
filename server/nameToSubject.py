@@ -1,8 +1,6 @@
 import pathlib
 import re
-from collections import OrderedDict
 from os import path
-from pprint import pprint
 from fuzzywuzzy import fuzz
 
 from copy import deepcopy
@@ -10,7 +8,7 @@ from copy import deepcopy
 base_dir = pathlib.Path(path.abspath(path.dirname(__file__)))
 import json
 
-with open(str(base_dir / 'server' / 'data.json'), 'r', encoding='utf-8') as f:
+with open(str(base_dir / 'data.json'), 'r', encoding='utf-8') as f:
     bgmList = json.load(f)
     items = bgmList['items']
 
@@ -68,4 +66,5 @@ def fromTitleToSubject(title):
         item['_match_score'] = score
         item['sites'] = list(filter(lambda x: x['site'] == 'bangumi', item['sites']))[0]
         d.append(item)
-    return sorted(d, key=lambda x: -x['_match_score'])[0]['site']['id']
+    so = sorted(d, key=lambda x: -x['_match_score'])
+    return so[0]['sites']['id']
