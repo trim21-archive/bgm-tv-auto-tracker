@@ -139,21 +139,6 @@
     console.log('dev')
   }
 
-  // href  ep subject_id auth
-  function submitAnimationInfo (data = {}) {
-    if (typeof data.href === 'undefined') {
-      data.href = tm_unsafeWindow.location.href
-    }
-
-    requests.post(`${VARS.apiServerURL}/api/v0.2/collectBangumiData`,
-      {
-        auth: auth.access_token,
-        user_id: auth.user_id,
-        website,
-        data
-      })
-  }
-
   function getEps (subjectID) {
     return new Promise(
       (resolve, reject) => {
@@ -274,7 +259,6 @@
       const bangumiID = status.mediaInfo.season_id
       bangumiData.bangumiID = status.mediaInfo.season_id
       bangumiData.episode = episode
-      submitAnimationInfo({ bangumiID: status.mediaInfo.season_id, episode })
 
       $('#bangumi_detail > div > div.info-right > div.info-title.clearfix > div.func-module.clearfix')
         .prepend('/* @include ../html/bilibili.min.html */')
@@ -355,7 +339,6 @@
       const episode = status.epInfo.index
       bangumiData.bangumiID = status.mediaInfo.season_id
       bangumiData.episode = episode
-      submitAnimationInfo({ bangumiID: status.mediaInfo.season_id, episode })
       $('#bgm_tv_tracker_episode').html(episode)
     }
 
@@ -382,7 +365,6 @@
       console.log('inject iqiyi just for collecting animation data now')
       videoID = tm_unsafeWindow._player._videoid
       title = tm_unsafeWindow.document.title
-      submitAnimationInfo({ videoID, title, href: tm_unsafeWindow.location.href, type: 'init' })
 
     }
 
@@ -395,7 +377,6 @@
       }
       videoID = tm_unsafeWindow._player._videoid
       title = tm_unsafeWindow.document.title
-      submitAnimationInfo({ videoID, title, href: tm_unsafeWindow.location.href, type: 'hashChange' })
     }
 
     if (tm_unsafeWindow.Q.PageInfo.playPageInfo.categoryName === '动漫') {

@@ -6,3 +6,5 @@ aiohttp_cors==0.7.0
 aiohttp-jinja2==1.0.0
 python-dateutil==2.7.3
 aiofiles
+fuzzywuzzy
+python-Levenshtein

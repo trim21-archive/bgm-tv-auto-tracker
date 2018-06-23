@@ -213,95 +213,6 @@ def _raise(exception: Exception):
     raise exception
 
 
-async def collectHrefAndEpsV0_1(request: web.Request):
-    data = await request.json()
-    auth = data.get('auth', None)
-    user_id = data.get('user_id', None)
-    href = data.get('href', None)
-    ep = data.get('ep', None)
-    subject_id = data.get('bangumi_id', None)
-
-    if not (href and ep and subject_id and auth and user_id):
-        return web.json_response({'status': 'error', 'message': 'missing some input'}, status=400)
-
-    # no auth fake request
-    if not await request.app.mongo.bilibili_bangumi.token.find_one({'_id': user_id, 'access_token': auth}):
-        return web.json_response({'status': 'error', 'message': 'no jokking'})
-
-    else:
-        await request.app.mongo.bilibili_bangumi.hrefLog \
-            .insert({'href'        : href,
-                     'ep'          : ep,
-                     'user_id'     : user_id,
-                     'access_token': auth,
-                     'subject_id'  : subject_id
-                     })
-        await request.app.mongo.bilibili_bangumi.hrefEpsMap \
-            .update({'_id': href},
-                    {'$set': {'href'      : href,
-                              'ep'        : ep,
-                              'subject_id': subject_id}},
-                    upsert=True)
-        return web.json_response({'href'      : href,
-                                  'ep'        : ep,
-                                  'subject_id': subject_id})
-
-
-from pprint import pprint
-
-
-async def collectHrefAndEpsV0_2(request: web.Request):
-    data = await request.json()
-    auth = data.get('auth', None)
-    user_id = data.get('user_id', None)
-    website = data.get('website', None)
-    if 'data' not in data:
-        raise web.HTTPBadRequest()
-
-    href = data['data'].get('href', None)
-
-    video_id = data['data'].get('videoID', None)
-    title = data['data'].get('title', None)
-    type = data['data'].get('type', None)
-
-    bangumi_id = data['data'].get('bangumiID', None)
-    ep = data['data'].get('episode', None)
-
-    for key in data['data'].keys():
-        if key.startswith('_') or key.startswith('$'):
-            raise web.HTTPBadRequest(reason='wrong key')
-    if not (((title and video_id and type) or (bangumi_id and ep)) and href and auth and user_id and website):
-        raise web.HTTPBadRequest(reason='missing field')
-
-    # no auth fake request
-    if not await request.app.mongo.bilibili_bangumi.token.find_one({'_id': user_id, 'access_token': auth}):
-        raise web.HTTPUnauthorized()
-
-    else:
-        data = data['data']
-        data['auth'] = auth
-        await request.app.mongo.bilibili_bangumi.hrefLog \
-            .insert(data)
-        data = {i: data[i] for i in data if i != '_id'}
-        if website == 'bilibili':
-            await request.app.mongo.bilibili_bangumi.hrefEpsMap \
-                .update({'_id': href},
-                        {'$set': data},
-                        upsert=True)
-
-        elif website == 'iqiyi':
-            await request.app.mongo.bilibili_bangumi.hrefEpsMap \
-                .update({'_id': video_id},
-                        {'$set': data},
-                        upsert=True)
-
-        else:
-            raise web.HTTPBadRequest()
-        return web.json_response({
-            'status': 'success',
-        })
-
-
 async def w(request):
     return web.json_response(await getEps(request, request.match_info.get('subject_id')))
 
@@ -312,7 +223,6 @@ def create_app(io_loop=None):
                           )
     app.mongo = mongo
     aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader(str(base_dir / 'templates')))
-    cors = aiohttp_cors.setup(app)
     app.add_routes([
         web.get('/', lambda request: aiohttp_jinja2.render_template('index.html', request, {})),
         web.get('/version', lambda request: web.Response(text='0.0.3')),
@@ -321,8 +231,6 @@ def create_app(io_loop=None):
         web.get('/query/{website}', fromPlayerUrlToBangumiSubjectID),
         web.post('/watch_episode', watchEpisode),
         web.get('/eps/{subject_id}', w),
-        web.post('/api/v0.1/collectBangumiData', collectHrefAndEpsV0_1),
-        web.post('/api/v0.2/collectBangumiData', collectHrefAndEpsV0_2),
     ])
     cors = aiohttp_cors.setup(app, defaults={
         "*": aiohttp_cors.ResourceOptions(
