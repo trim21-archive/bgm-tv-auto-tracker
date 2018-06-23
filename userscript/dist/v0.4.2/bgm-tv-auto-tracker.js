@@ -1,3 +1,26 @@
+// ==UserScript==
+// @name         Bgm.tv auto tracker
+// @namespace    https://trim21.me/
+// @description  auto tracker your bangumi progress
+// @version      0.4.2
+// @author       Trim21
+// @match        https://www.bilibili.com/bangumi/play/*
+// @match        https://bangumi-auto-tracker.trim21.cn/oauth_callback*
+// @match        https://bangumi-auto-tracker.trim21.cn/userscript/options*
+// @require      https://cdn.bootcss.com/axios/0.18.0/axios.js
+// @grant        GM_addStyle
+// @grant        GM_setValue
+// @grant        GM_getValue
+// @grant        GM_openInTab
+// @grant        GM_addStyle
+// @grant        GM_xmlhttpRequest
+// @grant        unsafeWindow
+// @connect      localhost
+// @connect      api.bgm.tv
+// @connect      bangumi-auto-tracker.trim21.cn
+// @run-at       document-end
+// ==/UserScript==
+
 (function () {
   'use strict'
   /* eslint-disable no-undef, camelcase */
@@ -274,10 +297,10 @@
       submitAnimationInfo(status.mediaInfo.season_id, episode)
 
       $('#bangumi_detail > div > div.info-right > div.info-title.clearfix > div.func-module.clearfix')
-        .prepend('/* @include ../html/bilibili.min.html */')
+        .prepend('<div id="bgm_tv_tracker" class="disable" data-id=""><div class="bgm_tv_tracker_btn bgm_tv_tracker bgm_tv_tracker_radius">bgm.tv</div><div class="bgm_tv_tracker_info"><br><div><p>你正在看: <span id="bgm_tv_tracker_title"></span></p><p>第 <span id="bgm_tv_tracker_episode">{episode}</span>集</p></div><br><div id="bgm_tv_tracker_link"></div><br><button class="bgm_tv_tracker_radius" id="bgm_tv_tracker_mark_watch">标记本集为看过</button> <button class="bgm_tv_tracker_radius" id="bgm_tv_tracker_mark_watched">看到本集</button><br><br><a href="https://github.com/Trim21/bilibili-bangumi-tv-auto-tracker/issues" target="_blank" rel="noopener noreferrer">报告问题</a><br><div id="bgm_tv_tracker_notification"></div></div></div>')
       $('#bgm_tv_tracker_episode').html(episode)
       $('#bgm_tv_tracker').data('id', bangumiID)
-      tm_addStyle('/* @include ../css/bilibili.min.css */')
+      tm_addStyle('#bgm_tv_tracker{display:inline-block;position:relative;float:left;margin-right:20px;user-select:none}.bgm_tv_tracker_radius{border-radius:4px;border:1px solid #e5e9ef}.bgm_tv_tracker_btn.bgm_tv_tracker{color:#6d757a;float:left;cursor:pointer;font-size:14px;height:28px;line-height:28px;text-align:center;width:80px!important;transition:all .1s ease-in}.bangumi-info .info-right .info-title.clearfix h2{width:380px}@media screen and (max-width:1400px){.arc-toolbar .block{padding:0 12px;margin-left:-12px}.video-toolbar-module .btn-item{padding:0 0 0 60px!important;margin-left:-12px}.bangumi-info .info-right .info-title.clearfix h2{width:200px!important}}#bgm_tv_tracker.disable .bgm_tv_tracker_info{display:none}.bgm_tv_tracker_info{padding:8px;margin-top:5px;background:#fff;border-radius:0 0 4px 4px;border:1px solid #e5e9ef;box-shadow:rgba(0,0,0,.16) 0 2px 4px;cursor:default;height:auto;left:-1px;line-height:normal;opacity:0;pointer-events:none;position:absolute;text-align:left;top:70px;white-space:normal;width:300px;z-index:1000}.bgm_tv_tracker_info *{max-width:100%}#bgm_tv_tracker .bgm_tv_tracker_info{opacity:1;pointer-events:auto;top:100%}.bgm_tv_tracker_info button{padding:4px 6px;line-height:14px;display:inline-block;margin:4px}')
       let info = $('.bgm_tv_tracker_info')
       $('.bgm_tv_tracker_btn.bgm_tv_tracker').click(() => {
         info.toggle('fast')

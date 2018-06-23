@@ -117,6 +117,7 @@
 
   const bgmApi = {
     get (url, headers = {}) {
+      Object.assign(headers, { 'User-Agent': 'Bgm.tv auto tracker' })
       return new Promise((resolve, reject) => {
         requests.get(url, headers).then(
           response => {
@@ -132,6 +133,7 @@
       })
     },
     post (url, data = {}, headers = {}) {
+      Object.assign(headers, { 'User-Agent': 'Bgm.tv auto tracker' })
       return new Promise((resolve, reject) => {
         requests.post(url, data, headers).then(
           response => { resolve(response) },
@@ -236,7 +238,18 @@
     collectSubject(message.subject_id)
     getEps(message.subject_id).then(
       (data) => {
-        let ep = data.eps[parseInt(message.episode) - 1].id
+        console.log(data.eps)
+        console.log(parseInt(message.episode))
+
+        let ep = data.eps.filter(function (val) {
+          return val.sort === parseInt(message.episode)
+        })
+
+        console.log(ep)
+        ep = ep.unshift().id
+        console.log(ep)
+
+        // let ep = data.eps[parseInt(message.episode) - 1].id
         requests.post(`${VARS.apiBgmUrl}/ep/${ep}/status/watched`,
           null, { 'Authorization': 'Bearer ' + auth.access_token }).then(
           () => notify(`mark your status successfully`.toString(), 2),
