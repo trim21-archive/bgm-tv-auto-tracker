@@ -7,16 +7,14 @@
   let tm_getValue = GM_getValue
   let tm_openInTab = GM_openInTab
   let tm_addStyle = GM_addStyle
+  let $ = window.$
+  let website
   /* eslint-enable no-undef, camelcase */
 
   let auth
   let bangumiData = {}
 
   console.log('hello world')
-  let $ = tm_unsafeWindow.jQuery
-  if (!$) {
-    console.log('no jquery in this page')
-  }
 
   function notify (message) {
     let now = new Date()
@@ -48,8 +46,6 @@
 
   const NORMAL_ONLOAD = (resolve, reject) => (response) => {
     response.headers = parseHeader(response.responseHeaders)
-
-    // console.log(response)
     if (response.status < 300) {
       if (response.headers['content-type'].startsWith('application/json')) {
         response.data = JSON.parse(response.responseText)
@@ -66,6 +62,7 @@
 
   const requests = {
     get (url, headers = {}) {
+      // headers.cookie = ''
       return new Promise((resolve, reject) => {
         tm_xmlHttpRequest({
           method: 'GET',
@@ -80,6 +77,7 @@
         data = JSON.stringify(data)
         headers['content-Type'] = 'application/json'
       }
+      // headers.cookie = ''
       return new Promise((resolve, reject) => {
         tm_xmlHttpRequest({
           method: 'POST',
@@ -98,7 +96,7 @@
       return new Promise((resolve, reject) => {
         requests.get(url, headers).then(
           response => {
-            if (response.data.code === 401) {
+            if (response.data.code && response.data.code >= 300) {
               let error = { response }
               reject(error)
             } else {
@@ -111,9 +109,17 @@
     },
     post (url, data = {}, headers = {}) {
       Object.assign(headers, { 'User-Agent': 'Bgm.tv auto tracker' })
+      // headers.cookie = ''
       return new Promise((resolve, reject) => {
         requests.post(url, data, headers).then(
-          response => { resolve(response) },
+          response => {
+            if (response.data.code && response.data.code >= 300) {
+              let error = { response }
+              reject(error)
+            } else {
+              resolve(response)
+            }
+          },
           error => reject(error)
         )
       })
@@ -134,14 +140,17 @@
   }
 
   // href  ep subject_id auth
-  function submitAnimationInfo (bangumiID, ep) {
-    requests.post(`${VARS.apiServerURL}/api/v0.1/collectBangumiData`,
+  function submitAnimationInfo (data = {}) {
+    if (typeof data.href === 'undefined') {
+      data.href = tm_unsafeWindow.location.href
+    }
+
+    requests.post(`${VARS.apiServerURL}/api/v0.2/collectBangumiData`,
       {
-        bangumi_id: bangumiID,
-        ep,
-        user_id: auth.user_id,
         auth: auth.access_token,
-        href: tm_unsafeWindow.location.href
+        user_id: auth.user_id,
+        website,
+        data
       })
   }
 
@@ -256,6 +265,7 @@
   // inject bilibili
   if (tm_unsafeWindow.location.href.startsWith('https://www.bilibili.com/bangumi/play/')) {
     console.log('inject bilibili')
+    website = 'bilibili'
 
     // noinspection JSAnnotator
     const injectBilibili = function () {
@@ -264,7 +274,7 @@
       const bangumiID = status.mediaInfo.season_id
       bangumiData.bangumiID = status.mediaInfo.season_id
       bangumiData.episode = episode
-      submitAnimationInfo(status.mediaInfo.season_id, episode)
+      submitAnimationInfo({ bangumiID: status.mediaInfo.season_id, episode })
 
       $('#bangumi_detail > div > div.info-right > div.info-title.clearfix > div.func-module.clearfix')
         .prepend('/* @include ../html/bilibili.min.html */')
@@ -289,23 +299,28 @@
           $('#bgm_tv_tracker_link').html(`<a href="http://bgm.tv/subject/${subjectID}" target="_blank" rel="noopener noreferrer">subject/${subjectID}</a>`)
           $('#bgm_tv_tracker_mark_watched').click(
             () => {
-              let eps = $('#bgm_tv_tracker_episode').html()
+              let ep = $('#bgm_tv_tracker_episode').html()
               collectSubject(subjectID)
-              bgmApi.post(`https://api.bgm.tv/subject/${subjectID}/update/watched_eps?watched_eps=${eps}`,
-                `watched_eps=${eps}`, {
-                  'content-type': 'application/x-www-form-urlencoded',
-                  'Authorization': 'Bearer ' + auth.access_token
-                })
-                .then(
-                  (response) => {
-                    if (response.data.code === 202) {
-                      notify('mark status successful')
-                    } else {
-                      notify('error: ' + JSON.stringify(response.data))
-                    }
-                  },
-                  error => notify('error: ' + JSON.stringify(error))
-                )
+              getEps(subjectID).then(data => {
+                let eps = data.eps.findIndex(function (element) {
+                  return element.sort === parseInt(ep)
+                }) + 1
+                bgmApi.post(`https://api.bgm.tv/subject/${subjectID}/update/watched_eps?watched_eps=${eps}`,
+                  `watched_eps=${eps}`, {
+                    'content-type': 'application/x-www-form-urlencoded',
+                    'Authorization': 'Bearer ' + auth.access_token
+                  })
+                  .then(
+                    (response) => {
+                      if (response.data.code === 202) {
+                        notify('mark status successful')
+                      } else {
+                        notify('error: ' + JSON.stringify(response.data))
+                      }
+                    },
+                    error => notify('error: ' + JSON.stringify(error))
+                  )
+              })
             }
           )
 
@@ -340,7 +355,7 @@
       const episode = status.epInfo.index
       bangumiData.bangumiID = status.mediaInfo.season_id
       bangumiData.episode = episode
-      submitAnimationInfo(status.mediaInfo.season_id, episode)
+      submitAnimationInfo({ bangumiID: status.mediaInfo.season_id, episode })
       $('#bgm_tv_tracker_episode').html(episode)
     }
 
@@ -355,5 +370,40 @@
 
     setInterval(detectHrefChange, 10 * 1000)
     setTimeout(detectHrefChange, 5000)
+  }
+  // inject iqiyi
+  if (tm_unsafeWindow.location.hostname === 'www.iqiyi.com') {
+    console.log(tm_unsafeWindow.Q.PageInfo.playPageInfo.categoryName)
+    website = 'iqiyi'
+    let videoID
+    let title = tm_unsafeWindow.document.title
+
+    const injectIqiyi = function () {
+      console.log('inject iqiyi just for collecting animation data now')
+      videoID = tm_unsafeWindow._player._videoid
+      title = tm_unsafeWindow.document.title
+      submitAnimationInfo({ videoID, title, href: tm_unsafeWindow.location.href, type: 'init' })
+
+    }
+
+    // noinspection JSAnnotator
+    const onHrefChange = function () {
+      console.log('hash change')
+      if (!(videoID !== tm_unsafeWindow._player._videoid && title !== tm_unsafeWindow.document.title)) {
+        console.log('video not change')
+        setTimeout(onHrefChange, 500)
+      }
+      videoID = tm_unsafeWindow._player._videoid
+      title = tm_unsafeWindow.document.title
+      submitAnimationInfo({ videoID, title, href: tm_unsafeWindow.location.href, type: 'hashChange' })
+    }
+
+    if (tm_unsafeWindow.Q.PageInfo.playPageInfo.categoryName === '动漫') {
+      setTimeout(injectIqiyi, 5 * 1000)
+      tm_unsafeWindow.addEventListener('hashchange', function () {
+        setTimeout(onHrefChange, 500)
+      }, false)
+    }
+
   }
 })()

@@ -1,7 +1,7 @@
 {
   "name": "bgm-tv-auto-tracker",
   "description": "auto tracker your bangumi progress",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "author": {
     "name": "Trim21",
     "email": "trim21me@gmail.com"
@@ -18,10 +18,14 @@
     "other": {
       "match": [
         "https://www.bilibili.com/bangumi/play/*",
+        "http*://www.iqiyi.com/*",
         "https://bangumi-auto-tracker.trim21.cn/oauth_callback*",
         "https://bangumi-auto-tracker.trim21.cn/userscript/options*"
       ],
-      "require": "https://cdn.bootcss.com/axios/0.18.0/axios.js",
+      "require": [
+        "https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js",
+        "https://cdn.bootcss.com/axios/0.18.0/axios.js"
+      ],
       "grant": [
         "GM_addStyle",
         "GM_setValue",

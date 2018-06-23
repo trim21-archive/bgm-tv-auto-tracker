@@ -5,8 +5,10 @@
 // @version      0.4.3
 // @author       Trim21
 // @match        https://www.bilibili.com/bangumi/play/*
+// @match        http*://www.iqiyi.com/*
 // @match        https://bangumi-auto-tracker.trim21.cn/oauth_callback*
 // @match        https://bangumi-auto-tracker.trim21.cn/userscript/options*
+// @require      https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js
 // @require      https://cdn.bootcss.com/axios/0.18.0/axios.js
 // @grant        GM_addStyle
 // @grant        GM_setValue
@@ -71,8 +73,6 @@
 
   const NORMAL_ONLOAD = (resolve, reject) => (response) => {
     response.headers = parseHeader(response.responseHeaders)
-
-    // console.log(response)
     if (response.status < 300) {
       if (response.headers['content-type'].startsWith('application/json')) {
         response.data = JSON.parse(response.responseText)
@@ -89,6 +89,7 @@
 
   const requests = {
     get (url, headers = {}) {
+      // headers.cookie = ''
       return new Promise((resolve, reject) => {
         tm_xmlHttpRequest({
           method: 'GET',
@@ -103,6 +104,7 @@
         data = JSON.stringify(data)
         headers['content-Type'] = 'application/json'
       }
+      // headers.cookie = ''
       return new Promise((resolve, reject) => {
         tm_xmlHttpRequest({
           method: 'POST',
@@ -121,7 +123,7 @@
       return new Promise((resolve, reject) => {
         requests.get(url, headers).then(
           response => {
-            if (response.data.code === 401) {
+            if (response.data.code && response.data.code >= 300) {
               let error = { response }
               reject(error)
             } else {
@@ -134,9 +136,17 @@
     },
     post (url, data = {}, headers = {}) {
       Object.assign(headers, { 'User-Agent': 'Bgm.tv auto tracker' })
+      // headers.cookie = ''
       return new Promise((resolve, reject) => {
         requests.post(url, data, headers).then(
-          response => { resolve(response) },
+          response => {
+            if (response.data.code && response.data.code >= 300) {
+              let error = { response }
+              reject(error)
+            } else {
+              resolve(response)
+            }
+          },
           error => reject(error)
         )
       })
@@ -312,23 +322,28 @@
           $('#bgm_tv_tracker_link').html(`<a href="http://bgm.tv/subject/${subjectID}" target="_blank" rel="noopener noreferrer">subject/${subjectID}</a>`)
           $('#bgm_tv_tracker_mark_watched').click(
             () => {
-              let eps = $('#bgm_tv_tracker_episode').html()
+              let ep = $('#bgm_tv_tracker_episode').html()
               collectSubject(subjectID)
-              bgmApi.post(`https://api.bgm.tv/subject/${subjectID}/update/watched_eps?watched_eps=${eps}`,
-                `watched_eps=${eps}`, {
-                  'content-type': 'application/x-www-form-urlencoded',
-                  'Authorization': 'Bearer ' + auth.access_token
-                })
-                .then(
-                  (response) => {
-                    if (response.data.code === 202) {
-                      notify('mark status successful')
-                    } else {
-                      notify('error: ' + JSON.stringify(response.data))
-                    }
-                  },
-                  error => notify('error: ' + JSON.stringify(error))
-                )
+              getEps(subjectID).then(data => {
+                let eps = data.eps.findIndex(function (element) {
+                  return element.sort === parseInt(ep)
+                }) + 1
+                bgmApi.post(`https://api.bgm.tv/subject/${subjectID}/update/watched_eps?watched_eps=${eps}`,
+                  `watched_eps=${eps}`, {
+                    'content-type': 'application/x-www-form-urlencoded',
+                    'Authorization': 'Bearer ' + auth.access_token
+                  })
+                  .then(
+                    (response) => {
+                      if (response.data.code === 202) {
+                        notify('mark status successful')
+                      } else {
+                        notify('error: ' + JSON.stringify(response.data))
+                      }
+                    },
+                    error => notify('error: ' + JSON.stringify(error))
+                  )
+              })
             }
           )
 
@@ -379,4 +394,6 @@
     setInterval(detectHrefChange, 10 * 1000)
     setTimeout(detectHrefChange, 5000)
   }
+
+  // inject iqiyi
 })()
