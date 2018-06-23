@@ -8,6 +8,10 @@
   let tm_openInTab = GM_openInTab
   let tm_addStyle = GM_addStyle
   /* eslint-enable no-undef, camelcase */
+
+  let auth
+  let bangumiData = {}
+
   console.log('hello world')
   let $ = tm_unsafeWindow.jQuery
   if (!$) {
@@ -43,7 +47,6 @@
   }
 
   const NORMAL_ONLOAD = (resolve, reject) => (response) => {
-
     response.headers = parseHeader(response.responseHeaders)
 
     // console.log(response)
@@ -126,6 +129,18 @@
   if (window.TM_ENV === 'dev') {
     VARS.apiServerURL = 'http://localhost:6001'
     console.log('dev')
+  }
+
+  // href  ep subject_id auth
+  function submitAnimationInfo (bangumiID, ep) {
+    requests.post(`${VARS.apiServerURL}/api/v0.1/collectBangumiData`,
+      {
+        bangumi_id: bangumiID,
+        ep,
+        user_id: auth.user_id,
+        auth: auth.access_token,
+        href: tm_unsafeWindow.location.href
+      })
   }
 
   function getEps (subjectID) {
@@ -212,7 +227,7 @@
   }
 
   // auth
-  let auth
+
   if (tm_unsafeWindow.location.href.startsWith(VARS.callBackUrl)) {
     if (tm_unsafeWindow.data) {
       tm_setValue('auth', JSON.stringify(tm_unsafeWindow.data))
@@ -241,6 +256,9 @@
       const status = tm_unsafeWindow.__INITIAL_STATE__
       const episode = status.epInfo.index
       const bangumiID = status.mediaInfo.season_id
+      bangumiData.bangumiID = status.mediaInfo.season_id
+      bangumiData.episode = episode
+      submitAnimationInfo(status.mediaInfo.season_id, episode)
 
       $('#bangumi_detail > div > div.info-right > div.info-title.clearfix > div.func-module.clearfix')
         .prepend('/* @include ../html/bilibili.min.html */')
@@ -261,7 +279,7 @@
       requests.get(`${VARS.apiServerURL}/query/bilibili?bangumi_id=${bangumiID}`).then(
         (response) => {
           let subjectID = response.data.bangumi_id || response.data.subject_id
-
+          bangumiData.subjectID = subjectID
           $('#bgm_tv_tracker_link').html(`<a href="http://bgm.tv/subject/${subjectID}" target="_blank" rel="noopener noreferrer">subject/${subjectID}</a>`)
           $('#bgm_tv_tracker_mark_watched').click(
             () => {
@@ -314,6 +332,9 @@
     const onHrefChange = function () {
       const status = tm_unsafeWindow.__INITIAL_STATE__
       const episode = status.epInfo.index
+      bangumiData.bangumiID = status.mediaInfo.season_id
+      bangumiData.episode = episode
+      submitAnimationInfo(status.mediaInfo.season_id, episode)
       $('#bgm_tv_tracker_episode').html(episode)
     }
 
@@ -327,6 +348,6 @@
     }
 
     setInterval(detectHrefChange, 10 * 1000)
-    setTimeout(detectHrefChange, 2000)
+    setTimeout(detectHrefChange, 5000)
   }
 })()

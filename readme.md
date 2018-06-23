@@ -12,7 +12,7 @@
 https://greasyfork.org/zh-CN/scripts/369643-bgm-tv-auto-tracker 
 
 安装后去 
-https://bgm.tv/oauth/authorize?client_id=bgm2775b2797b4d958b&response_type=code&redirect_uri=https://bangumi-auto-tracker.trim21.cn/oauth_callback
+[https://bgm.tv/oauth/authorize](https://bgm.tv/oauth/authorize?client_id=bgm2775b2797b4d958b&response_type=code&redirect_uri=https://bangumi-auto-tracker.trim21.cn/oauth_callback)
 进行授权 
 
 效果图 
