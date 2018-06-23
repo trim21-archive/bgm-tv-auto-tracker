@@ -215,18 +215,11 @@
     collectSubject(message.subject_id)
     getEps(message.subject_id).then(
       (data) => {
-        console.log(data.eps)
-        console.log(parseInt(message.episode))
-
         let ep = data.eps.filter(function (val) {
           return val.sort === parseInt(message.episode)
         })
+        ep = ep[0].id
 
-        console.log(ep)
-        ep = ep.unshift().id
-        console.log(ep)
-
-        // let ep = data.eps[parseInt(message.episode) - 1].id
         requests.post(`${VARS.apiBgmUrl}/ep/${ep}/status/watched`,
           null, { 'Authorization': 'Bearer ' + auth.access_token }).then(
           () => notify(`mark your status successfully`.toString(), 2),
