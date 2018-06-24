@@ -331,7 +331,6 @@
         }
       )
     }
-
     injectBilibili()
 
     let INNER_EPISODE = tm_unsafeWindow.__INITIAL_STATE__.epInfo.index

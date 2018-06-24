@@ -24,7 +24,7 @@
 
 }
 
-.bangumi-info .info-right .info-title.clearfix h2 {
+#bangumi_detail .bangumi-info.clearfix .info-right .info-title.clearfix a h2 {
     width: 380px;
 }
 
@@ -39,7 +39,7 @@
         margin-left: -12px;
     }
 
-    .bangumi-info .info-right .info-title.clearfix h2 {
+    #bangumi_detail .bangumi-info.clearfix .info-right .info-title.clearfix a h2 {
         width: 200px !important;
     }
 }
@@ -85,8 +85,13 @@
     line-height: 14px;
     display: inline-block;
     margin: 4px;
+    border: 2px solid white;
 }
 
 .bgm_tv_tracker_info button:active {
     background: white;
+}
+
+.bgm_tv_tracker_info button:hover {
+    border: 2px solid #99bdf7;
 }
