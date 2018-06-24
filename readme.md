@@ -34,7 +34,14 @@ bilibili部分已经完工了
 
 server文件夹内是python服务端,基于python3.6.5的aiohttp
 
-userscript是用`Grunt`编译成的,不要修改dist内的内容,`npm i`安装依赖,使用`npm run build`进行编译,`npm run dev`进行开发
+userscript是用`Grunt`编译成的,不要修改dist内的内容,
+
+```bash
+cd userscript
+
+npm i #安装依赖
+npm run dev # 检测文件变动,自动重新编译
+```
 
 
 在`Tampermonkey`中添加如下脚本,在修改脚本后刷新页面,最新脚本会自动起效
