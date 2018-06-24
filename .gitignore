@@ -1,6 +1,6 @@
 .idea
 .vscode
-server/env
+env
 __pycache__
 tmp
 node_modules

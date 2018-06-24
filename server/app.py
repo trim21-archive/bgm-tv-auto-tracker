@@ -116,8 +116,6 @@ async def fromPlayerUrlToBangumiSubjectID(request: web.Request):
     website = request.match_info.get('website', None)
     if bangumi_id and website:
         r = await request.app.mongo.bilibili_bangumi.bilibili.find_one({'_id': bangumi_id}, {'_id': 0, 'title': 0, 'name': 0})
-        print(r)
-        r['subject_id'] = r['bangumi_id']
         if r:
             return web.json_response(r)
         else:
