@@ -67,4 +67,6 @@ def fromTitleToSubject(title):
         item['sites'] = list(filter(lambda x: x['site'] == 'bangumi', item['sites']))[0]
         d.append(item)
     so = sorted(d, key=lambda x: -x['_match_score'])
-    return so[0]['sites']['id']
+
+    if int(so[0]['_match_score']) > 50:
+        return so[0]['sites']['id']

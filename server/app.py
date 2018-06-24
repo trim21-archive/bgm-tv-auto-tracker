@@ -30,24 +30,27 @@ def cacheFunction(key_name, collection_name, expires=60 * 60 * 3):
             print(args)
             key = kwargs.get(key_name, args[0])
             r = await request.app.mongo.bilibili_bangumi[collection_name].find_one({'_id': key})
+
             # 已缓存
             if r:
                 # 未过期
-                print(r.get('_expires', None))
-                print(int(time.time()))
                 if r.get('_expires', 35029759086) > int(time.time()):
-                    return r
+                    return r['data']
                 # 过期
                 else:
                     r = await f(*args, **kwargs)
-                    r['_expires'] = int(time.time()) + expires
-                    await request.app.mongo.bilibili_bangumi[collection_name].update({'_id': key}, r, upsert=True)
+                    await request.app.mongo.bilibili_bangumi[collection_name] \
+                        .update({'_id': key},
+                                {'$set': {'data'    : r,
+                                          '_expires': int(time.time()) + expires}},
+                                upsert=True)
                     return r
             # 未缓存
             else:
-                r = await f(*args, **kwargs)
-                r['_expires'] = int(time.time()) + expires
-                await request.app.mongo.bilibili_bangumi[collection_name].update({'_id': key}, r, upsert=True)
+                d = {}
+                d['data'] = await f(*args, **kwargs)
+                d['_expires'] = int(time.time()) + expires
+                await request.app.mongo.bilibili_bangumi[collection_name].update({'_id': key}, d, upsert=True)
                 return r
 
         return wrapped
