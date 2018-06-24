@@ -43,6 +43,11 @@ npm i #安装依赖
 npm run dev # 检测文件变动,自动重新编译
 ```
 
+原文件是`userscript/src/js/index.js`
+
+使用`/* @include ../css/bilibili.min.css */`来引入别的文件(基于`Grunt`的字符串替换)
+css和html文件在编译后会后缀名会变成`.min.css`和`.min.html`,添加文件后要引入对应的`*.min.{css|html}`
+
 
 在`Tampermonkey`中添加如下脚本,在修改脚本后刷新页面,最新脚本会自动起效
 ```javascript
