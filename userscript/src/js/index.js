@@ -253,7 +253,50 @@
   if (tm_unsafeWindow.location.href.startsWith('https://www.bilibili.com/bangumi/play/')) {
     console.log('inject bilibili')
     website = 'bilibili'
+    const dealWithSubjectID = function (subjectID) {
+      bangumiData.subjectID = subjectID
 
+      $('#bgm_tv_tracker_link').html(`<a href="http://bgm.tv/subject/${subjectID}" target="_blank" rel="noopener noreferrer">subject/${subjectID}</a>`)
+      $('#bgm_tv_tracker_mark_watched').click(
+        () => {
+          let ep = $('#bgm_tv_tracker_episode').html()
+          collectSubject(subjectID)
+          getEps(subjectID).then(data => {
+            let eps = data.eps.findIndex(function (element) {
+              return element.sort === parseInt(ep)
+            }) + 1
+            bgmApi.post(`https://api.bgm.tv/subject/${subjectID}/update/watched_eps?watched_eps=${eps}`,
+              `watched_eps=${eps}`, {
+                'content-type': 'application/x-www-form-urlencoded',
+                'Authorization': 'Bearer ' + auth.access_token
+              })
+              .then(
+                (response) => {
+                  if (response.data.code === 202) {
+                    notify('mark status successful')
+                  } else {
+                    notify('error: ' + JSON.stringify(response.data))
+                  }
+                },
+                error => notify('error: ' + JSON.stringify(error))
+              )
+          })
+        }
+      )
+
+      $('#bgm_tv_tracker_mark_watch').click(
+        () => {
+          watchEpisode({
+            subject_id: subjectID,
+            'type': 'watch_episode',
+            'website': 'bilibili',
+            'bangumi_id': $('#bgm_tv_tracker').data('id'),
+            'title': $('#bgm_tv_tracker_title').html(),
+            episode: $('#bgm_tv_tracker_episode').html()
+          })
+        }
+      )
+    }
     // noinspection JSAnnotator
     const injectBilibili = function () {
       const status = tm_unsafeWindow.__INITIAL_STATE__
@@ -279,54 +322,21 @@
       $('#bgm_tv_tracker_episode').html(episode)
       $('#bgm_tv_tracker').data('id', bangumiID)
       $('#bgm_tv_tracker_title').html(status.mediaInfo.title)
+
       requests.get(`${VARS.apiServerURL}/query/bilibili?bangumi_id=${bangumiID}`).then(
         (response) => {
           let subjectID = response.data.bangumi_id || response.data.subject_id
-          bangumiData.subjectID = subjectID
-          $('#bgm_tv_tracker_link').html(`<a href="http://bgm.tv/subject/${subjectID}" target="_blank" rel="noopener noreferrer">subject/${subjectID}</a>`)
-          $('#bgm_tv_tracker_mark_watched').click(
-            () => {
-              let ep = $('#bgm_tv_tracker_episode').html()
-              collectSubject(subjectID)
-              getEps(subjectID).then(data => {
-                let eps = data.eps.findIndex(function (element) {
-                  return element.sort === parseInt(ep)
-                }) + 1
-                bgmApi.post(`https://api.bgm.tv/subject/${subjectID}/update/watched_eps?watched_eps=${eps}`,
-                  `watched_eps=${eps}`, {
-                    'content-type': 'application/x-www-form-urlencoded',
-                    'Authorization': 'Bearer ' + auth.access_token
-                  })
-                  .then(
-                    (response) => {
-                      if (response.data.code === 202) {
-                        notify('mark status successful')
-                      } else {
-                        notify('error: ' + JSON.stringify(response.data))
-                      }
-                    },
-                    error => notify('error: ' + JSON.stringify(error))
-                  )
-              })
-            }
-          )
-
-          $('#bgm_tv_tracker_mark_watch').click(
-            () => {
-              watchEpisode({
-                subject_id: subjectID,
-                'type': 'watch_episode',
-                'website': 'bilibili',
-                'bangumi_id': $('#bgm_tv_tracker').data('id'),
-                'title': $('#bgm_tv_tracker_title').html(),
-                episode: $('#bgm_tv_tracker_episode').html()
-              })
-            }
-          )
+          dealWithSubjectID(subjectID)
         },
         (err) => {
           if (err.response.status === 404) {
-            $('.bgm_tv_tracker_info').html('没找到你在看的番剧')
+            // $('.bgm_tv_tracker_info').html('没找到你在看的番剧')
+            const subjectID = tm_unsafeWindow.prompt('Bgm.tv auto tracker 没找到你在看的番剧 手动指定subject id')
+            console.log(subjectID)
+            if (subjectID) {
+              requests.get(`${VARS.apiServerURL}/api/v0.1/missingBilibili?bangumi_id=${bangumiID}&subject_id=${subjectID}`)
+              dealWithSubjectID(subjectID)
+            }
           }
         }
       )
@@ -439,7 +449,6 @@
           }
         }
       )
-
     }
 
     // noinspection JSAnnotator
@@ -460,6 +469,5 @@
         setTimeout(onHrefChange, 500)
       }, false)
     }
-
   }
 })()

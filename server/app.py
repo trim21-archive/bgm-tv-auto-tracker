@@ -239,6 +239,16 @@ async def w(request):
     return web.json_response(await getEps(request, request.match_info.get('subject_id')))
 
 
+async def collectMissingBangumiInBilibili(request: web.Request):
+    bangumi_id = request.query.get('bangumi_id', None)
+    subject_id = request.query.get('subject_id', None)
+    if not (bangumi_id and subject_id):
+        raise web.HTTPBadRequest()
+    else:
+        await request.app.mongo.bilibili_bangumi.missing_bangumi.insert({'bangumi_id': bangumi_id, 'subject_id': subject_id})
+        return web.json_response({'status': 'success'})
+
+
 def create_app(io_loop=None):
     app = web.Application(loop=io_loop,
                           # middlewares=[error_middleware, ]
@@ -253,7 +263,8 @@ def create_app(io_loop=None):
         web.get('/query/{website}', fromPlayerUrlToBangumiSubjectID),
         web.post('/watch_episode', watchEpisode),
         web.get('/eps/{subject_id}', w),
-        web.post('/api/v0.1/parser/title', nameToSubjectID)
+        web.post('/api/v0.1/parser/title', nameToSubjectID),
+        web.get('/api/v0.1/missingBilibili', collectMissingBangumiInBilibili),
     ])
     cors = aiohttp_cors.setup(app, defaults={
         "*": aiohttp_cors.ResourceOptions(
