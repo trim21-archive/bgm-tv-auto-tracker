@@ -416,7 +416,6 @@
           } else {
             let notFound = $('.bgm_tv_tracker_info .not_found')
               .html('/* @include ../html/bilibili_notfound.min.html */')
-
             $('.bgm_tv_tracker_info .not_found button').click(
               () => {
                 let subjectID = $('.bgm_tv_tracker_info .not_found input').val()

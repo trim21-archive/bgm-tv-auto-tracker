@@ -441,7 +441,6 @@
           } else {
             let notFound = $('.bgm_tv_tracker_info .not_found')
               .html('<label><input type="text" class="subject"> <button class="notfound">submit subject id</button></label>')
-
             $('.bgm_tv_tracker_info .not_found button').click(
               () => {
                 let subjectID = $('.bgm_tv_tracker_info .not_found input').val()
@@ -452,7 +451,6 @@
                 }
               })
           }
-
         },
         () => {
           notify('net work error')

@@ -19,7 +19,10 @@ https://greasyfork.org/zh-CN/scripts/369643-bgm-tv-auto-tracker
 
 ![](./screenshot/bilibili.png) 
 ![](./screenshot/iqiyi.jpg) 
+
 PS: 有添加优酷和其他什么乱七八糟网站支持的计划, 但是具体什么时候能加上就看心情了...(
+
+不要试图加载`extension`文件夹, 里面是陈年代码
 
 ## 开发
 
@@ -49,7 +52,8 @@ npm run dev # 检测文件变动,自动重新编译
 css和html文件在编译后会后缀名会变成`.min.css`和`.min.html`,添加文件后要引入对应的`*.min.{css|html}`
 
 
-在`Tampermonkey`中添加如下脚本,在修改脚本后刷新页面,最新脚本会自动起效
+在`Tampermonkey`中添加如下脚本,在修改原文件(`index.js`,`*.css`,`*.html`)后,会自动编译最新脚本会自动起效,刷新页面即可起效.
+
 ```javascript
 // ==UserScript==
 // @name         dev Bgm.tv auto tracker
