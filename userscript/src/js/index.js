@@ -209,9 +209,11 @@
     collectSubject(message.subject_id)
     getEps(message.subject_id).then(
       (data) => {
+        console.log(message.episode)
         let ep = data.eps.filter(function (val) {
           return val.sort === parseInt(message.episode)
         })
+        console.log(ep)
         ep = ep[0].id
 
         requests.post(`${VARS.apiBgmUrl}/ep/${ep}/status/watched`,
@@ -391,6 +393,7 @@
           let subjectID = response.data.bangumi_id || response.data.subject_id
           bangumiData.subjectID = subjectID
           $('#bgm_tv_tracker_link').html(`<a href="http://bgm.tv/subject/${subjectID}" target="_blank" rel="noopener noreferrer">subject/${subjectID}</a>`)
+
           $('#bgm_tv_tracker_mark_watched').click(
             () => {
               let ep = $('#bgm_tv_tracker_episode').html()

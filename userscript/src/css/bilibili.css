@@ -86,3 +86,7 @@
     display: inline-block;
     margin: 4px;
 }
+
+.bgm_tv_tracker_info button:active {
+    background: white;
+}
