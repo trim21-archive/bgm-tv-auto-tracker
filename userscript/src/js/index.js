@@ -127,17 +127,12 @@
   }
 
   const VARS = {
-    apiServerURL: 'https://bangumi-auto-tracker.trim21.cn',
+    apiServerURL: window.TM_ENV === 'dev' ? 'http://localhost:6001' : 'https://bangumi-auto-tracker.trim21.cn',
     callBackUrl: 'https://bangumi-auto-tracker.trim21.cn/oauth_callback',
     apiBgmUrl: 'https://api.bgm.tv',
     authURL: ''
   }
   VARS.authURL = 'https://bgm.tv/oauth/authorize?client_id=bgm2775b2797b4d958b&response_type=code&redirect_uri=' + VARS.callBackUrl
-
-  if (window.TM_ENV === 'dev') {
-    VARS.apiServerURL = 'http://localhost:6001'
-    console.log('dev')
-  }
 
   function getEps (subjectID) {
     return new Promise(

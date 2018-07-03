@@ -78,7 +78,7 @@ module.exports = function (grunt) {
         stripBanners: false
       },
       js: {
-        src: ['src/js/**/*.js'],
+        src: ['src/js/*.js'],
         dest: 'tmp/js/0-concat.js'
       },
       ferdig: {
