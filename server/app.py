@@ -51,7 +51,7 @@ def cacheFunction(key_name, collection_name, expires=60 * 60 * 3):
                 d['data'] = await f(*args, **kwargs)
                 d['_expires'] = int(time.time()) + expires
                 await request.app.mongo.bilibili_bangumi[collection_name].update_one({'_id': key}, {'$set': d}, upsert=True)
-                return d
+                return d['data']
 
         return wrapped
 
