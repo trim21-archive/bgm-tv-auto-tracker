@@ -40,18 +40,18 @@ def cacheFunction(key_name, collection_name, expires=60 * 60 * 3):
                 else:
                     r = await f(*args, **kwargs)
                     await request.app.mongo.bilibili_bangumi[collection_name] \
-                        .update({'_id': key},
-                                {'$set': {'data'    : r,
+                        .update_one({'_id': key},
+                                    {'$set': {'data': r,
                                           '_expires': int(time.time()) + expires}},
-                                upsert=True)
+                                    upsert=True)
                     return r
             # 未缓存
             else:
                 d = {}
                 d['data'] = await f(*args, **kwargs)
                 d['_expires'] = int(time.time()) + expires
-                await request.app.mongo.bilibili_bangumi[collection_name].update({'_id': key}, d, upsert=True)
-                return r
+                await request.app.mongo.bilibili_bangumi[collection_name].update_one({'_id': key}, {'$set': d}, upsert=True)
+                return d
 
         return wrapped
 
@@ -107,10 +107,9 @@ async def getToken(request: web.Request, ):
             r = await resp.json()
         if 'error' in r:
             return web.json_response(r)
-        r['_id'] = r['user_id']
         r['auth_time'] = int(parser.parse(resp.headers['Date']).timestamp())
 
-        get_mongo_collection(request).update({'_id': r['_id']}, r, upsert=True)
+        get_mongo_collection(request).update_one({'_id': r['user_id']}, {'$set': r}, upsert=True)
         return aiohttp_jinja2.render_template('post_to_extension.html', request, {'data': json.dumps(r), })
 
 
@@ -232,7 +231,7 @@ async def nameToSubjectID(request: web.Request):
     if title:
         d = await parseTitle(request, title)
         if title_with_episode:
-            d['episode'] = (await parseTitle(request, title_with_episode))['episode']
+            d['episode'] = nameToSubject.parse_episode(title_with_episode)
         return web.json_response(d)
     else:
         raise web.HTTPBadRequest()
@@ -268,6 +267,7 @@ def create_app(io_loop=None):
         web.get('/eps/{subject_id}', w),
         web.post('/api/v0.1/parser/title', nameToSubjectID),
         web.get('/api/v0.1/missingBilibili', collectMissingBangumiInBilibili),
+        web.get('/auth', lambda request: _raise(web.HTTPFound(f'https://bgm.tv/oauth/authorize?client_id={APP_ID}&response_type=code&redirect_uri={callback_url}')))
     ])
     cors = aiohttp_cors.setup(app, defaults={
         "*": aiohttp_cors.ResourceOptions(

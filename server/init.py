@@ -1,16 +1,16 @@
+import json
 import pathlib
 from os import path
 
 import pymongo
+
 from db import mongo_uri
-import json
 
 base_dir = pathlib.Path(path.dirname(__file__))
 
 client = pymongo.MongoClient(mongo_uri)
 db = client.get_database('bilibili_bangumi')
 collection = db.get_collection('bilibili')
-collection.drop()
 
 with open(base_dir / 'data.json', 'r', encoding='utf-8') as f:
     data = json.load(f)
@@ -33,7 +33,5 @@ for item in data["items"]:
     if site_bangumi.get('id', None):
         d['subject_id'] = site_bangumi.get('id', None)
         if '_id' in d:
-            collection.insert(d)
-with open(base_dir / 'patch.bilibili.json', 'r', encoding='utf-8') as f:
-    patch = json.load(f)
-    collection.insert_many(patch)
+            print(d)
+            collection.update({'_id': d['_id']}, {'$set': d}, upsert=True)

@@ -30,14 +30,14 @@ module.exports = function (grunt) {
             cwd: 'src',
             src: ['css/*.css'],
             dest: 'tmp',
-            ext: '.min.css'
+            ext: '.css'
           },
           {
             expand: true,
             cwd: 'tmp',
             src: ['sass_dist/*.css'],
             dest: 'tmp/css',
-            ext: '.min.css'
+            ext: '.css'
           }
         ]
       }
@@ -55,7 +55,7 @@ module.exports = function (grunt) {
           cwd: 'src',
           src: ['html/*.html'],
           dest: 'tmp',
-          ext: '.min.html'
+          ext: '.html'
         }]
       }
     },
@@ -78,22 +78,34 @@ module.exports = function (grunt) {
         stripBanners: false
       },
       js: {
-        src: ['src/js/*.js'],
+        src: ['src/js/utils.js', 'src/js/index.js'],
         dest: 'tmp/js/0-concat.js'
       },
-      ferdig: {
+      prependMeta: {
         files: {
-          '<%= dist %>/<%= pkg.name %>.js': ['tmp/userscript.meta.js', 'tmp/js/1-med-css.js'],
-          '<%= dist %>/<%= pkg.name %>.min.js': ['tmp/userscript.meta.js', 'tmp/js/1-med-css.min.js']
+          '<%= dist %>/<%= pkg.name %>.js': ['tmp/userscript.meta.js', 'tmp/js/2-iife.js'],
+          // '<%= dist %>/<%= pkg.name %>.min.js': ['tmp/userscript.meta.js', 'tmp/js/1-med-css.min.js']
         }
-      }
+      },
+
+      iife: {
+        options: {
+          stripBanners: true,
+          nonull: true,
+          banner: '(function () {\n  "use strict";\n',
+          footer: '}());'
+        },
+        files: {
+          'tmp/js/2-iife.js': 'tmp/js/1-med-css.js'
+        },
+      },
 
     },
 
     watch: {
       options: {
         debounceDelay: 250,
-        livereload: true,
+        livereload: 35729,
         spawn: false,
         interval: 500
       },
@@ -102,7 +114,7 @@ module.exports = function (grunt) {
     },
 
     jshint: {
-      files: ['src/js/**/*.js', 'Gruntfile.js'],
+      files: ['tmp/js/*.js', 'Gruntfile.js'],
       options: {
         jshintrc: '.jshintrc',
         debug: true
@@ -128,7 +140,7 @@ module.exports = function (grunt) {
         src: ['**'],
         dest: 'dist/v<%= pkg.version %>'
       }
-    }
+    },
   })
 
   grunt.loadNpmTasks('grunt-contrib-concat')
@@ -139,21 +151,20 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-cssmin')
   grunt.loadNpmTasks('grunt-contrib-htmlmin')
   grunt.loadNpmTasks('grunt-contrib-uglify-es')
-  grunt.loadTasks('grunt-userscript-meta')
-  // grunt.loadNpmTasks('grunt-userscript-meta')
   grunt.loadNpmTasks('grunt-preprocess')
+  grunt.loadTasks('grunt-userscript-meta')
 
-  grunt.registerTask('default', [
-    'jshint', 'clean', 'userscript-meta',
-    'cssmin', 'htmlmin', 'concat:js',
-    'preprocess:jsCss', 'uglify',
-    'concat:ferdig', 'clean:tmp', 'copy'
-  ])
 
   grunt.registerTask('dev', [
-    'jshint', 'clean', 'userscript-meta',
-    'cssmin', 'htmlmin', 'concat:js',
-    'preprocess:jsCss', 'uglify',
-    'concat:ferdig'
+    'clean', 'userscript-meta',
+    'cssmin', 'htmlmin', 'concat:js', 'jshint',
+    'preprocess:jsCss',
+    'concat:iife', 'concat:prependMeta',
   ])
+
+  grunt.registerTask('default', [
+    'dev',
+    'clean:tmp', 'copy'
+  ])
+
 }
