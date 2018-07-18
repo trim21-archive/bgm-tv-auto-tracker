@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name Bgm.tv auto tracker
 // @namespace https://trim21.me/
-// @version 0.5.2
+// @version 0.5.3
 // @author Trim21 <trim21me@gmail.com>
 // @source https://github.com/Trim21/bilibili-bangumi-tv-auto-tracker
 // @match https://www.bilibili.com/bangumi/play/*
@@ -328,8 +328,7 @@ const requests = {
 }
 
 class BgmApi {
-  constructor ({ userAgent = null, access_token, serverRoot = 'https://api.bgm.tv' }) {
-    this.userAgent = null
+  constructor ({ access_token, serverRoot = 'https://api.bgm.tv' }) {
     this.access_token = access_token
     if (serverRoot.endsWith('/')) {
       this.serverRoot = serverRoot.substring(0, serverRoot.length - 1)
@@ -341,7 +340,6 @@ class BgmApi {
   }
 
   setSubjectProgress (subjectID, ep) {
-
     return new Promise((resolve, reject) => {
       this.post(`${this.serverRoot}/subject/${subjectID}/update/watched_eps`,
         `watched_eps=${ep}`,
@@ -407,9 +405,6 @@ class BgmApi {
         url = this.serverRoot + '/' + url
       }
     }
-    if (this.userAgent) {
-      headers['User-Agent'] = this.userAgent
-    }
     headers['Authorization'] = 'Bearer ' + this.access_token
     return new Promise((resolve, reject) => {
       requests.get(url, headers).then(
@@ -434,9 +429,6 @@ class BgmApi {
       else {
         url = this.serverRoot + '/' + url
       }
-    }
-    if (this.userAgent) {
-      headers['User-Agent'] = this.userAgent
     }
     headers['Authorization'] = 'Bearer ' + this.access_token
     return new Promise((resolve, reject) => {
@@ -504,8 +496,9 @@ let bgmApi
 /**
  * @namespace
  * @property {object} bangumiData
- * @property {string} bangumiID access token
- * @property {string} subjectID expires duration
+ * @property {string} bangumiID
+ * @property {string} subjectID
+ * @property {string} title
  * @property {number} episode
  */
 let bangumiData = {}
@@ -671,7 +664,7 @@ const dealWithSubjectID = function (subjectID) {
   $('#bgm_tv_tracker_link').html(`<a href="http://bgm.tv/subject/${subjectID}" target="_blank" rel="noopener noreferrer">subject/${subjectID}</a>`)
   $('#bgm_tv_tracker_mark_watched').click(
     () => {
-      let ep = $('#bgm_tv_tracker_episode').html()
+      let ep = bangumiData.episode
       collectSubject(subjectID)
       getEps(subjectID).then(data => {
         let eps = data.eps.findIndex(function (element) {
@@ -700,9 +693,9 @@ const dealWithSubjectID = function (subjectID) {
         subject_id: subjectID,
         'type': 'watch_episode',
         'website': 'bilibili',
-        'bangumi_id': $('#bgm_tv_tracker').data('id'),
+        'bangumi_id': bangumiData.bangumiID,
         'title': $('#bgm_tv_tracker_title').html(),
-        episode: $('#bgm_tv_tracker_episode').html()
+        episode: bangumiData.episode,
       })
     }
   )
@@ -793,7 +786,7 @@ if (tm_unsafeWindow.location.href.startsWith('https://www.bilibili.com/bangumi/p
 // inject iqiyi
 if (tm_unsafeWindow.location.hostname === 'www.iqiyi.com') {
   console.log(tm_unsafeWindow.Q.PageInfo.playPageInfo.categoryName)
-  website = 'iqiyi'
+  website = WEBSITE.iqiyi
   let videoID
   let title = tm_unsafeWindow.document.title
 
@@ -828,8 +821,7 @@ if (tm_unsafeWindow.location.hostname === 'www.iqiyi.com') {
         if (subjectID) {
           dealWithSubjectID(subjectID)
         } else {
-          let notFound = $('.bgm_tv_tracker_info .not_found')
-            .html(bilibili_notfound_default.a)
+          let notFound = $('.bgm_tv_tracker_info .not_found').html(bilibili_notfound_default.a)
           $('.bgm_tv_tracker_info .not_found button').click(
             () => {
               let subjectID = $('.bgm_tv_tracker_info .not_found input').val()

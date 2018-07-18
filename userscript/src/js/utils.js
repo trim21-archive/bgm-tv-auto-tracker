@@ -71,8 +71,7 @@ const requests = {
 }
 
 class BgmApi {
-  constructor ({ userAgent = null, access_token, serverRoot = 'https://api.bgm.tv' }) {
-    this.userAgent = null
+  constructor ({ access_token, serverRoot = 'https://api.bgm.tv' }) {
     this.access_token = access_token
     if (serverRoot.endsWith('/')) {
       this.serverRoot = serverRoot.substring(0, serverRoot.length - 1)
@@ -84,7 +83,6 @@ class BgmApi {
   }
 
   setSubjectProgress (subjectID, ep) {
-
     return new Promise((resolve, reject) => {
       this.post(`${this.serverRoot}/subject/${subjectID}/update/watched_eps`,
         `watched_eps=${ep}`,
@@ -150,9 +148,6 @@ class BgmApi {
         url = this.serverRoot + '/' + url
       }
     }
-    if (this.userAgent) {
-      headers['User-Agent'] = this.userAgent
-    }
     headers['Authorization'] = 'Bearer ' + this.access_token
     return new Promise((resolve, reject) => {
       requests.get(url, headers).then(
@@ -177,9 +172,6 @@ class BgmApi {
       else {
         url = this.serverRoot + '/' + url
       }
-    }
-    if (this.userAgent) {
-      headers['User-Agent'] = this.userAgent
     }
     headers['Authorization'] = 'Bearer ' + this.access_token
     return new Promise((resolve, reject) => {
