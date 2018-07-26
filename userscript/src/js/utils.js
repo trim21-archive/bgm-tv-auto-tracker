@@ -1,94 +1,58 @@
-import { tm_xmlHttpRequest } from './gm_vars'
+import { tm_getValue, tm_setValue } from './vars'
+import axios from 'axios'
+import adapter from 'axios-gmxhr-adapter'
+// monkey patch for https://github.com/damoclark/axios-gmxhr-adapter/issues/1
+import GmXHR from 'gmxhr'
+// var adapter = require('axios-gmxhr-adapter')
+axios.defaults.adapter = adapter
 
-const deepCopy = function (obj) {
-  return JSON.parse(JSON.stringify(obj))
-}
+GmXHR.prototype.send = function (data) {
+  this.data = data
+  var that = this
+  // http://wiki.greasespot.net/GM_xmlhttpRequest
+  GM_xmlhttpRequest({
+    method: this.type,
+    url: this.url,
+    headers: this.headers,
+    data: this.data,
+    onload: function (rsp) {
+      // Populate wrapper object with returned data
+      // including the Greasemonk ey specific "responseHeaders"
+      var responseKeys = ['readyState', 'responseHeaders', 'finalUrl', 'status', 'statusText', 'response', 'responseText']
+      for (var k in responseKeys) {
+        if (rsp.hasOwnProperty(responseKeys[k]))
+          that[responseKeys[k]] = rsp[responseKeys[k]]
 
-const parseHeader = function (lines) {
-  let headers = {}
-  for (let line of lines.trim().split('\r')) {
-    line = line.trim()
-    if (line) {
-      Object.assign(headers, parseHeaderLine(line))
+      }
+      that.onreadystatechange()
+    },
+    onerror: function (rsp) {
+      var responseKeys = ['readyState', 'responseHeaders', 'finalUrl', 'status', 'statusText', 'response', 'responseText']
+      for (var k in responseKeys) {
+        if (rsp.hasOwnProperty(responseKeys[k]))
+          that[responseKeys[k]] = rsp[responseKeys[k]]
+      }
+      that.onreadystatechange()
     }
-  }
-  return headers
-}
-
-const parseHeaderLine = function (line) {
-  let headers = {}
-  let headerExp = /^([^: \t]+):[ \t]*((?:.*[^ \t])|)/
-  let match = headerExp.exec(line)
-  let k = match && match[1]
-  k = k.toLowerCase()
-  headers[k] = match[2]
-  return headers
-}
-
-const NORMAL_ONLOAD = (resolve, reject) => (response) => {
-  response.headers = parseHeader(response.responseHeaders)
-  if (response.status < 300) {
-    if (response.headers['content-type'].startsWith('application/json')) {
-      response.data = JSON.parse(response.responseText)
-    }
-    resolve(response)
-  } else {
-    if (response.headers['content-type'].startsWith('application/json')) {
-      response.data = JSON.parse(response.responseText)
-    }
-    reject({ response })
-  }
-}
-
-const requests = {
-  get (url, headers = {}) {
-    // headers.cookie = ''
-    return new Promise((resolve, reject) => {
-      tm_xmlHttpRequest({
-        method: 'GET',
-        url,
-        headers,
-        onload: NORMAL_ONLOAD(resolve, reject)
-      })
-    })
-  },
-  post (url, data = {}, headers = {}) {
-    if (data !== null && typeof data === 'object') {
-      data = JSON.stringify(data)
-      headers['content-Type'] = 'application/json'
-    }
-    // headers.cookie = ''
-    return new Promise((resolve, reject) => {
-      tm_xmlHttpRequest({
-        method: 'POST',
-        data,
-        url,
-        headers,
-        onload: NORMAL_ONLOAD(resolve, reject)
-      })
-    })
-  }
+  })
 }
 
 class BgmApi {
   constructor ({ access_token, serverRoot = 'https://api.bgm.tv' }) {
     this.access_token = access_token
-    if (serverRoot.endsWith('/')) {
-      this.serverRoot = serverRoot.substring(0, serverRoot.length - 1)
-    }
-    else {
-      this.serverRoot = serverRoot
-    }
-    console.log('register server root at ' + this.serverRoot)
+    this.http = axios.create({
+      baseURL: serverRoot,
+      headers: { Authorization: 'Bearer ' + this.access_token },
+      adapter
+    })
   }
 
   setSubjectProgress (subjectID, ep) {
     return new Promise((resolve, reject) => {
-      this.post(`${this.serverRoot}/subject/${subjectID}/update/watched_eps`,
+      this.post(`/subject/${subjectID}/update/watched_eps`,
         `watched_eps=${ep}`,
         { 'content-type': 'application/x-www-form-urlencoded', })
         .then((response) => {
-            console.log(response)
             if (response.data.code >= 300) {
               reject({ status: response.data.code, response })
             }
@@ -102,12 +66,42 @@ class BgmApi {
   }
 
   setEpisodeWatched (ep) {
-    return this.post(`${this.serverRoot}/ep/${ep}/status/watched`)
+    return this.post(`/ep/${ep}/status/watched`)
+  }
+
+  getEps (subjectID) {
+    return new Promise((resolve, reject) => {
+        let noData = false
+        let eps = tm_getValue(`eps_${subjectID}`, false)
+        // no data
+        if (!eps) noData = true
+        if (eps) {
+          eps = JSON.parse(eps)
+          // out of time
+          if (Number(new Date().getTime() / 1000) - eps.time > 60 * 60 * 2) noData = true
+        }
+
+        if (!noData) {
+          resolve(eps)
+        } else {
+          this.getSubjectEps(subjectID).then(
+            (response) => {
+              response.data.time = Number(new Date().getTime() / 1000)
+              tm_setValue(`eps_${subjectID}`, JSON.stringify(response.data))
+              resolve(response.data)
+            },
+            (error) => {
+              reject(error)
+            }
+          )
+        }
+      }
+    )
   }
 
   getSubjectEps (subjectID) {
     return new Promise((resolve, reject) => {
-      this.get(`${this.serverRoot}/subject/${subjectID}/ep`).then(
+      this.get(`/subject/${subjectID}/ep`).then(
         response => {
           if (response.data.code >= 300) {
             reject({ status: response.data.code, response })
@@ -135,59 +129,54 @@ class BgmApi {
     })
   }
 
-  getCalendar () {
-    return this.get(`${this.serverRoot}/calendar`)
-  }
-
-  get (url, headers = {}) {
-    if (!url.startsWith('http')) {
-      if (url.startsWith('/')) {
-        url = this.serverRoot + url
-      }
-      else {
-        url = this.serverRoot + '/' + url
-      }
-    }
-    headers['Authorization'] = 'Bearer ' + this.access_token
-    return new Promise((resolve, reject) => {
-      requests.get(url, headers).then(
+  setSubjectCollectionStatus ({ subjectID, status }) {
+    return new Promise(((resolve, reject) => {
+      this.post(`/collection/${subjectID}/update`, `status=${status}`,
+        {
+          'content-type': 'application/x-www-form-urlencoded'
+        }).then(
         response => {
           if (response.data.code >= 300) {
-            reject({ status: response.data.code, response })
+            reject({ response })
           } else {
             resolve(response)
           }
         },
         error => reject(error)
       )
+    }))
+  }
+
+  get (url, headers = {}) {
+    return new Promise((resolve, reject) => {
+      this.http.get(url, { headers }).then(response => {
+          if (response.data.code && response.data.code >= 300) {
+            reject({ status: response.data.code, response })
+          } else {
+            resolve(response)
+          }
+        },
+        error => reject(error))
     })
   }
 
   post (url, data = {}, headers = {}) {
-    console.log(url)
-    if (!url.startsWith('http')) {
-      if (url.startsWith('/')) {
-        url = this.serverRoot + url
-      }
-      else {
-        url = this.serverRoot + '/' + url
-      }
-    }
-    headers['Authorization'] = 'Bearer ' + this.access_token
     return new Promise((resolve, reject) => {
-      requests.post(url, data, headers).then(
-        response => {
-          // if (response.data.code && response.data.code >= 300) {
-          //   let error = { response }
-          //   reject(error)
-          // } else {
+      this.http.post(url, data, { headers }).then(response => {
+          if (response.data.code && response.data.code >= 300) {
+            reject({ status: response.data.code, response })
+          } else {
             resolve(response)
-          // }
+          }
         },
-        error => reject(error)
-      )
+        error => reject(error))
     })
   }
 }
 
-export { BgmApi, requests }
+let apiServer = axios.create({
+  baseURL: 'https://bangumi-auto-tracker.trim21.cn/',
+  headers: { 'bgm.tv': process.env.version },
+})
+
+export { BgmApi, axios, apiServer }

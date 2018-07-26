@@ -1,6 +1,8 @@
 const path = require('path')
 const webpack = require('webpack')
-
+const VueLoaderPlugin = require('vue-loader/lib/plugin')
+const UglifyJSPlugin = require('uglifyjs-webpack-plugin')
+const pkg = require('../package.json')
 const production = process.env.NODE_ENV === 'production'
 
 const config = {
@@ -19,10 +21,23 @@ const config = {
     rules: [
       { test: /webpack\..+\.config\.js$/, use: 'webpack-loader' },
       {
+        test: /\.vue$/,
+        loader: 'vue-loader',
+        options: {
+          loaders: {
+            scss: 'vue-style-loader!css-loader!sass-loader', // <style lang="style">
+          }
+        }
+      },
+      {
+        test: /\.scss$/,
+        loaders: ['style-loader', 'css-loader', 'sass-loader']
+      },
+      {
         test: /\.css$/,
         use: [
           'to-string-loader',
-          // 'style-loader/useable',
+          // 'style-loader',
           {
             loader: 'css-loader',
             options: {
@@ -43,11 +58,13 @@ const config = {
       }
     ]
   },
-  plugins: []
+  plugins: [
+    new VueLoaderPlugin()
+  ]
 }
 
 if (production) {
-  // config.plugins.unshift(new UglifyJSPlugin())
+  config.plugins.unshift(new UglifyJSPlugin())
 } else {
   config.devtool = 'inline-source-map'
 }
@@ -55,6 +72,7 @@ config.plugins.unshift(
   new webpack.DefinePlugin({
     'PRODUCTION': JSON.stringify(production),
     'process.env': {
+      "version": JSON.stringify(pkg.version),
       NODE_ENV: JSON.stringify(process.env.NODE_ENV)
     }
   })

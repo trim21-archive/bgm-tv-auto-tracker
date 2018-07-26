@@ -50,26 +50,6 @@ const generateMetadataBlock = (metadata) => {
     + '// ==/UserScript==\n\n'
 }
 
-const metadata = {
-  'name': pkg['name'],
-  'namespace': 'https://github.com/YePpHa',
-  'description': pkg['description'],
-  'version': pkg['version'],
-  'author': parseAuthor(pkg['author']),
-  'match': 'https://www.youtube.com/*',
-  'source': pkg['repository']['url'],
-  'grant': [
-    'GM_setValue',
-    'GM_getValue',
-    'GM_deleteValue',
-    'GM.setValue',
-    'GM.getValue',
-    'GM.deleteValue'
-  ],
-  'noframes': undefined,
-  'run-at': 'document-start'
-}
-
 let myMeta = {
   'name': 'Bgm.tv auto tracker',
   'namespace': 'https://trim21.me/',
