@@ -1,5 +1,6 @@
 import { tm_unsafeWindow } from './vars'
-import { apiServer } from './utils'
+import { apiServer, parseEpisode } from './utils'
+import path from 'path'
 
 class bilibili {
   /**
@@ -13,10 +14,12 @@ class bilibili {
     const status = tm_unsafeWindow.__INITIAL_STATE__
     const episode = status.epInfo.index
     const bangumiID = status.mediaInfo.season_id
-
     let title = status.mediaInfo.title
+
     return new Promise((resolve, reject) => {
-      apiServer.get('/query/bilibili', { params: { bangumi_id: bangumiID } }).then(
+      apiServer.get('/api/v0.2/querySubjectID', {
+        params: { bangumiID, website: 'bilibili' }
+      }).then(
         response => resolve({
           subjectID: response.data.subject_id,
           episode,
@@ -79,24 +82,25 @@ class iQiyi {
     //   `?bangumi_id=${encodeURI(tm_unsafeWindow.location.href)}&subject_id=${subjectID}`)
   }
 
-  static inject () {
-    console.log(bangumiName)
-    let bangumiName = $('#datainfo-navlist > a:nth-child(3)').html()
+  static init () {
+    // console.log(bangumiName)
+    let collectionLinkEl = $('#datainfo-navlist > a:nth-child(3)')
+    let bangumiName = collectionLinkEl.html()
     let title = tm_unsafeWindow.document.title
-    return new Promise((resolve, reject) => {
+    let collectionLink = collectionLinkEl.attr('href')
+    let filename = path.basename(collectionLink)
+    let bangumiID = filename.split('.').slice(0, -1).join('.')
 
-      apiServer.post('/api/v0.1/parser/title', {
-        data: {
-          title: bangumiName,
-          title_with_episode: title
-        }
+    return new Promise((resolve, reject) => {
+      apiServer.get('/api/v0.2/querySubjectID', {
+        params: { bangumiID, website: 'iqiyi' }
       }).then(
         response => {
-          $('#bgm_tv_tracker_title').html(bangumiName)
-          $('#bgm_tv_tracker').data('id', response.data.bangumi_id)
+          console.log(response)
           let subjectID = response.data.subject_id
-          let episode = response.data.episode
-          resolve({ subjectID, episode, title, bangumiName })
+          let episode = parseEpisode(title)
+          // let episode = response.data.episode
+          resolve({ subjectID, episode, title, bangumiName, bangumiID })
         },
         err => {
           reject(err)
@@ -107,16 +111,14 @@ class iQiyi {
 
   static detectEpisodeChange (cb, notfound) {
     function onEpisodeChange () {
+      console.log('href change')
       let title = tm_unsafeWindow.document.title
-      apiServer.post('/api/v0.1/parser/title', {
-        data: {
-          title: $('#datainfo-navlist > a:nth-child(3)').html(),
-          title_with_episode: title
-        }
-      }).then(
-        response => cb(response.data),
-        notfound
-      )
+      let episode = parseEpisode(title)
+      if (episode) {
+        cb({ episode })
+      } else {
+        notfound()
+      }
     }
 
     tm_unsafeWindow.addEventListener('hashchange', function () {

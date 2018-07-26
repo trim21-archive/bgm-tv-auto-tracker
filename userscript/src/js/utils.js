@@ -179,4 +179,11 @@ let apiServer = axios.create({
   headers: { 'bgm.tv': process.env.version },
 })
 
-export { BgmApi, axios, apiServer }
+function parseEpisode (title) {
+  let re = /第(<episode>\d+)集/g
+  let result = re.exec(title)
+  console.log(result)
+  return result.groups.episode
+}
+
+export { BgmApi, axios, apiServer, parseEpisode }

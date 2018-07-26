@@ -12,10 +12,10 @@
       <br>
       <div>
         <p>你正在看:
-          <span id="bgm_tv_tracker_title"></span>
+          <span id="bgm_tv_tracker_title">{{ bangumiName }}</span>
         </p>
-        <p>第
-          <span id="bgm_tv_tracker_episode">{{ episode }}</span>集</p>
+        <p>第 <span id="bgm_tv_tracker_episode">{{ episode }}</span>集</p>
+        <p>Bangumi ID: {{ bangumiID }}</p>
       </div>
       <br>
       <div id="bgm_tv_tracker_link">
@@ -68,11 +68,21 @@ export default {
       tmpSubjectID: null,
       messages: [],
       bangumiID: null,
+      bangumiName: null,
       episode: null,
       title: null,
       subjectID: null,
       score: '',
       website
+    }
+  },
+  watch: {
+    subjectID (val) {
+      let vm = this
+      this.$bgmApi.getSubject(val).then(response => {
+        vm.score = ' ' + response.data.rating.score
+        vm.bangumiName = response.data.name_cn || response.data.name
+      })
     }
   },
   methods: {
@@ -172,8 +182,10 @@ export default {
     })
     let vm = this
     this.$website.detectEpisodeChange(data => {
-        vm.subjectID = data.subjectID
-        vm.episode = data.episode
+        if (data.subjectID)
+          vm.subjectID = data.subjectID
+        if (data.episode)
+          vm.episode = data.episode
       },
       error => {
         this.subjectID = undefined
