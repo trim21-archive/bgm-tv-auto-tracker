@@ -254,12 +254,12 @@ async def collectMissingBangumiInBilibili(request: web.Request):
 async def querySubjectID(request: web.Request):
     website = request.query.get('website', None)
     bangumi_id = request.query.get('bangumiID', None)
-    if not (website and bangumi_id):
+    if not (website and bangumi_id and website in ['iqiyi', 'bilibili']):
         raise web.HTTPBadRequest(reason='missing input `website` or `bangumiID`')
     collection = request.app.mongo.bilibili_bangumi.get_collection(website)
-    e = collection.find_one({'_id': bangumi_id})
+    e = await collection.find_one({'_id': bangumi_id})
     if e:
-        return e
+        return web.json_response(e)
     else:
         raise web.HTTPNotFound()
     # request.mongo.get_data
