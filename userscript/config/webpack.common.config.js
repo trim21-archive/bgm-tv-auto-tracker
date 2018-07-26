@@ -19,6 +19,12 @@ const config = {
   },
   module: {
     rules: [
+      // {
+      //   test: /\.js$/,
+      //   exclude: /(node_modules|bower_components)/,
+      //   loader: 'babel-loader',
+        // options: {        }
+      // },
       { test: /webpack\..+\.config\.js$/, use: 'webpack-loader' },
       {
         test: /\.vue$/,

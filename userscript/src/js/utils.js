@@ -180,10 +180,15 @@ let apiServer = axios.create({
 })
 
 function parseEpisode (title) {
-  let re = /第(<episode>\d+)集/g
+  let re = /第(\d+)集/g
   let result = re.exec(title)
   console.log(result)
-  return result.groups.episode
+
+  if (result) {
+    return parseInt(result[1], 10)
+  } else {
+    return 0
+  }
 }
 
 export { BgmApi, axios, apiServer, parseEpisode }
