@@ -251,6 +251,22 @@ async def collectMissingBangumiInBilibili(request: web.Request):
         return web.json_response({'status': 'success'})
 
 
+async def querySubjectID(request: web.Request):
+    website = request.query.get('website', None)
+    bangumi_id = request.query.get('bangumiID', None)
+    if not (website and bangumi_id):
+        raise web.HTTPBadRequest(reason='missing input `website` or `bangumiID`')
+    collection = request.app.mongo.bilibili_bangumi.get_collection(website)
+    e = collection.find_one({'_id': bangumi_id})
+    if e:
+        return e
+    else:
+        raise web.HTTPNotFound()
+    # request.mongo.get_data
+
+    pass
+
+
 def create_app(io_loop=None):
     app = web.Application(loop=io_loop,
                           # middlewares=[error_middleware, ]
@@ -266,6 +282,7 @@ def create_app(io_loop=None):
         web.post('/watch_episode', watchEpisode),
         web.get('/eps/{subject_id}', w),
         web.post('/api/v0.1/parser/title', nameToSubjectID),
+        web.get('/api/v0.2/querySubjectID', querySubjectID),
         web.get('/api/v0.1/missingBilibili', collectMissingBangumiInBilibili),
         web.get('/auth', lambda request: _raise(web.HTTPFound(f'https://bgm.tv/oauth/authorize?client_id={APP_ID}&response_type=code&redirect_uri={callback_url}')))
     ])
