@@ -56,6 +56,7 @@ let myMeta = {
   'version': pkg['version'],
   'author': parseAuthor(pkg['author']),
   'source': pkg['repository']['url'],
+  'license': 'MIT',
   'match': [
     'https://www.bilibili.com/bangumi/play/*',
     'http*://www.iqiyi.com/*',

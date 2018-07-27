@@ -31,7 +31,7 @@
          rel="noopener noreferrer">报告问题</a>
       <br>
       <div id="bgm_tv_tracker_notification">
-        <div v-for="message in messages">
+        <div v-for="(message, index) in messages" :key="index">
           <hr>
           <p>{{ message.time.getHours() }}:{{ message.time.getMinutes() }}:{{ message.time.getSeconds() }}
             {{ message.text }}</p>
