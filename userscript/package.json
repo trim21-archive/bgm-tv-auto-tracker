@@ -1,15 +1,15 @@
 {
   "name": "bgm-tv-auto-tracker",
   "description": "auto tracker your bangumi progress",
-  "version": "0.5.5",
+  "version": "0.5.6",
   "author": {
     "name": "Trim21",
     "email": "trim21me@gmail.com"
   },
   "scripts": {
     "version": "npm run build && git add -A dist",
-    "build": "cross-env NODE_ENV=production webpack --mode production --config config/userscript.webpack.config.js",
-    "dev": "webpack --mode development --watch --config config/userscript.webpack.config.js"
+    "build": "cross-env NODE_ENV=production webpack --mode production --config config/webpack.config.js",
+    "dev": "webpack --mode development --watch --config config/webpack.config.js"
   },
   "repository": {
     "type": "git",
@@ -17,10 +17,6 @@
   },
   "private": false,
   "devDependencies": {
-    "@babel/plugin-transform-runtime": "^7.0.0-beta.54",
-    "babel-core": "^6.26.3",
-    "babel-plugin-transform-modern-regexp": "0.0.5",
-    "babel-plugin-transform-runtime": "^6.23.0",
     "cross-env": "^5.2.0",
     "css-loader": "^0.28.11",
     "hoek": "^4.2.1",
@@ -31,21 +27,20 @@
     "style-loader": "^0.21.0",
     "to-string-loader": "^1.1.5",
     "uglifyjs-webpack-plugin": "^1.0.0-beta.3",
+    "userscript-metadata-webpack-plugin": "^0.0.3",
     "vue-loader": "^15.2.6",
     "vue-style-loader": "^4.1.1",
     "vue-template-compiler": "^2.5.16",
     "webpack": "^4.16.2",
     "webpack-cli": "^2.0.9",
     "webpack-merge": "^4.1.3",
-    "webpack-watch-livereload-plugin": "0.0.1",
+    "webpack-watch-livereload-plugin": "^0.0.1",
     "wrapper-webpack-plugin": "^1.0.0"
   },
   "dependencies": {
-    "@babel/runtime": "^7.0.0-beta.54",
     "axios": "^0.18.0",
     "axios-gmxhr-adapter": "^0.15.3",
-    "babel-loader": "^7.1.5",
-    "babel-preset-env": "^1.7.0",
+    "axios-userscript-adapter": "^0.0.1",
     "vue": "^2.5.16"
   }
 }

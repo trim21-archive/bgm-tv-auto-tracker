@@ -70,10 +70,6 @@ class bilibili {
 }
 
 class iQiyi {
-  static reportMissingBangumi (subjectID) {
-    // requests.get(`${URLS.apiServerURL}/api/v0.1/missingBilibili` +
-    //   `?bangumi_id=${encodeURI(tm_unsafeWindow.location.href)}&subject_id=${subjectID}`)
-  }
 
   static init () {
     // console.log(bangumiName)

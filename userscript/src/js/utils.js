@@ -1,41 +1,8 @@
 import { tm_getValue, tm_setValue, URLS } from './vars'
 import axios from 'axios'
-import adapter from 'axios-gmxhr-adapter'
-import GmXHR from 'gmxhr'
+import adapter from 'axios-userscript-adapter'
 
 axios.defaults.adapter = adapter
-
-// monkey patch for https://github.com/damoclark/axios-gmxhr-adapter/issues/1
-GmXHR.prototype.send = function (data) {
-  this.data = data
-  var that = this
-  // http://wiki.greasespot.net/GM_xmlhttpRequest
-  GM_xmlhttpRequest({
-    method: this.type,
-    url: this.url,
-    headers: this.headers,
-    data: this.data,
-    onload: function (rsp) {
-      // Populate wrapper object with returned data
-      // including the Greasemonk ey specific "responseHeaders"
-      var responseKeys = ['readyState', 'responseHeaders', 'finalUrl', 'status', 'statusText', 'response', 'responseText']
-      for (var k in responseKeys) {
-        if (rsp.hasOwnProperty(responseKeys[k]))
-          that[responseKeys[k]] = rsp[responseKeys[k]]
-
-      }
-      that.onreadystatechange()
-    },
-    onerror: function (rsp) {
-      var responseKeys = ['readyState', 'responseHeaders', 'finalUrl', 'status', 'statusText', 'response', 'responseText']
-      for (var k in responseKeys) {
-        if (rsp.hasOwnProperty(responseKeys[k]))
-          that[responseKeys[k]] = rsp[responseKeys[k]]
-      }
-      that.onreadystatechange()
-    }
-  })
-}
 
 class BgmApi {
   constructor ({ access_token, serverRoot = 'https://api.bgm.tv' }) {
