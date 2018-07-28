@@ -26,19 +26,12 @@ class bilibili {
           title,
           bangumiID,
         }),
-        err => {
-          // reject({
-          //   subjectID: response.data.subject_id,
-          //   episode,
-          //   title,
-          //   bangumiID,
-          // })
-          if (err.response.status === 404) {
-            reject(err)
-          } else {
-            reject({ error: 'not found' })
-          }
-        }
+        error => reject({
+          episode,
+          title,
+          bangumiID,
+          error
+        })
       )
     })
   }
@@ -90,6 +83,7 @@ class iQiyi {
     let collectionLink = collectionLinkEl.attr('href')
     let filename = path.basename(collectionLink)
     let bangumiID = filename.split('.').slice(0, -1).join('.')
+    let episode = parseEpisode(title)
 
     return new Promise((resolve, reject) => {
       apiServer.get('/api/v0.2/querySubjectID', {
@@ -98,13 +92,14 @@ class iQiyi {
         response => {
           console.log(response)
           let subjectID = response.data.subject_id
-          let episode = parseEpisode(title)
-          // let episode = response.data.episode
           resolve({ subjectID, episode, title, bangumiName, bangumiID })
         },
-        err => {
-          reject(err)
-        }
+        error => reject({
+          episode,
+          title,
+          bangumiID,
+          bangumiName,
+        })
       )
     })
   }

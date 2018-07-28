@@ -1,11 +1,11 @@
-import { tm_getValue, tm_setValue } from './vars'
+import { tm_getValue, tm_setValue, URLS } from './vars'
 import axios from 'axios'
 import adapter from 'axios-gmxhr-adapter'
-// monkey patch for https://github.com/damoclark/axios-gmxhr-adapter/issues/1
 import GmXHR from 'gmxhr'
-// var adapter = require('axios-gmxhr-adapter')
+
 axios.defaults.adapter = adapter
 
+// monkey patch for https://github.com/damoclark/axios-gmxhr-adapter/issues/1
 GmXHR.prototype.send = function (data) {
   this.data = data
   var that = this
@@ -175,7 +175,7 @@ class BgmApi {
 }
 
 let apiServer = axios.create({
-  baseURL: 'https://bangumi-auto-tracker.trim21.cn/',
+  baseURL: URLS.apiServerURL,
   headers: { 'bgm.tv': process.env.version },
 })
 
@@ -191,4 +191,66 @@ function parseEpisode (title) {
   }
 }
 
-export { BgmApi, axios, apiServer, parseEpisode }
+/**
+ * A number, or a string containing a number.
+ * @typedef {object} Auth
+ * @property {string} access_token access token
+ * @property {number} expires_in expires duration
+ * @property {string} token_type
+ * @property {null}   scope
+ * @property {number} user_id
+ * @property {string} refresh_token
+ * @property {number} auth_time
+ */
+
+/**
+ *
+ * @param {Auth} auth
+ */
+function saveAuth (auth) {
+  auth.auth_time = parseInt(new Date().getTime() / 1000, 10)
+  tm_setValue('auth', JSON.stringify(auth))
+}
+
+/**
+ * @param {Auth} auth
+ * @return {boolean}
+ */
+function ifAuthExpires (auth) {
+  /* auth_time 2d  expires in 9d */
+  /*            2d + 7d - 1d < 6d => false*/
+  /*            2d + 7d - 1d < 8d => true*/
+  return (auth.auth_time + auth.expires_in - 2 * 24 * 60 * 60) < Math.round(new Date().getTime() / 1000)
+}
+
+// * @returns {(Auth|false)}
+/**
+ *
+ * @return {Promise.< Auth|false >}
+ */
+function getAuth () {
+  /**
+   * @type {Auth}
+   */
+  let auth = tm_getValue('auth', false)
+  if (auth) {
+    auth = JSON.parse(auth)
+    if (ifAuthExpires(auth)) {
+      // if (true) {
+      console.log('refresh token')
+      return apiServer.post('/refresh_token', auth,)
+        .then(response => {
+          if (response.data.hasOwnProperty('error')) {
+            // alert('续期token失败,请手动重新授权')
+            console.log(response.data)
+          }
+          saveAuth(response.data)
+          return response.data
+        },)
+    }
+  }
+  return Promise.resolve(auth)
+  // return auth
+}
+
+export { BgmApi, axios, apiServer, parseEpisode, saveAuth, getAuth }

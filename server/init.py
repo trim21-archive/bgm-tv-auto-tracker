@@ -38,8 +38,8 @@ for item in data["items"]:
     if site_bangumi.get('id', None):
         d['subject_id'] = site_bangumi.get('id', None)
         if 'bangumi_id' in d:
-            # print(d)
-            db.get_collection(d['website']).update({'_id': d['bangumi_id']}, {'$set': {
+            print(d)
+            db.get_collection(d['website']).update_one({'_id': d['bangumi_id']}, {'$set': {
                 'subject_id': d['subject_id'],
                 'title': d['title']
             }}, upsert=True)

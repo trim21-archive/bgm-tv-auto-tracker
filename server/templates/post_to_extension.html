@@ -7,6 +7,9 @@
     <title>Document</title>
 </head>
 <body>
+<code>
+    {{ data }}
+</code>
 <script>
   var data = JSON.parse('{{ data|safe }}')
   data.type = 'auth'

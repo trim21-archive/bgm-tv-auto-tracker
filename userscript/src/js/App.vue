@@ -179,6 +179,12 @@ export default {
       this.episode = episode
       this.title = title
       this.bangumiID = bangumiID
+    }, error => {
+      console.log(error)
+      let { episode, title, bangumiID, } = error
+      this.episode = episode
+      this.title = title
+      this.bangumiID = bangumiID
     })
     let vm = this
     this.$website.detectEpisodeChange(data => {

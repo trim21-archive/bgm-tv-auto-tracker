@@ -41,8 +41,8 @@ def cacheFunction(key_name, collection_name, expires=60 * 60 * 3):
                     r = await f(*args, **kwargs)
                     await request.app.mongo.bilibili_bangumi[collection_name] \
                         .update_one({'_id': key},
-                                    {'$set': {'data': r,
-                                          '_expires': int(time.time()) + expires}},
+                                    {'$set': {'data'    : r,
+                                              '_expires': int(time.time()) + expires}},
                                     upsert=True)
                     return r
             # 未缓存
@@ -50,7 +50,8 @@ def cacheFunction(key_name, collection_name, expires=60 * 60 * 3):
                 d = {}
                 d['data'] = await f(*args, **kwargs)
                 d['_expires'] = int(time.time()) + expires
-                await request.app.mongo.bilibili_bangumi[collection_name].update_one({'_id': key}, {'$set': d}, upsert=True)
+                await request.app.mongo.bilibili_bangumi[collection_name].update_one({'_id': key}, {'$set': d},
+                                                                                     upsert=True)
                 return d['data']
 
         return wrapped
@@ -117,7 +118,8 @@ async def fromPlayerUrlToBangumiSubjectID(request: web.Request):
     bangumi_id = request.query.get('bangumi_id', None)
     website = request.match_info.get('website', None)
     if bangumi_id and website:
-        r = await request.app.mongo.bilibili_bangumi.bilibili.find_one({'_id': bangumi_id}, {'_id': 0, 'title': 0, 'name': 0})
+        r = await request.app.mongo.bilibili_bangumi.bilibili.find_one({'_id': bangumi_id},
+                                                                       {'_id': 0, 'title': 0, 'name': 0})
         if r:
             return web.json_response(r)
         else:
@@ -132,21 +134,23 @@ async def refreshToken(request: web.Request, ):
     user_id = data.get('user_id', None)
     if not (refresh_token and user_id):
         return web.HTTPBadRequest()
-
+    data = {'grant_type'   : 'refresh_token',
+            'client_id'    : APP_ID,
+            'client_secret': APP_SECRET,
+            'refresh_token': refresh_token,
+            'redirect_uri' : callback_url}
+    print(data)
     async with aiohttp.ClientSession() as session:
-        async with session.post('https://bgm.tv/oauth/access_token',
-                                data={'grant_type'   : 'refresh_token',
-                                      'client_id'    : APP_ID,
-                                      'client_secret': APP_SECRET,
-                                      'refresh_token': refresh_token,
-                                      'redirect_uri' : callback_url}) as resp:
+        async with session.post('https://bgm.tv/oauth/access_token', json=data) as resp:
+            # async with session.post('https://postman-echo.com/post', json=data) as resp:
             r = await resp.json()
+        print(r)
         if 'error' in r:
             return web.json_response(r)
         r['_id'] = r['user_id']
         r['auth_time'] = int(parser.parse(resp.headers['Date']).timestamp())
 
-        get_mongo_collection(request).update({'_id': r['_id']}, r, upsert=True)
+        get_mongo_collection(request).update_one({'_id': r['_id']}, {'$set': r}, upsert=True)
         return web.json_response(r)
 
 
@@ -171,8 +175,12 @@ async def getEps(subject_id):
 async def collectSubject(request, subject_id, user_id, access_token):
     r = await request.app.mongo.bilibili_bangumi.user_collection.find_one({'_id': user_id, 'subject_id': subject_id})
     if not r:
-        await aio_post(f'https://api.bgm.tv/collection/{subject_id}/update', data='status=do', headers={'Content-Type': 'application/x-www-form-urlencoded', 'authorization': f'Bearer {access_token}'})
-        await request.app.mongo.bilibili_bangumi.user_collection.update({'_id': user_id}, {'_id': user_id, 'subject_id': subject_id}, upsert=True)
+        await aio_post(f'https://api.bgm.tv/collection/{subject_id}/update', data='status=do',
+                       headers={'Content-Type' : 'application/x-www-form-urlencoded',
+                                'authorization': f'Bearer {access_token}'})
+        await request.app.mongo.bilibili_bangumi.user_collection.update_one({'_id': user_id},
+                                                                            {'_id': user_id, 'subject_id': subject_id},
+                                                                            upsert=True)
 
 
 async def watchEpisode(request: web.Request):
@@ -200,7 +208,8 @@ async def watchEpisode(request: web.Request):
     else:
         return web.json_response({'status': 'error', 'message': 'please upgrade userscript'}, status=400)
 
-    r3 = await aio_post(f'https://api.bgm.tv/ep/{ep}/status/watched', headers={'authorization': f'Bearer {access_token}'})
+    r3 = await aio_post(f'https://api.bgm.tv/ep/{ep}/status/watched',
+                        headers={'authorization': f'Bearer {access_token}'})
 
     print(r3)
     if r3['error'] != 'OK':
@@ -247,7 +256,8 @@ async def collectMissingBangumiInBilibili(request: web.Request):
     if not (bangumi_id and subject_id):
         raise web.HTTPBadRequest()
     else:
-        await request.app.mongo.bilibili_bangumi.missing_bangumi.insert({'bangumi_id': bangumi_id, 'subject_id': subject_id})
+        await request.app.mongo.bilibili_bangumi.missing_bangumi.insert(
+            {'bangumi_id': bangumi_id, 'subject_id': subject_id})
         return web.json_response({'status': 'success'})
 
 
@@ -277,20 +287,21 @@ def create_app(io_loop=None):
         web.get('/', lambda request: aiohttp_jinja2.render_template('index.html', request, {})),
         web.get('/version', lambda request: web.Response(text='0.0.3')),
         web.get('/oauth_callback', getToken),
-        web.post('/refresh_token', refreshToken),
+        web.post('/api/v0.1/refresh_token', refreshToken),
         web.get('/query/{website}', fromPlayerUrlToBangumiSubjectID),
         web.post('/watch_episode', watchEpisode),
         web.get('/eps/{subject_id}', w),
         web.post('/api/v0.1/parser/title', nameToSubjectID),
         web.get('/api/v0.2/querySubjectID', querySubjectID),
         web.get('/api/v0.1/missingBilibili', collectMissingBangumiInBilibili),
-        web.get('/auth', lambda request: _raise(web.HTTPFound(f'https://bgm.tv/oauth/authorize?client_id={APP_ID}&response_type=code&redirect_uri={callback_url}')))
+        web.get('/auth', lambda request: _raise(web.HTTPFound(
+            f'https://bgm.tv/oauth/authorize?client_id={APP_ID}&response_type=code&redirect_uri={callback_url}')))
     ])
     cors = aiohttp_cors.setup(app, defaults={
         "*": aiohttp_cors.ResourceOptions(
-                allow_credentials=True,
-                expose_headers="*",
-                allow_headers="*",
+            allow_credentials=True,
+            expose_headers="*",
+            allow_headers="*",
         )
     })
     for route in list(app.router.routes()):

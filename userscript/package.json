@@ -7,7 +7,7 @@
     "email": "trim21me@gmail.com"
   },
   "scripts": {
-    "version": "npm run build",
+    "version": "npm run build && git add -A dist",
     "build": "cross-env NODE_ENV=production webpack --mode production --config config/userscript.webpack.config.js",
     "dev": "webpack --mode development --watch --config config/userscript.webpack.config.js"
   },
