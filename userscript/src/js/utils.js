@@ -1,4 +1,4 @@
-import { tm_getValue, tm_setValue, URLS } from './vars'
+import { tm_getValue, tm_setValue, URLS } from './vars.js'
 import axios from 'axios'
 import adapter from 'axios-userscript-adapter'
 
@@ -16,7 +16,7 @@ class BgmApi {
 
   setSubjectProgress (subjectID, ep) {
     return new Promise((resolve, reject) => {
-      this.post(`/subject/${subjectID}/update/watched_eps`,
+      this.http.post(`/subject/${subjectID}/update/watched_eps`,
         `watched_eps=${ep}`,
         { 'content-type': 'application/x-www-form-urlencoded', })
         .then((response) => {
@@ -33,7 +33,7 @@ class BgmApi {
   }
 
   setEpisodeWatched (ep) {
-    return this.post(`/ep/${ep}/status/watched`)
+    return this.http.post(`/ep/${ep}/status/watched`)
   }
 
   getEps (subjectID) {
@@ -51,10 +51,10 @@ class BgmApi {
         if (!noData) {
           resolve(eps)
         } else {
-          this.getSubjectEps(subjectID).then(
+          this.http.getSubjectEps(subjectID).then(
             (response) => {
               response.data.time = Number(new Date().getTime() / 1000)
-              tm_setValue(`eps_${subjectID}`, JSON.stringify(response.data))
+              tm_setValue(`eps_${subjectID}`, JSON.stringify({ eps: response.data.eps }))
               resolve(response.data)
             },
             (error) => {
@@ -68,7 +68,7 @@ class BgmApi {
 
   getSubjectEps (subjectID) {
     return new Promise((resolve, reject) => {
-      this.get(`/subject/${subjectID}/ep`).then(
+      this.http.get(`/subject/${subjectID}/ep`).then(
         response => {
           if (response.data.code >= 300) {
             reject({ status: response.data.code, response })
@@ -83,7 +83,7 @@ class BgmApi {
 
   getSubject (subjectID) {
     return new Promise((resolve, reject) => {
-      this.get(`/subject/${subjectID}`).then(
+      this.http.get(`/subject/${subjectID}`).then(
         response => {
           if (response.data.code >= 300) {
             reject({ status: response.data.code, response })
@@ -98,7 +98,7 @@ class BgmApi {
 
   setSubjectCollectionStatus ({ subjectID, status }) {
     return new Promise(((resolve, reject) => {
-      this.post(`/collection/${subjectID}/update`, `status=${status}`,
+      this.http.post(`/collection/${subjectID}/update`, `status=${status}`,
         {
           'content-type': 'application/x-www-form-urlencoded'
         }).then(
@@ -112,32 +112,6 @@ class BgmApi {
         error => reject(error)
       )
     }))
-  }
-
-  get (url, headers = {}) {
-    return new Promise((resolve, reject) => {
-      this.http.get(url, { headers }).then(response => {
-          if (response.data.code && response.data.code >= 300) {
-            reject({ status: response.data.code, response })
-          } else {
-            resolve(response)
-          }
-        },
-        error => reject(error))
-    })
-  }
-
-  post (url, data = {}, headers = {}) {
-    return new Promise((resolve, reject) => {
-      this.http.post(url, data, { headers }).then(response => {
-          if (response.data.code && response.data.code >= 300) {
-            reject({ status: response.data.code, response })
-          } else {
-            resolve(response)
-          }
-        },
-        error => reject(error))
-    })
   }
 }
 
@@ -213,7 +187,7 @@ function getAuth () {
           }
           saveAuth(response.data)
           return response.data
-        },)
+        })
     }
   }
   return Promise.resolve(auth)

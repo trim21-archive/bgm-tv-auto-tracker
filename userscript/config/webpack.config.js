@@ -46,6 +46,9 @@ const config = {
   resolve: {
     extensions: ['.js', '.vue']
   },
+  performance: {
+    hints: false
+  },
   optimization: {
     minimize: false
   },
@@ -98,15 +101,6 @@ const config = {
   },
   plugins: [
     new VueLoaderPlugin(),
-    new WatchLiveReloadPlugin({
-      delay: 500,
-      files: [
-        // Replace these globs with yours
-        './src/**/*.html',
-        './src/**/*.css',
-        './src/**/*.js',
-      ]
-    }),
     new UserScriptMetaDataPlugin({
       metadata
     }),
@@ -114,8 +108,24 @@ const config = {
 }
 
 if (production) {
-  config.plugins.unshift(new UglifyJSPlugin())
+  // config.plugins.unshift(new UglifyJSPlugin({
+  //   uglifyOptions: {
+  //     output: {
+  //       comments: false,
+  //       beautify: true,
+  //     },
+  //   }
+  // }))
 } else {
+  config.plugins.push(new WatchLiveReloadPlugin({
+    delay: 500,
+    files: [
+      // Replace these globs with yours
+      './src/**/*.html',
+      './src/**/*.css',
+      './src/**/*.js',
+    ]
+  }),)
   config.devtool = 'inline-source-map'
 }
 config.plugins.unshift(

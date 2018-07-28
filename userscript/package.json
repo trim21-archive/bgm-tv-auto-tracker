@@ -40,7 +40,7 @@
   "dependencies": {
     "axios": "^0.18.0",
     "axios-gmxhr-adapter": "^0.15.3",
-    "axios-userscript-adapter": "^0.0.1",
+    "axios-userscript-adapter": "^0.0.2",
     "vue": "^2.5.16"
   }
 }

@@ -33,8 +33,11 @@
       <div id="bgm_tv_tracker_notification">
         <div v-for="(message, index) in messages" :key="index">
           <hr>
-          <p>{{ message.time.getHours() }}:{{ message.time.getMinutes() }}:{{ message.time.getSeconds() }}
-            {{ message.text }}</p>
+          <div><p>
+            {{ message.time.getHours() }}:{{ message.time.getMinutes() }}:{{ message.time.getSeconds() }}
+          </p>
+            <pre><code>{{ message.text }}</code></pre>
+          </div>
         </div>
       </div>
     </div>
@@ -181,22 +184,58 @@ export default {
       this.bangumiID = bangumiID
     }, error => {
       console.log(error)
+      if (error.error.response.status === 404) {
+        this.notify('番剧没找到 手动输入吧')
+      }
       let { episode, title, bangumiID, } = error
       this.episode = episode
       this.title = title
       this.bangumiID = bangumiID
     })
+
     let vm = this
     this.$website.detectEpisodeChange(data => {
         if (data.subjectID)
           vm.subjectID = data.subjectID
         if (data.episode)
           vm.episode = data.episode
+        if (data.bangumiID)
+          vm.bangumiID = data.bangumiID
       },
       error => {
-        this.subjectID = undefined
-        this.notify(JSON.stringify(error))
+        console.log(error)
+        // if (error.subjectID)
+        //   this.subjectID = undefined
+
       })
+
+    this.$bgmApi.http.interceptors.request.use(function (config) {
+      //在发送请求之前做某事
+      if (tm_unsafeWindow.bgm_tv_debug || window.bgm_tv_debug) {
+        vm.notify('config: ' + JSON.stringify(config, null, 2))
+      }
+      return config
+    }, function (error) {
+      //请求错误时做些事
+      if (tm_unsafeWindow.bgm_tv_debug || window.bgm_tv_debug) {
+        vm.notify('response: ' + JSON.stringify(response, null, 2))
+      }
+      return Promise.reject(error)
+    })
+
+    this.$bgmApi.http.interceptors.response.use(function (response) {
+      //对响应数据做些事
+      if (tm_unsafeWindow.bgm_tv_debug || window.bgm_tv_debug) {
+        vm.notify('response: ' + JSON.stringify(response, null, 2))
+      }
+      return response
+    }, function (error) {
+      //请求错误时做些事
+      if (tm_unsafeWindow.bgm_tv_debug || window.bgm_tv_debug) {
+        vm.notify('error: ' + JSON.stringify(error, null, 2))
+      }
+      return Promise.reject(error)
+    })
   }
 }
 

@@ -40,26 +40,40 @@ class bilibili {
     let cls = this
     const status = tm_unsafeWindow.__INITIAL_STATE__
     let bangumiID = status.mediaInfo.season_id
-
     let INNER_EPISODE = tm_unsafeWindow.__INITIAL_STATE__.epInfo.index
 
-    function onEpisodeChange () {
+    function onEpisodeChange ({ season = false, episode = false }) {
+      if (season) {
       cls.init().then(
         data => {
           cb(data)
         },
         notfound
       )
+      }
+      if (episode) {
+        cb({
+          episode: tm_unsafeWindow.__INITIAL_STATE__.epInfo.index
+        })
+      }
     }
 
     const detectHrefChange = function () {
       console.log('check href')
-      if (INNER_EPISODE !== tm_unsafeWindow.__INITIAL_STATE__.epInfo.index ||
-        bangumiID !== tm_unsafeWindow.__INITIAL_STATE__.mediaInfo.season_id) {
-        onEpisodeChange()
+      if (bangumiID !== tm_unsafeWindow.__INITIAL_STATE__.mediaInfo.season_id) {
+        onEpisodeChange({
+          season: true
+        })
+      }
+
+      else if (INNER_EPISODE !== tm_unsafeWindow.__INITIAL_STATE__.epInfo.index) {
+        onEpisodeChange({
+          episode: true
+        })
+      }
+
         INNER_EPISODE = tm_unsafeWindow.__INITIAL_STATE__.epInfo.index
         bangumiID = tm_unsafeWindow.__INITIAL_STATE__.mediaInfo.season_id
-      }
     }
 
     setInterval(detectHrefChange, 10 * 1000)
