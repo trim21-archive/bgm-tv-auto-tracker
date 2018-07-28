@@ -82,10 +82,11 @@ export default {
   watch: {
     subjectID (val) {
       let vm = this
-      this.$bgmApi.getSubject(val).then(response => {
-        vm.score = ' ' + response.data.rating.score
-        vm.bangumiName = response.data.name_cn || response.data.name
-      })
+      if (val)
+        this.$bgmApi.getSubject(val).then(response => {
+          vm.score = ' ' + response.data.rating.score
+          vm.bangumiName = response.data.name_cn || response.data.name
+        })
     }
   },
   methods: {
@@ -204,9 +205,13 @@ export default {
       },
       error => {
         console.log(error)
-        // if (error.subjectID)
-        //   this.subjectID = undefined
-
+        vm.episode = error.episode
+        if (error.bangumiID !== vm.bangumiID) {
+          if (!error.subjectID) {
+            this.subjectID = undefined
+          }
+          vm.bangumiID = error.bangumiID
+        }
       })
 
     this.$bgmApi.http.interceptors.request.use(function (config) {

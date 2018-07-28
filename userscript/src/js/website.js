@@ -59,14 +59,12 @@ class bilibili {
     }
 
     const detectHrefChange = function () {
-      console.log('check href')
+      console.log('check href', bangumiID, INNER_EPISODE)
       if (bangumiID !== tm_unsafeWindow.__INITIAL_STATE__.mediaInfo.season_id) {
         onEpisodeChange({
           season: true
         })
-      }
-
-      else if (INNER_EPISODE !== tm_unsafeWindow.__INITIAL_STATE__.epInfo.index) {
+      } else if (INNER_EPISODE !== tm_unsafeWindow.__INITIAL_STATE__.epInfo.index) {
         onEpisodeChange({
           episode: true
         })
