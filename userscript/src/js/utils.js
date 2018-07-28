@@ -238,7 +238,7 @@ function getAuth () {
     if (ifAuthExpires(auth)) {
       // if (true) {
       console.log('refresh token')
-      return apiServer.post('/refresh_token', auth,)
+      return apiServer.post('/api/v0.1/refresh_token', auth,)
         .then(response => {
           if (response.data.hasOwnProperty('error')) {
             // alert('续期token失败,请手动重新授权')

@@ -28,6 +28,11 @@ parseAuthor = (author) => {
  * @return {string} the metadata block as a string.
  */
 const generateMetadataBlock = (metadata) => {
+
+  let keys = Object.keys(metadata)
+  var longest = keys.reduce(function (a, b) { return a.length > b.length ? a : b })
+  let pad = longest.length
+
   let block = ''
   for (let key in metadata) {
     if (metadata.hasOwnProperty(key)) {
@@ -37,7 +42,7 @@ const generateMetadataBlock = (metadata) => {
           values = [values]
         }
         for (let i = 0; i < values.length; i++) {
-          block += '// @' + key + ' ' + values[i] + '\n'
+          block += '// @' + key.padEnd(pad + 3) + values[i] + '\n'
         }
       } else {
         block += '// @' + key + '\n'
