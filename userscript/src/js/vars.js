@@ -1,14 +1,8 @@
 /* eslint-disable no-undef, camelcase */
-let tm_unsafeWindow = unsafeWindow
-let tm_xmlHttpRequest = GM_xmlhttpRequest
-let tm_setValue = GM_setValue
-let tm_getValue = GM_getValue
-let tm_openInTab = GM_openInTab
-let tm_addStyle = GM_addStyle
-/**
- * @type {jQuery}
- */
-let $ = window.$
+let gmUnsafeWindow = unsafeWindow
+let gmSetValue = GM_setValue
+let gmGetValue = GM_getValue
+let gmOpenInTab = GM_openInTab
 /* eslint-enable no-undef, camelcase */
 
 /**
@@ -41,4 +35,4 @@ const WEBSITE = {
   iqiyi: 'iqiyi',
 }
 
-export { $, WEBSITE, tm_setValue, tm_getValue, tm_openInTab, tm_unsafeWindow, URLS, tm_addStyle }
+export { WEBSITE, gmSetValue, gmGetValue, gmOpenInTab, gmUnsafeWindow, URLS }

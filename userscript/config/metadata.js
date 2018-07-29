@@ -15,7 +15,9 @@ module.exports = {
   ],
   'require': [
     'https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js',
-    'https://cdn.bootcss.com/axios/0.18.0/axios.js'
+    'https://cdn.bootcss.com/axios/0.18.0/axios.js',
+    'https://cdn.bootcss.com/vue/2.5.16/vue.min.js',
+    'https://cdn.bootcss.com/axios/0.18.0/axios.min.js'
   ],
   'grant': [
     'GM_addStyle',

@@ -1,12 +1,12 @@
-import { tm_getValue, tm_setValue, URLS } from './vars.js'
+import { gmGetValue, gmSetValue, URLS } from './vars.js'
 import axios from 'axios'
 import adapter from 'axios-userscript-adapter'
 
 axios.defaults.adapter = adapter
 
 class BgmApi {
-  constructor ({ access_token, serverRoot = 'https://api.bgm.tv' }) {
-    this.access_token = access_token
+  constructor ({ accessToken, serverRoot = 'https://api.bgm.tv' }) {
+    this.access_token = accessToken
     this.http = axios.create({
       baseURL: serverRoot,
       headers: { Authorization: 'Bearer ' + this.access_token },
@@ -18,12 +18,12 @@ class BgmApi {
     return new Promise((resolve, reject) => {
       this.http.post(`/subject/${subjectID}/update/watched_eps`,
         `watched_eps=${ep}`,
-        { 'content-type': 'application/x-www-form-urlencoded', })
-        .then((response) => {
+        { headers: { 'content-type': 'application/x-www-form-urlencoded', } })
+        .then(
+          response => {
             if (response.data.code >= 300) {
               reject({ status: response.data.code, response })
-            }
-            else {
+            } else {
               resolve(response)
             }
           },
@@ -37,24 +37,30 @@ class BgmApi {
   }
 
   getEps (subjectID) {
-    return new Promise((resolve, reject) => {
+    let ins = this
+    return new Promise(
+      (resolve, reject) => {
         let noData = false
-        let eps = tm_getValue(`eps_${subjectID}`, false)
+        let eps = gmGetValue(`eps_${subjectID}`, false)
         // no data
         if (!eps) noData = true
         if (eps) {
           eps = JSON.parse(eps)
           // out of time
-          if (Number(new Date().getTime() / 1000) - eps.time > 60 * 60 * 2) noData = true
+          if (Number(new Date().getTime() / 1000) - eps.time > 60 * 60 * 2) {
+            noData = true
+          }
         }
 
         if (!noData) {
           resolve(eps)
         } else {
-          this.http.getSubjectEps(subjectID).then(
+          ins.getSubjectEps(subjectID).then(
             (response) => {
-              response.data.time = Number(new Date().getTime() / 1000)
-              tm_setValue(`eps_${subjectID}`, JSON.stringify({ eps: response.data.eps }))
+              gmSetValue(`eps_${subjectID}`, JSON.stringify({
+                eps: response.data.eps,
+                time: Number(new Date().getTime() / 1000)
+              }))
               resolve(response.data)
             },
             (error) => {
@@ -67,16 +73,22 @@ class BgmApi {
   }
 
   getSubjectEps (subjectID) {
+    let ins = this
+    console.log('fetch api result')
     return new Promise((resolve, reject) => {
-      this.http.get(`/subject/${subjectID}/ep`).then(
+      ins.http.get(`/subject/${subjectID}/ep`).then(
         response => {
+          console.log(response)
           if (response.data.code >= 300) {
             reject({ status: response.data.code, response })
           } else {
             resolve(response)
           }
         },
-        error => reject(error)
+        error => {
+          console.log(error)
+          reject(error)
+        }
       )
     })
   }
@@ -97,11 +109,9 @@ class BgmApi {
   }
 
   setSubjectCollectionStatus ({ subjectID, status }) {
-    return new Promise(((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       this.http.post(`/collection/${subjectID}/update`, `status=${status}`,
-        {
-          'content-type': 'application/x-www-form-urlencoded'
-        }).then(
+        { headers: { 'content-type': 'application/x-www-form-urlencoded' } }).then(
         response => {
           if (response.data.code >= 300) {
             reject({ response })
@@ -111,7 +121,7 @@ class BgmApi {
         },
         error => reject(error)
       )
-    }))
+    })
   }
 }
 
@@ -150,7 +160,7 @@ function parseEpisode (title) {
  */
 function saveAuth (auth) {
   auth.auth_time = parseInt(new Date().getTime() / 1000, 10)
-  tm_setValue('auth', JSON.stringify(auth))
+  gmSetValue('auth', JSON.stringify(auth))
 }
 
 /**
@@ -159,8 +169,8 @@ function saveAuth (auth) {
  */
 function ifAuthExpires (auth) {
   /* auth_time 2d  expires in 9d */
-  /*            2d + 7d - 1d < 6d => false*/
-  /*            2d + 7d - 1d < 8d => true*/
+  /*            2d + 7d - 1d < 6d => false */
+  /*            2d + 7d - 1d < 8d => true */
   return (auth.auth_time + auth.expires_in - 2 * 24 * 60 * 60) < Math.round(new Date().getTime() / 1000)
 }
 
@@ -173,13 +183,13 @@ function getAuth () {
   /**
    * @type {Auth}
    */
-  let auth = tm_getValue('auth', false)
+  let auth = gmGetValue('auth', false)
   if (auth) {
     auth = JSON.parse(auth)
     if (ifAuthExpires(auth)) {
       // if (true) {
       console.log('refresh token')
-      return apiServer.post('/api/v0.1/refresh_token', auth,)
+      return apiServer.post('/api/v0.1/refresh_token', auth)
         .then(response => {
           if (response.data.hasOwnProperty('error')) {
             // alert('续期token失败,请手动重新授权')

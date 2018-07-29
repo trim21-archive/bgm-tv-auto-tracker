@@ -1,0 +1,16 @@
+{
+  "extends": "standard",
+  // eslint options (if necessary)
+  "rules": {
+    // or
+    "comma-dangle": [
+      0
+    ],
+    "standard/no-callback-literal": [
+      0
+    ],
+    "prefer-promise-reject-errors": [
+      0
+    ]
+  }
+}

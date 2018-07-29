@@ -22,8 +22,18 @@ let webpackConfig = {
   output: {
     path: path.resolve(__dirname, '../dist')
   },
+  externals: {
+    'jquery': '$',
+    'vue': 'Vue',
+    axios: 'axios',
+  },
   module: {
     rules: [
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        loader: 'eslint-loader',
+      },
       {
         test: /\.vue$/,
         loader: 'vue-loader',

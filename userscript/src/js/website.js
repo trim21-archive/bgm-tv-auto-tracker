@@ -1,6 +1,7 @@
-import { tm_unsafeWindow } from './vars'
-import { apiServer, parseEpisode } from './utils'
 import path from 'path'
+import $ from 'jquery'
+import { gmUnsafeWindow } from './vars'
+import { apiServer, parseEpisode } from './utils'
 
 class bilibili {
   /**
@@ -10,8 +11,7 @@ class bilibili {
    * @returns {Promise}
    */
   static init () {
-
-    const status = tm_unsafeWindow.__INITIAL_STATE__
+    const status = gmUnsafeWindow.__INITIAL_STATE__
     const episode = status.epInfo.index
     const bangumiID = status.mediaInfo.season_id
     let title = status.mediaInfo.title
@@ -24,7 +24,7 @@ class bilibili {
           subjectID: response.data.subject_id,
           episode,
           title,
-          bangumiID,
+          bangumiID
         }),
         error => reject({
           episode,
@@ -38,56 +38,53 @@ class bilibili {
 
   static detectEpisodeChange (cb, notfound) {
     let cls = this
-    const status = tm_unsafeWindow.__INITIAL_STATE__
+    const status = gmUnsafeWindow.__INITIAL_STATE__
     let bangumiID = status.mediaInfo.season_id
-    let INNER_EPISODE = tm_unsafeWindow.__INITIAL_STATE__.epInfo.index
+    let INNER_EPISODE = gmUnsafeWindow.__INITIAL_STATE__.epInfo.index
 
     function onEpisodeChange ({ season = false, episode = false }) {
       if (season) {
-      cls.init().then(
-        data => {
-          cb(data)
-        },
-        notfound
-      )
+        cls.init().then(
+          data => {
+            cb(data)
+          },
+          notfound
+        )
       }
       if (episode) {
         cb({
-          episode: tm_unsafeWindow.__INITIAL_STATE__.epInfo.index
+          episode: gmUnsafeWindow.__INITIAL_STATE__.epInfo.index
         })
       }
     }
 
     const detectHrefChange = function () {
       console.log('check href', bangumiID, INNER_EPISODE)
-      if (bangumiID !== tm_unsafeWindow.__INITIAL_STATE__.mediaInfo.season_id) {
+      if (bangumiID !== gmUnsafeWindow.__INITIAL_STATE__.mediaInfo.season_id) {
         onEpisodeChange({
           season: true
         })
-      } else if (INNER_EPISODE !== tm_unsafeWindow.__INITIAL_STATE__.epInfo.index) {
+      } else if (INNER_EPISODE !== gmUnsafeWindow.__INITIAL_STATE__.epInfo.index) {
         onEpisodeChange({
           episode: true
         })
       }
 
-        INNER_EPISODE = tm_unsafeWindow.__INITIAL_STATE__.epInfo.index
-        bangumiID = tm_unsafeWindow.__INITIAL_STATE__.mediaInfo.season_id
+      INNER_EPISODE = gmUnsafeWindow.__INITIAL_STATE__.epInfo.index
+      bangumiID = gmUnsafeWindow.__INITIAL_STATE__.mediaInfo.season_id
     }
 
     setInterval(detectHrefChange, 10 * 1000)
     setTimeout(detectHrefChange, 5000)
-
   }
-
 }
 
 class iQiyi {
-
   static init () {
     // console.log(bangumiName)
     let collectionLinkEl = $('#datainfo-navlist > a:nth-child(3)')
     let bangumiName = collectionLinkEl.html()
-    let title = tm_unsafeWindow.document.title
+    let title = gmUnsafeWindow.document.title
     let collectionLink = collectionLinkEl.attr('href')
     let filename = path.basename(collectionLink)
     let bangumiID = filename.split('.').slice(0, -1).join('.')
@@ -102,11 +99,11 @@ class iQiyi {
           let subjectID = response.data.subject_id
           resolve({ subjectID, episode, title, bangumiName, bangumiID })
         },
-        error => reject({
+        () => reject({
           episode,
           title,
           bangumiID,
-          bangumiName,
+          bangumiName
         })
       )
     })
@@ -115,7 +112,7 @@ class iQiyi {
   static detectEpisodeChange (cb, notfound) {
     function onEpisodeChange () {
       console.log('href change')
-      let title = tm_unsafeWindow.document.title
+      let title = gmUnsafeWindow.document.title
       let episode = parseEpisode(title)
       if (episode) {
         cb({ episode })
@@ -124,7 +121,7 @@ class iQiyi {
       }
     }
 
-    tm_unsafeWindow.addEventListener('hashchange', function () {
+    gmUnsafeWindow.addEventListener('hashchange', function () {
       setTimeout(onEpisodeChange, 500)
     }, false)
   }

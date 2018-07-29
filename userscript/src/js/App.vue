@@ -44,13 +44,14 @@
   </div>
 </template>
 <script>
-import { $, tm_getValue, tm_setValue, tm_unsafeWindow, WEBSITE } from './vars'
+import $ from 'jquery'
+import { gmGetValue, gmSetValue, gmUnsafeWindow, WEBSITE } from './vars'
 import { apiServer } from './utils'
 
 /**
  * @type {Object}
  */
-let collection = tm_getValue('collection', false)
+let collection = gmGetValue('collection', false)
 
 if (!collection) {
   collection = {}
@@ -61,10 +62,10 @@ if (!collection) {
 export default {
   data () {
     let website = ''
-    if (tm_unsafeWindow.location.href.startsWith('https://www.bilibili.com/bangumi/play/')) {
+    if (gmUnsafeWindow.location.href.startsWith('https://www.bilibili.com/bangumi/play/')) {
       website = WEBSITE.bilibili
     }
-    else if (tm_unsafeWindow.location.hostname === 'www.iqiyi.com') {
+    else if (gmUnsafeWindow.location.hostname === 'www.iqiyi.com') {
       website = WEBSITE.iqiyi
     }
     return {
@@ -118,11 +119,12 @@ export default {
         this.$bgmApi.setSubjectCollectionStatus({ subjectID, status: 'do' }).then(
           response => {
             if (response.data.code === 401) {
+              vm.notify(JSON.stringify(response))
               vm.notify(response.data.error)
             } else {
               vm.notify('add this bangumi to your collection')
               collection[subjectID] = true
-              tm_setValue('collection', JSON.stringify(collection))
+              gmSetValue('collection', JSON.stringify(collection))
             }
           },
           error => vm.notify(error.response.data.error_description)
@@ -142,22 +144,23 @@ export default {
         'title': this.title,
         episode: this.episode,
       }
-      this.collectSubject(message.subject_id)
+      this.collectSubject(this.subjectID)
       let vm = this
-
-      vm.$bgmApi.getEps(message.subject_id)
-        .then(data => {
+      vm.$bgmApi.getEps(this.subjectID).then(
+        data => {
           let ep = data.eps.filter(function (val) {
             return val.sort === parseInt(message.episode)
           })
           ep = ep[0].id
-            this.$bgmApi.setEpisodeWatched(ep)
-            vm.notify(`mark your status successfully`.toString())
+          vm.$bgmApi.setEpisodeWatched(ep)
+          vm.notify('mark your status successfully')
           return ep
         },
-          error => vm.notify(JSON.stringify(error.response.data)))
+        error => {
+          vm.notify(JSON.stringify(error))
+        })
         .catch(reason => vm.notify(JSON.stringify(reason))
-      )
+        )
     },
     setWatchProgress () {
       let ep = this.episode
@@ -216,13 +219,13 @@ export default {
 
     this.$bgmApi.http.interceptors.request.use(function (config) {
       //在发送请求之前做某事
-      if (tm_unsafeWindow.bgm_tv_debug || window.bgm_tv_debug) {
+      if (gmUnsafeWindow.bgm_tv_debug || window.bgm_tv_debug) {
         vm.notify('config: ' + JSON.stringify(config, null, 2))
       }
       return config
     }, function (error) {
       //请求错误时做些事
-      if (tm_unsafeWindow.bgm_tv_debug || window.bgm_tv_debug) {
+      if (gmUnsafeWindow.bgm_tv_debug || window.bgm_tv_debug) {
         vm.notify('response: ' + JSON.stringify(response, null, 2))
       }
       return Promise.reject(error)
@@ -230,13 +233,13 @@ export default {
 
     this.$bgmApi.http.interceptors.response.use(function (response) {
       //对响应数据做些事
-      if (tm_unsafeWindow.bgm_tv_debug || window.bgm_tv_debug) {
+      if (gmUnsafeWindow.bgm_tv_debug || window.bgm_tv_debug) {
         vm.notify('response: ' + JSON.stringify(response, null, 2))
       }
       return response
     }, function (error) {
       //请求错误时做些事
-      if (tm_unsafeWindow.bgm_tv_debug || window.bgm_tv_debug) {
+      if (gmUnsafeWindow.bgm_tv_debug || window.bgm_tv_debug) {
         vm.notify('error: ' + JSON.stringify(error, null, 2))
       }
       return Promise.reject(error)

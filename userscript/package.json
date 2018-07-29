@@ -1,7 +1,7 @@
 {
   "name": "bgm-tv-auto-tracker",
   "description": "auto tracker your bangumi progress",
-  "version": "0.5.7",
+  "version": "0.5.8",
   "author": {
     "name": "Trim21",
     "email": "trim21me@gmail.com"
@@ -19,6 +19,13 @@
   "devDependencies": {
     "cross-env": "^5.2.0",
     "css-loader": "^0.28.11",
+    "eslint": "^5.2.0",
+    "eslint-config-standard": "^11.0.0",
+    "eslint-loader": "^2.1.0",
+    "eslint-plugin-import": "^2.13.0",
+    "eslint-plugin-node": "^7.0.1",
+    "eslint-plugin-promise": "^3.8.0",
+    "eslint-plugin-standard": "^3.1.0",
     "hoek": "^4.2.1",
     "html-loader": "^0.5.5",
     "node-gyp": "^3.7.0",
@@ -41,6 +48,7 @@
     "axios": "^0.18.0",
     "axios-gmxhr-adapter": "^0.15.3",
     "axios-userscript-adapter": "^0.0.2",
+    "jquery": "^3.3.1",
     "vue": "^2.5.16"
   }
 }
