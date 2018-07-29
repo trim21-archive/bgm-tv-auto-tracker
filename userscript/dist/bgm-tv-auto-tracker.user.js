@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Bgm.tv auto tracker
 // @namespace   https://trim21.me/
-// @version     0.5.8
+// @version     0.5.9
 // @author      Trim21 <trim21me@gmail.com>
 // @source      https://github.com/Trim21/bilibili-bangumi-tv-auto-tracker
 // @license     MIT
@@ -1309,7 +1309,7 @@ process.umask = function() { return 0; };
 /* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_lib_loader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_App_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3);
 /* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_lib_loader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_App_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_lib_loader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_App_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0__);
 /* unused harmony reexport * */
- /* unused harmony default export */ var _unused_webpack_default_export = (_node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_lib_loader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_App_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default.a);
+ /* unused harmony default export */ var _unused_webpack_default_export = (_node_modules_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_sass_loader_lib_loader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_App_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_0___default.a); 
 
 /***/ }),
 /* 17 */
@@ -2081,7 +2081,7 @@ class utils_BgmApi {
 
 let apiServer = external_axios_default.a.create({
   baseURL: URLS.apiServerURL,
-  headers: { 'bgm.tv': "0.5.7" },
+  headers: { 'bgm.tv': "0.5.9" },
 })
 
 function parseEpisode (title) {
@@ -2296,12 +2296,12 @@ class website_iQiyi {
 
 
 
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/js/App.vue?vue&type=template&id=0b6e1af8&
+// CONCATENATED MODULE: ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/js/App.vue?vue&type=template&id=3e1157a3&
 var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"disable",class:{iqiyi:this.website==='iqiyi', bilibili:this.website==='bilibili'},attrs:{"id":"bgm_tv_tracker"}},[_c('div',{staticClass:"bgm_tv_tracker_btn bgm_tv_tracker bgm_tv_tracker_radius",on:{"click":_vm.trigger}},[_vm._v("bgm.tv"+_vm._s(_vm.score))]),_vm._v(" "),_c('div',{staticClass:"bgm_tv_tracker_info"},[(!_vm.subjectID)?_c('div',{staticClass:"not_found"},[_c('label',[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.tmpSubjectID),expression:"tmpSubjectID"}],staticClass:"subject",attrs:{"type":"text"},domProps:{"value":(_vm.tmpSubjectID)},on:{"input":function($event){if($event.target.composing){ return; }_vm.tmpSubjectID=$event.target.value}}}),_vm._v(" "),_c('button',{staticClass:"notfound",on:{"click":function($event){_vm.userSubmitSubjectID()}}},[_vm._v("submit subject id")])])]):_vm._e(),_vm._v(" "),_c('br'),_vm._v(" "),_c('div',[_c('p',[_vm._v("你正在看:\n        "),_c('span',{attrs:{"id":"bgm_tv_tracker_title"}},[_vm._v(_vm._s(_vm.bangumiName))])]),_vm._v(" "),_c('p',[_vm._v("第 "),_c('span',{attrs:{"id":"bgm_tv_tracker_episode"}},[_vm._v(_vm._s(_vm.episode))]),_vm._v("集")]),_vm._v(" "),_c('p',[_vm._v("Bangumi ID: "+_vm._s(_vm.bangumiID))])]),_vm._v(" "),_c('br'),_vm._v(" "),_c('div',{attrs:{"id":"bgm_tv_tracker_link"}},[_c('a',{attrs:{"href":("https://bgm.tv/subject/" + _vm.subjectID),"target":"_blank","rel":"noopener noreferrer"}},[_vm._v("subject/"+_vm._s(_vm.subjectID))])]),_vm._v(" "),_c('br'),_vm._v(" "),_c('button',{staticClass:"bgm_tv_tracker_radius",attrs:{"id":"bgm_tv_tracker_mark_watch"},on:{"click":_vm.watchEps}},[_vm._v("标记本集为看过")]),_vm._v(" "),_c('button',{staticClass:"bgm_tv_tracker_radius",attrs:{"id":"bgm_tv_tracker_mark_watched"},on:{"click":_vm.setWatchProgress}},[_vm._v("看到本集")]),_vm._v(" "),_c('br'),_vm._v(" "),_c('br'),_vm._v(" "),_c('a',{attrs:{"href":"https://github.com/Trim21/bilibili-bangumi-tv-auto-tracker/issues","target":"_blank","rel":"noopener noreferrer"}},[_vm._v("报告问题")]),_vm._v(" "),_c('br'),_vm._v(" "),_c('div',{attrs:{"id":"bgm_tv_tracker_notification"}},_vm._l((_vm.messages),function(message,index){return _c('div',{key:index},[_c('hr'),_vm._v(" "),_c('div',[_c('p',[_vm._v("\n          "+_vm._s(message.time.getHours())+":"+_vm._s(message.time.getMinutes())+":"+_vm._s(message.time.getSeconds())+"\n        ")]),_vm._v(" "),_c('pre',[_c('code',[_vm._v(_vm._s(message.text))])])])])}))])])}
 var staticRenderFns = []
 
 
-// CONCATENATED MODULE: ./src/js/App.vue?vue&type=template&id=0b6e1af8&
+// CONCATENATED MODULE: ./src/js/App.vue?vue&type=template&id=3e1157a3&
 
 // CONCATENATED MODULE: ./node_modules/vue-loader/lib??vue-loader-options!./src/js/App.vue?vue&type=script&lang=js&
 //
@@ -2442,31 +2442,31 @@ if (!collection) {
       external_$_default()('.bgm_tv_tracker_info').toggle('fast')
     },
     watchEps () {
-      let message = {
-        subject_id: this.subjectID,
-        'type': 'watch_episode',
-        'website': 'bilibili',
-        'bangumi_id': this.bangumiID,
-        'title': this.title,
-        episode: this.episode,
-      }
-      this.collectSubject(this.subjectID)
       let vm = this
+      this.collectSubject(this.subjectID)
       vm.$bgmApi.getEps(this.subjectID).then(
         data => {
           let ep = data.eps.filter(function (val) {
-            return val.sort === parseInt(message.episode)
+            return val.sort === parseInt(vm.episode)
           })
-          ep = ep[0].id
-          vm.$bgmApi.setEpisodeWatched(ep)
-          vm.notify('mark your status successfully')
+          console.log(ep)
+          if (ep.length) {
+            ep = ep[0].id
+            vm.$bgmApi.setEpisodeWatched(ep)
+            vm.notify('mark your status successfully')
+          } else {
+            ep = data.eps[parseInt(vm.episode) - 1].id
+            vm.$bgmApi.setEpisodeWatched(ep)
+            vm.notify('mark your status successfully')
+            // vm.notify('can\'t find episode')
+          }
           return ep
         },
         error => {
+          vm.notify('233')
           vm.notify(JSON.stringify(error))
         })
-        .catch(reason => vm.notify(JSON.stringify(reason))
-        )
+      // .catch(reason => vm.notify(JSON.stringify(reason)))
     },
     setWatchProgress () {
       let ep = this.episode
@@ -2555,7 +2555,7 @@ if (!collection) {
 
 
 // CONCATENATED MODULE: ./src/js/App.vue?vue&type=script&lang=js&
- /* harmony default export */ var js_Appvue_type_script_lang_js_ = (Appvue_type_script_lang_js_);
+ /* harmony default export */ var js_Appvue_type_script_lang_js_ = (Appvue_type_script_lang_js_); 
 // EXTERNAL MODULE: ./src/js/App.vue?vue&type=style&index=0&lang=scss&
 var Appvue_type_style_index_0_lang_scss_ = __webpack_require__(16);
 
@@ -2671,7 +2671,7 @@ var component = normalizeComponent(
   null,
   null,
   null
-
+  
 )
 
 /* harmony default export */ var App = (component.exports);

@@ -136,31 +136,31 @@ export default {
       $('.bgm_tv_tracker_info').toggle('fast')
     },
     watchEps () {
-      let message = {
-        subject_id: this.subjectID,
-        'type': 'watch_episode',
-        'website': 'bilibili',
-        'bangumi_id': this.bangumiID,
-        'title': this.title,
-        episode: this.episode,
-      }
-      this.collectSubject(this.subjectID)
       let vm = this
+      this.collectSubject(this.subjectID)
       vm.$bgmApi.getEps(this.subjectID).then(
         data => {
           let ep = data.eps.filter(function (val) {
-            return val.sort === parseInt(message.episode)
+            return val.sort === parseInt(vm.episode)
           })
-          ep = ep[0].id
-          vm.$bgmApi.setEpisodeWatched(ep)
-          vm.notify('mark your status successfully')
+          console.log(ep)
+          if (ep.length) {
+            ep = ep[0].id
+            vm.$bgmApi.setEpisodeWatched(ep)
+            vm.notify('mark your status successfully')
+          } else {
+            ep = data.eps[parseInt(vm.episode) - 1].id
+            vm.$bgmApi.setEpisodeWatched(ep)
+            vm.notify('mark your status successfully')
+            // vm.notify('can\'t find episode')
+          }
           return ep
         },
         error => {
+          vm.notify('233')
           vm.notify(JSON.stringify(error))
         })
-        .catch(reason => vm.notify(JSON.stringify(reason))
-        )
+      // .catch(reason => vm.notify(JSON.stringify(reason)))
     },
     setWatchProgress () {
       let ep = this.episode
