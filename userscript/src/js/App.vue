@@ -31,6 +31,10 @@
       <a href="https://github.com/Trim21/bilibili-bangumi-tv-auto-tracker/issues" target='_blank'
          rel="noopener noreferrer">报告问题</a>
       <br>
+      <label>
+        播放进度大于80%时自动标记为看过
+        <input type="checkbox" style="-webkit-appearance:checkbox" v-model="config.autoMarkWatched">
+      </label>
       <div id="bgm_tv_tracker_notification">
         <div v-for="(message, index) in messages" :key="index">
           <hr>
@@ -41,11 +45,6 @@
           </div>
         </div>
       </div>
-      <!--<button class="bgm_tv_tracker_radius" id="bgm_tv_tracker_config">config</button>-->
-      <label>
-        播放进度大于80%时自动标记为看过
-        <input type="checkbox" style="-webkit-appearance:checkbox" v-model="config.autoMarkWatched">
-      </label>
     </div>
   </div>
 </template>
@@ -284,7 +283,7 @@ export default {
         console.log('get player percent')
         this.watchPercent = percent
         if (percent > 0.8) {
-          if (this.config.autoMarkWatched && !this.episodeMarked) {
+          if (this.config.autoMarkWatched && this.subjectID && !this.episodeMarked) {
             this.episodeMarked = true
             this.watchEps()
           }
