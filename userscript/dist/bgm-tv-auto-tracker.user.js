@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Bgm.tv auto tracker
 // @namespace   https://trim21.me/
-// @version     0.6.11
+// @version     0.6.12
 // @author      Trim21 <trim21me@gmail.com>
 // @source      https://github.com/Trim21/bilibili-bangumi-tv-auto-tracker
 // @license     MIT
@@ -2081,7 +2081,7 @@ class utils_BgmApi {
 
 let apiServer = external_axios_default.a.create({
   baseURL: URLS.apiServerURL,
-  headers: { 'bgm.tv': "0.6.11" },
+  headers: { 'bgm.tv': "0.6.12" },
 })
 
 function parseEpisode (title) {
@@ -2179,7 +2179,8 @@ class website_bilibili {
    */
   static init () {
     const status = gmUnsafeWindow.__INITIAL_STATE__
-    const episode = status.epInfo.index
+    const episode = gmUnsafeWindow.__INITIAL_STATE__.epList
+      .findIndex(val => val.index === gmUnsafeWindow.__INITIAL_STATE__.epInfo.index) + 1
     const bangumiID = status.mediaInfo.season_id
     let title = status.mediaInfo.title
     let episodeStartWith = parseInt(status.epList[0].index)
@@ -2222,9 +2223,17 @@ class website_bilibili {
         )
       }
       if (episode) {
-        cb({
-          episode: gmUnsafeWindow.__INITIAL_STATE__.epInfo.index
-        })
+        let ep = gmUnsafeWindow.__INITIAL_STATE__.epList
+          .findIndex(val => val.index === gmUnsafeWindow.__INITIAL_STATE__.epInfo.index) + 1
+        if (ep) {
+          cb({
+            episode: ep
+          })
+        } else {
+          cb({
+            episode: gmUnsafeWindow.__INITIAL_STATE__.epInfo.index
+          })
+        }
       }
     }
 
@@ -2246,6 +2255,10 @@ class website_bilibili {
 
     setInterval(detectHrefChange, 10 * 1000)
     setTimeout(detectHrefChange, 5000)
+  }
+
+  static getPlayerTime () {
+    return Promise.resolve(gmUnsafeWindow.player.getCurrentTime() / gmUnsafeWindow.player.getDuration())
   }
 }
 
@@ -2298,18 +2311,32 @@ class website_iQiyi {
       setTimeout(onEpisodeChange, 500)
     }, false)
   }
+
+  static getPlayerTime () {
+    return new Promise((resolve) => {
+      gmUnsafeWindow._player.getPlayInfo(resolve)
+    }).then(info => {
+      return info.currentTime / info.totalDuration * 1000
+    })
+  }
 }
 
 
 
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/js/App.vue?vue&type=template&id=42e61d5a&
-var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"disable",class:{iqiyi:this.website==='iqiyi', bilibili:this.website==='bilibili'},attrs:{"id":"bgm_tv_tracker"}},[_c('div',{staticClass:"bgm_tv_tracker_btn bgm_tv_tracker bgm_tv_tracker_radius",on:{"click":_vm.trigger}},[_vm._v("bgm.tv"+_vm._s(_vm.score))]),_vm._v(" "),_c('div',{staticClass:"bgm_tv_tracker_info"},[(!_vm.subjectID)?_c('div',{staticClass:"not_found"},[_c('label',[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.tmpSubjectID),expression:"tmpSubjectID"}],staticClass:"subject",attrs:{"type":"text"},domProps:{"value":(_vm.tmpSubjectID)},on:{"input":function($event){if($event.target.composing){ return; }_vm.tmpSubjectID=$event.target.value}}}),_vm._v(" "),_c('button',{staticClass:"notfound",on:{"click":function($event){_vm.userSubmitSubjectID()}}},[_vm._v("submit subject id")])])]):_vm._e(),_vm._v(" "),_c('br'),_vm._v(" "),_c('div',[_c('p',[_vm._v("你正在看:\n        "),_c('span',{attrs:{"id":"bgm_tv_tracker_title"}},[_vm._v(_vm._s(_vm.bangumiName))])]),_vm._v(" "),_c('p',[_vm._v("第 "),_c('span',{attrs:{"id":"bgm_tv_tracker_episode"}},[_vm._v(_vm._s(_vm.episode))]),_vm._v("集")]),_vm._v(" "),_c('p',[_vm._v("Bangumi ID: "+_vm._s(_vm.bangumiID))])]),_vm._v(" "),_c('br'),_vm._v(" "),_c('div',{attrs:{"id":"bgm_tv_tracker_link"}},[_c('a',{attrs:{"href":("https://bgm.tv/subject/" + _vm.subjectID),"target":"_blank","rel":"noopener noreferrer"}},[_vm._v("subject/"+_vm._s(_vm.subjectID))])]),_vm._v(" "),_c('br'),_vm._v(" "),_c('button',{staticClass:"bgm_tv_tracker_radius",attrs:{"id":"bgm_tv_tracker_mark_watch"},on:{"click":_vm.watchEps}},[_vm._v("标记本集为看过")]),_vm._v(" "),_c('button',{staticClass:"bgm_tv_tracker_radius",attrs:{"id":"bgm_tv_tracker_mark_watched"},on:{"click":_vm.setWatchProgress}},[_vm._v("看到本集")]),_vm._v(" "),_c('br'),_vm._v(" "),_c('br'),_vm._v(" "),_c('a',{attrs:{"href":"https://github.com/Trim21/bilibili-bangumi-tv-auto-tracker/issues","target":"_blank","rel":"noopener noreferrer"}},[_vm._v("报告问题")]),_vm._v(" "),_c('br'),_vm._v(" "),_c('div',{attrs:{"id":"bgm_tv_tracker_notification"}},_vm._l((_vm.messages),function(message,index){return _c('div',{key:index},[_c('hr'),_vm._v(" "),_c('div',[_c('p',[_vm._v("\n          "+_vm._s(message.time.getHours())+":"+_vm._s(message.time.getMinutes())+":"+_vm._s(message.time.getSeconds())+"\n        ")]),_vm._v(" "),_c('pre',[_c('code',[_vm._v(_vm._s(message.text))])])])])}))])])}
+// CONCATENATED MODULE: ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/js/App.vue?vue&type=template&id=33932cb4&
+var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"disable",class:{iqiyi:this.website==='iqiyi', bilibili:this.website==='bilibili'},attrs:{"id":"bgm_tv_tracker"}},[_c('div',{staticClass:"bgm_tv_tracker_btn bgm_tv_tracker bgm_tv_tracker_radius",on:{"click":_vm.trigger}},[_vm._v("bgm.tv"+_vm._s(_vm.score))]),_vm._v(" "),_c('div',{staticClass:"bgm_tv_tracker_info"},[(!_vm.subjectID)?_c('div',{staticClass:"not_found"},[_c('label',[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.tmpSubjectID),expression:"tmpSubjectID"}],staticClass:"subject",attrs:{"type":"text"},domProps:{"value":(_vm.tmpSubjectID)},on:{"input":function($event){if($event.target.composing){ return; }_vm.tmpSubjectID=$event.target.value}}}),_vm._v(" "),_c('button',{staticClass:"notfound",on:{"click":function($event){_vm.userSubmitSubjectID()}}},[_vm._v("submit subject id")])])]):_vm._e(),_vm._v(" "),_c('br'),_vm._v(" "),_c('div',[_c('p',[_vm._v("你正在看:\n        "),_c('span',{attrs:{"id":"bgm_tv_tracker_title"}},[_vm._v(_vm._s(_vm.bangumiName))])]),_vm._v(" "),_c('p',[_vm._v("第 "),_c('span',{attrs:{"id":"bgm_tv_tracker_episode"}},[_vm._v(_vm._s(_vm.episode))]),_vm._v(" 集")]),_vm._v(" "),_c('p',[_vm._v("Bangumi ID: "+_vm._s(_vm.bangumiID))]),_vm._v(" "),_c('p',[_vm._v("本集观看进度: "+_vm._s(_vm.watchPercent.toString().substr(0, 4))+"%")])]),_vm._v(" "),_c('br'),_vm._v(" "),_c('div',{attrs:{"id":"bgm_tv_tracker_link"}},[_c('a',{attrs:{"href":("https://bgm.tv/subject/" + _vm.subjectID),"target":"_blank","rel":"noopener noreferrer"}},[_vm._v("subject/"+_vm._s(_vm.subjectID))])]),_vm._v(" "),_c('br'),_vm._v(" "),_c('button',{staticClass:"bgm_tv_tracker_radius",attrs:{"id":"bgm_tv_tracker_mark_watch"},on:{"click":_vm.watchEps}},[_vm._v("标记本集为看过")]),_vm._v(" "),_c('button',{staticClass:"bgm_tv_tracker_radius",attrs:{"id":"bgm_tv_tracker_mark_watched"},on:{"click":_vm.setWatchProgress}},[_vm._v("看到本集")]),_vm._v(" "),_c('br'),_vm._v(" "),_c('br'),_vm._v(" "),_c('a',{attrs:{"href":"https://github.com/Trim21/bilibili-bangumi-tv-auto-tracker/issues","target":"_blank","rel":"noopener noreferrer"}},[_vm._v("报告问题")]),_vm._v(" "),_c('br'),_vm._v(" "),_c('div',{attrs:{"id":"bgm_tv_tracker_notification"}},_vm._l((_vm.messages),function(message,index){return _c('div',{key:index},[_c('hr'),_vm._v(" "),_c('div',[_c('p',[_vm._v("\n          "+_vm._s(message.time.getHours())+":"+_vm._s(message.time.getMinutes())+":"+_vm._s(message.time.getSeconds())+"\n        ")]),_vm._v(" "),_c('pre',[_c('code',[_vm._v(_vm._s(message.text))])])])])})),_vm._v(" "),_c('label',[_vm._v("\n      播放进度大于80%时自动标记为看过\n      "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.config.autoMarkWatched),expression:"config.autoMarkWatched"}],staticStyle:{"-webkit-appearance":"checkbox"},attrs:{"type":"checkbox"},domProps:{"checked":Array.isArray(_vm.config.autoMarkWatched)?_vm._i(_vm.config.autoMarkWatched,null)>-1:(_vm.config.autoMarkWatched)},on:{"change":function($event){var $$a=_vm.config.autoMarkWatched,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(_vm.config, "autoMarkWatched", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(_vm.config, "autoMarkWatched", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(_vm.config, "autoMarkWatched", $$c)}}}})])])])}
 var staticRenderFns = []
 
 
-// CONCATENATED MODULE: ./src/js/App.vue?vue&type=template&id=42e61d5a&
+// CONCATENATED MODULE: ./src/js/App.vue?vue&type=template&id=33932cb4&
 
 // CONCATENATED MODULE: ./node_modules/vue-loader/lib??vue-loader-options!./src/js/App.vue?vue&type=script&lang=js&
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -2380,6 +2407,10 @@ if (!collection) {
     else if (gmUnsafeWindow.location.hostname === 'www.iqiyi.com') {
       website = WEBSITE.iqiyi
     }
+    let config = gmGetValue('config', false)
+    if (config) {
+      config = JSON.parse(config)
+    }
     return {
       tmpSubjectID: null,
       messages: [],
@@ -2391,17 +2422,34 @@ if (!collection) {
       title: null,
       subjectID: null,
       score: '',
+      config: {
+        autoMarkWatched: config.autoMarkWatched,
+      },
+      watchPercent: 0,
+      episodeMarked: false,
       website
     }
   },
   watch: {
+    config: {
+      handler (val, oldVal) {
+        // this.notify(JSON.stringify(val, null, 2))
+        console.log(val)
+        gmSetValue('config', JSON.stringify(val))
+      },
+      deep: true
+    },
     subjectID (val) {
+      this.episodeMarked = false
       let vm = this
       if (val)
         this.$bgmApi.getSubject(val).then(response => {
           vm.score = ' ' + response.data.rating.score
           vm.bangumiName = response.data.name_cn || response.data.name
         })
+    },
+    episode () {
+      this.episodeMarked = false
     }
   },
   methods: {
@@ -2564,6 +2612,18 @@ if (!collection) {
       }
       return Promise.reject(error)
     })
+    setInterval(() => {
+      this.$website.getPlayerTime().then(percent => {
+        console.log('get player percent')
+        this.watchPercent = percent
+        if (percent > 0.8) {
+          if (this.config.autoMarkWatched && !this.episodeMarked) {
+            this.episodeMarked = true
+            this.watchEps()
+          }
+        }
+      })
+    }, 5 * 1000)
   }
 });
 
@@ -2739,7 +2799,8 @@ if (external_$_default()('#bgm_tv_app')) {
         if (js_website) {
           if (js_website === 'bilibili') external_Vue_default.a.prototype.$website = website_bilibili
           if (js_website === 'iqiyi') external_Vue_default.a.prototype.$website = website_iQiyi
-          gmUnsafeWindow.vm = new external_Vue_default.a({
+          // eslint-disable-next-line no-new
+          new external_Vue_default.a({
             el: '#bgm_tv_app',
             render: h => h(App),
           })
