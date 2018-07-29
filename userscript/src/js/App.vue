@@ -73,6 +73,8 @@ export default {
       messages: [],
       bangumiID: null,
       bangumiName: null,
+      // is episode starts with 1, like https://www.bilibili.com/bangumi/play/ep200167
+      episodeStartWith: null,
       episode: null,
       title: null,
       subjectID: null,
@@ -140,27 +142,31 @@ export default {
       this.collectSubject(this.subjectID)
       vm.$bgmApi.getEps(this.subjectID).then(
         data => {
-          let ep = data.eps.filter(function (val) {
-            return val.sort === parseInt(vm.episode)
+          let episode = vm.episode - vm.episodeStartWith + 1
+          let eps = data.eps.filter(val => Number.isInteger(Number(val.sort)))
+
+          eps = eps.sort(function (a, b) {
+            let key = 'sort'
+            var x = a[key]
+            var y = b[key]
+            return ((x < y) ? -1 : ((x > y) ? 1 : 0))
           })
-          console.log(ep)
-          if (ep.length) {
-            ep = ep[0].id
+
+          try {
+            let ep = eps[episode - 1].id
             vm.$bgmApi.setEpisodeWatched(ep)
             vm.notify('mark your status successfully')
-          } else {
-            ep = data.eps[parseInt(vm.episode) - 1].id
-            vm.$bgmApi.setEpisodeWatched(ep)
-            vm.notify('mark your status successfully')
-            // vm.notify('can\'t find episode')
+          } catch (e) {
+            vm.notify(e.toString())
           }
-          return ep
+
         },
         error => {
           vm.notify('233')
           vm.notify(JSON.stringify(error))
         })
       // .catch(reason => vm.notify(JSON.stringify(reason)))
+
     },
     setWatchProgress () {
       let ep = this.episode
@@ -181,17 +187,19 @@ export default {
     // episode-item
     this.$website.init().then(data => {
       console.log(data)
-      let { subjectID, episode, title, bangumiID } = data
+      let { subjectID, episode, title, bangumiID, episodeStartWith } = data
       this.subjectID = subjectID
       this.episode = episode
       this.title = title
       this.bangumiID = bangumiID
+      this.episodeStartWith = episodeStartWith
     }, error => {
       console.log(error)
       if (error.error.response.status === 404) {
         this.notify('番剧没找到 手动输入吧')
       }
-      let { episode, title, bangumiID, } = error
+      let { episode, title, bangumiID, episodeStartWith } = error
+      this.episodeStartWith = episodeStartWith
       this.episode = episode
       this.title = title
       this.bangumiID = bangumiID

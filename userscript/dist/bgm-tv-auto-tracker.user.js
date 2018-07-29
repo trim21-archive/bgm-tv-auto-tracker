@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Bgm.tv auto tracker
 // @namespace   https://trim21.me/
-// @version     0.5.9
+// @version     0.5.10
 // @author      Trim21 <trim21me@gmail.com>
 // @source      https://github.com/Trim21/bilibili-bangumi-tv-auto-tracker
 // @license     MIT
@@ -2081,7 +2081,7 @@ class utils_BgmApi {
 
 let apiServer = external_axios_default.a.create({
   baseURL: URLS.apiServerURL,
-  headers: { 'bgm.tv': "0.5.9" },
+  headers: { 'bgm.tv': "0.5.10" },
 })
 
 function parseEpisode (title) {
@@ -2182,6 +2182,7 @@ class website_bilibili {
     const episode = status.epInfo.index
     const bangumiID = status.mediaInfo.season_id
     let title = status.mediaInfo.title
+    let episodeStartWith = parseInt(status.epList[0].index)
 
     return new Promise((resolve, reject) => {
       apiServer.get('/api/v0.2/querySubjectID', {
@@ -2191,11 +2192,13 @@ class website_bilibili {
           subjectID: response.data.subject_id,
           episode,
           title,
+          episodeStartWith,
           bangumiID
         }),
         error => reject({
           episode,
           title,
+          episodeStartWith,
           bangumiID,
           error
         })
@@ -2264,11 +2267,14 @@ class website_iQiyi {
         response => {
           console.log(response)
           let subjectID = response.data.subject_id
-          resolve({ subjectID, episode, title, bangumiName, bangumiID })
+          resolve({
+            subjectID, episode, title, bangumiName, bangumiID, episodeStartWith: 1,
+          })
         },
         () => reject({
           episode,
           title,
+          episodeStartWith: 1,
           bangumiID,
           bangumiName
         })
@@ -2296,12 +2302,12 @@ class website_iQiyi {
 
 
 
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/js/App.vue?vue&type=template&id=3e1157a3&
+// CONCATENATED MODULE: ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/js/App.vue?vue&type=template&id=22f71d86&
 var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"disable",class:{iqiyi:this.website==='iqiyi', bilibili:this.website==='bilibili'},attrs:{"id":"bgm_tv_tracker"}},[_c('div',{staticClass:"bgm_tv_tracker_btn bgm_tv_tracker bgm_tv_tracker_radius",on:{"click":_vm.trigger}},[_vm._v("bgm.tv"+_vm._s(_vm.score))]),_vm._v(" "),_c('div',{staticClass:"bgm_tv_tracker_info"},[(!_vm.subjectID)?_c('div',{staticClass:"not_found"},[_c('label',[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.tmpSubjectID),expression:"tmpSubjectID"}],staticClass:"subject",attrs:{"type":"text"},domProps:{"value":(_vm.tmpSubjectID)},on:{"input":function($event){if($event.target.composing){ return; }_vm.tmpSubjectID=$event.target.value}}}),_vm._v(" "),_c('button',{staticClass:"notfound",on:{"click":function($event){_vm.userSubmitSubjectID()}}},[_vm._v("submit subject id")])])]):_vm._e(),_vm._v(" "),_c('br'),_vm._v(" "),_c('div',[_c('p',[_vm._v("你正在看:\n        "),_c('span',{attrs:{"id":"bgm_tv_tracker_title"}},[_vm._v(_vm._s(_vm.bangumiName))])]),_vm._v(" "),_c('p',[_vm._v("第 "),_c('span',{attrs:{"id":"bgm_tv_tracker_episode"}},[_vm._v(_vm._s(_vm.episode))]),_vm._v("集")]),_vm._v(" "),_c('p',[_vm._v("Bangumi ID: "+_vm._s(_vm.bangumiID))])]),_vm._v(" "),_c('br'),_vm._v(" "),_c('div',{attrs:{"id":"bgm_tv_tracker_link"}},[_c('a',{attrs:{"href":("https://bgm.tv/subject/" + _vm.subjectID),"target":"_blank","rel":"noopener noreferrer"}},[_vm._v("subject/"+_vm._s(_vm.subjectID))])]),_vm._v(" "),_c('br'),_vm._v(" "),_c('button',{staticClass:"bgm_tv_tracker_radius",attrs:{"id":"bgm_tv_tracker_mark_watch"},on:{"click":_vm.watchEps}},[_vm._v("标记本集为看过")]),_vm._v(" "),_c('button',{staticClass:"bgm_tv_tracker_radius",attrs:{"id":"bgm_tv_tracker_mark_watched"},on:{"click":_vm.setWatchProgress}},[_vm._v("看到本集")]),_vm._v(" "),_c('br'),_vm._v(" "),_c('br'),_vm._v(" "),_c('a',{attrs:{"href":"https://github.com/Trim21/bilibili-bangumi-tv-auto-tracker/issues","target":"_blank","rel":"noopener noreferrer"}},[_vm._v("报告问题")]),_vm._v(" "),_c('br'),_vm._v(" "),_c('div',{attrs:{"id":"bgm_tv_tracker_notification"}},_vm._l((_vm.messages),function(message,index){return _c('div',{key:index},[_c('hr'),_vm._v(" "),_c('div',[_c('p',[_vm._v("\n          "+_vm._s(message.time.getHours())+":"+_vm._s(message.time.getMinutes())+":"+_vm._s(message.time.getSeconds())+"\n        ")]),_vm._v(" "),_c('pre',[_c('code',[_vm._v(_vm._s(message.text))])])])])}))])])}
 var staticRenderFns = []
 
 
-// CONCATENATED MODULE: ./src/js/App.vue?vue&type=template&id=3e1157a3&
+// CONCATENATED MODULE: ./src/js/App.vue?vue&type=template&id=22f71d86&
 
 // CONCATENATED MODULE: ./node_modules/vue-loader/lib??vue-loader-options!./src/js/App.vue?vue&type=script&lang=js&
 //
@@ -2379,6 +2385,8 @@ if (!collection) {
       messages: [],
       bangumiID: null,
       bangumiName: null,
+      // is episode starts with 1, like https://www.bilibili.com/bangumi/play/ep200167
+      episodeStartWith: null,
       episode: null,
       title: null,
       subjectID: null,
@@ -2446,27 +2454,31 @@ if (!collection) {
       this.collectSubject(this.subjectID)
       vm.$bgmApi.getEps(this.subjectID).then(
         data => {
-          let ep = data.eps.filter(function (val) {
-            return val.sort === parseInt(vm.episode)
+          let episode = vm.episode - vm.episodeStartWith + 1
+          let eps = data.eps.filter(val => Number.isInteger(Number(val.sort)))
+
+          eps = eps.sort(function (a, b) {
+            let key = 'sort'
+            var x = a[key]
+            var y = b[key]
+            return ((x < y) ? -1 : ((x > y) ? 1 : 0))
           })
-          console.log(ep)
-          if (ep.length) {
-            ep = ep[0].id
+
+          try {
+            let ep = eps[episode - 1].id
             vm.$bgmApi.setEpisodeWatched(ep)
             vm.notify('mark your status successfully')
-          } else {
-            ep = data.eps[parseInt(vm.episode) - 1].id
-            vm.$bgmApi.setEpisodeWatched(ep)
-            vm.notify('mark your status successfully')
-            // vm.notify('can\'t find episode')
+          } catch (e) {
+            vm.notify(e.toString())
           }
-          return ep
+
         },
         error => {
           vm.notify('233')
           vm.notify(JSON.stringify(error))
         })
       // .catch(reason => vm.notify(JSON.stringify(reason)))
+
     },
     setWatchProgress () {
       let ep = this.episode
@@ -2487,17 +2499,19 @@ if (!collection) {
     // episode-item
     this.$website.init().then(data => {
       console.log(data)
-      let { subjectID, episode, title, bangumiID } = data
+      let { subjectID, episode, title, bangumiID, episodeStartWith } = data
       this.subjectID = subjectID
       this.episode = episode
       this.title = title
       this.bangumiID = bangumiID
+      this.episodeStartWith = episodeStartWith
     }, error => {
       console.log(error)
       if (error.error.response.status === 404) {
         this.notify('番剧没找到 手动输入吧')
       }
-      let { episode, title, bangumiID, } = error
+      let { episode, title, bangumiID, episodeStartWith } = error
+      this.episodeStartWith = episodeStartWith
       this.episode = episode
       this.title = title
       this.bangumiID = bangumiID

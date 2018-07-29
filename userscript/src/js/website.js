@@ -15,6 +15,7 @@ class bilibili {
     const episode = status.epInfo.index
     const bangumiID = status.mediaInfo.season_id
     let title = status.mediaInfo.title
+    let episodeStartWith = parseInt(status.epList[0].index)
 
     return new Promise((resolve, reject) => {
       apiServer.get('/api/v0.2/querySubjectID', {
@@ -24,11 +25,13 @@ class bilibili {
           subjectID: response.data.subject_id,
           episode,
           title,
+          episodeStartWith,
           bangumiID
         }),
         error => reject({
           episode,
           title,
+          episodeStartWith,
           bangumiID,
           error
         })
@@ -97,11 +100,14 @@ class iQiyi {
         response => {
           console.log(response)
           let subjectID = response.data.subject_id
-          resolve({ subjectID, episode, title, bangumiName, bangumiID })
+          resolve({
+            subjectID, episode, title, bangumiName, bangumiID, episodeStartWith: 1,
+          })
         },
         () => reject({
           episode,
           title,
+          episodeStartWith: 1,
           bangumiID,
           bangumiName
         })
