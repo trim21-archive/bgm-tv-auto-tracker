@@ -12,7 +12,8 @@ class bilibili {
    */
   static init () {
     const status = gmUnsafeWindow.__INITIAL_STATE__
-    const episode = status.epInfo.index
+    const episode = gmUnsafeWindow.__INITIAL_STATE__.epList
+      .findIndex(val => val.index === gmUnsafeWindow.__INITIAL_STATE__.epInfo.index) + 1
     const bangumiID = status.mediaInfo.season_id
     let title = status.mediaInfo.title
     let episodeStartWith = parseInt(status.epList[0].index)
@@ -55,9 +56,17 @@ class bilibili {
         )
       }
       if (episode) {
-        cb({
-          episode: gmUnsafeWindow.__INITIAL_STATE__.epInfo.index
-        })
+        let ep = gmUnsafeWindow.__INITIAL_STATE__.epList
+          .findIndex(val => val.index === gmUnsafeWindow.__INITIAL_STATE__.epInfo.index) + 1
+        if (ep) {
+          cb({
+            episode: ep
+          })
+        } else {
+          cb({
+            episode: gmUnsafeWindow.__INITIAL_STATE__.epInfo.index
+          })
+        }
       }
     }
 
@@ -79,6 +88,10 @@ class bilibili {
 
     setInterval(detectHrefChange, 10 * 1000)
     setTimeout(detectHrefChange, 5000)
+  }
+
+  static getPlayerTime () {
+    return Promise.resolve(gmUnsafeWindow.player.getCurrentTime() / gmUnsafeWindow.player.getDuration())
   }
 }
 
@@ -130,6 +143,14 @@ class iQiyi {
     gmUnsafeWindow.addEventListener('hashchange', function () {
       setTimeout(onEpisodeChange, 500)
     }, false)
+  }
+
+  static getPlayerTime () {
+    return new Promise((resolve) => {
+      gmUnsafeWindow._player.getPlayInfo(resolve)
+    }).then(info => {
+      return info.currentTime / info.totalDuration * 1000
+    })
   }
 }
 

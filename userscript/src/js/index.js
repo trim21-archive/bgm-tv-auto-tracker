@@ -47,7 +47,8 @@ if ($('#bgm_tv_app')) {
         if (website) {
           if (website === 'bilibili') Vue.prototype.$website = bilibili
           if (website === 'iqiyi') Vue.prototype.$website = iQiyi
-          gmUnsafeWindow.vm = new Vue({
+          // eslint-disable-next-line no-new
+          new Vue({
             el: '#bgm_tv_app',
             render: h => h(App),
           })

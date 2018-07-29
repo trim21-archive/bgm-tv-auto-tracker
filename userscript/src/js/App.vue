@@ -14,8 +14,9 @@
         <p>你正在看:
           <span id="bgm_tv_tracker_title">{{ bangumiName }}</span>
         </p>
-        <p>第 <span id="bgm_tv_tracker_episode">{{ episode }}</span>集</p>
+        <p>第 <span id="bgm_tv_tracker_episode">{{ episode }}</span> 集</p>
         <p>Bangumi ID: {{ bangumiID }}</p>
+        <p>本集观看进度: {{ watchPercent.toString().substr(0, 4) }}%</p>
       </div>
       <br>
       <div id="bgm_tv_tracker_link">
@@ -40,6 +41,11 @@
           </div>
         </div>
       </div>
+      <!--<button class="bgm_tv_tracker_radius" id="bgm_tv_tracker_config">config</button>-->
+      <label>
+        播放进度大于80%时自动标记为看过
+        <input type="checkbox" style="-webkit-appearance:checkbox" v-model="config.autoMarkWatched">
+      </label>
     </div>
   </div>
 </template>
@@ -68,6 +74,10 @@ export default {
     else if (gmUnsafeWindow.location.hostname === 'www.iqiyi.com') {
       website = WEBSITE.iqiyi
     }
+    let config = gmGetValue('config', false)
+    if (config) {
+      config = JSON.parse(config)
+    }
     return {
       tmpSubjectID: null,
       messages: [],
@@ -79,17 +89,34 @@ export default {
       title: null,
       subjectID: null,
       score: '',
+      config: {
+        autoMarkWatched: config.autoMarkWatched,
+      },
+      watchPercent: 0,
+      episodeMarked: false,
       website
     }
   },
   watch: {
+    config: {
+      handler (val, oldVal) {
+        // this.notify(JSON.stringify(val, null, 2))
+        console.log(val)
+        gmSetValue('config', JSON.stringify(val))
+      },
+      deep: true
+    },
     subjectID (val) {
+      this.episodeMarked = false
       let vm = this
       if (val)
         this.$bgmApi.getSubject(val).then(response => {
           vm.score = ' ' + response.data.rating.score
           vm.bangumiName = response.data.name_cn || response.data.name
         })
+    },
+    episode () {
+      this.episodeMarked = false
     }
   },
   methods: {
@@ -252,6 +279,18 @@ export default {
       }
       return Promise.reject(error)
     })
+    setInterval(() => {
+      this.$website.getPlayerTime().then(percent => {
+        console.log('get player percent')
+        this.watchPercent = percent
+        if (percent > 0.8) {
+          if (this.config.autoMarkWatched && !this.episodeMarked) {
+            this.episodeMarked = true
+            this.watchEps()
+          }
+        }
+      })
+    }, 5 * 1000)
   }
 }
 
