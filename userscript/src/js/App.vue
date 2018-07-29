@@ -169,9 +169,9 @@ export default {
 
     },
     setWatchProgress () {
-      let ep = this.episode
+      let episode = this.episode - this.episodeStartWith + 1
       this.collectSubject(this.subjectID)
-      this.$bgmApi.setSubjectProgress(this.subjectID, ep).then(
+      this.$bgmApi.setSubjectProgress(this.subjectID, episode).then(
         () => this.notify('mark status successful'),
         error => {
           if (error.response.data.code === 400) {
