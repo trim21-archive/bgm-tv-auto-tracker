@@ -37,8 +37,6 @@ bilibili部分已经完工了
 
 server文件夹内是python服务端,基于python3.6.5的aiohttp
 
-userscript是用`Grunt`编译成的,不要修改dist内的内容,
-
 ```bash
 cd userscript
 
@@ -48,11 +46,10 @@ npm run dev # 检测文件变动,自动重新编译
 
 原文件是`userscript/src/js/index.js`
 
-使用`/* @include ../css/bilibili.min.css */`来引入别的文件(基于`Grunt`的字符串替换)
-css和html文件在编译后会后缀名会变成`.min.css`和`.min.html`,添加文件后要引入对应的`*.min.{css|html}`
+使用`webpack`打包
 
 
-在`Tampermonkey`中添加如下脚本,在修改原文件(`index.js`,`*.css`,`*.html`)后,会自动编译最新脚本会自动起效,刷新页面即可起效.
+在`Tampermonkey`中添加如下脚本,在修改原文件(`*.js`,`*.css`,`*.html`)后,会自动编译最新脚本会自动起效,刷新页面即可起效.
 
 ```javascript
 // ==UserScript==
@@ -90,5 +87,5 @@ console.log('hello world')
 
 在同一集内重复点击`看到本集`会报错 这是api的设定
 
-如果bgm的某个番没有对应条目(比如柯南的900+集),两个按钮均会报错
+如果bgm的某个番没有对应条目(比如柯南的900+集),`看过本集会报错`
 
