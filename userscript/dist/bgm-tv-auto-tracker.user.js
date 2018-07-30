@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Bgm.tv auto tracker
 // @namespace   https://trim21.me/
-// @version     0.7.1
+// @version     0.7.2
 // @author      Trim21 <trim21me@gmail.com>
 // @source      https://github.com/Trim21/bilibili-bangumi-tv-auto-tracker
 // @license     MIT
@@ -2081,7 +2081,7 @@ class utils_BgmApi {
 
 let apiServer = external_axios_default.a.create({
   baseURL: URLS.apiServerURL,
-  headers: { 'bgm.tv': "0.7.1" },
+  headers: { 'bgm.tv': "0.7.2" },
 })
 
 function parseEpisode (title) {
