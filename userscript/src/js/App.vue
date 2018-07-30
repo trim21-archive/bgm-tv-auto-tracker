@@ -1,7 +1,9 @@
 <template>
   <div id="bgm_tv_tracker" class="disable"
        :class="{iqiyi:this.website==='iqiyi', bilibili:this.website==='bilibili'}">
-    <div class="bgm_tv_tracker_btn bgm_tv_tracker bgm_tv_tracker_radius" @click="trigger">bgm.tv{{ score }}</div>
+    <div class="bgm_tv_tracker_btn bgm_tv_tracker bgm_tv_tracker_radius" :class="{}" @click="trigger">bgm.tv{{ score
+      }}
+    </div>
     <div class="bgm_tv_tracker_info">
       <div class="not_found" v-if="!subjectID">
         <label>
@@ -14,7 +16,7 @@
         <p>你正在看:
           <span id="bgm_tv_tracker_title">{{ bangumiName }}</span>
         </p>
-        <p>第 <span id="bgm_tv_tracker_episode">{{ episode }}</span> 集</p>
+        <p>第 <span id="bgm_tv_tracker_episode">{{ episode + episodeStartWith -1 }}</span> 集</p>
         <p>Bangumi ID: {{ bangumiID }}</p>
         <p>本集观看进度: {{ watchPercent.toString().substr(0, 4) }}%</p>
       </div>
@@ -168,7 +170,7 @@ export default {
       this.collectSubject(this.subjectID)
       vm.$bgmApi.getEps(this.subjectID).then(
         data => {
-          let episode = vm.episode - vm.episodeStartWith + 1
+          let episode = vm.episode
           let eps = data.eps.filter(val => Number.isInteger(Number(val.sort)))
 
           eps = eps.sort(function (a, b) {
@@ -195,7 +197,7 @@ export default {
 
     },
     setWatchProgress () {
-      let episode = this.episode - this.episodeStartWith + 1
+      let episode = this.episode
       this.collectSubject(this.subjectID)
       this.$bgmApi.setSubjectProgress(this.subjectID, episode).then(
         () => this.notify('mark status successful'),
