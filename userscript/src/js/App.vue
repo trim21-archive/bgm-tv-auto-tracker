@@ -33,10 +33,11 @@
       <a href="https://github.com/Trim21/bilibili-bangumi-tv-auto-tracker/issues" target='_blank'
          rel="noopener noreferrer">报告问题</a>
       <br>
-      <label>
+      <input type="checkbox" v-model="config.autoMarkWatched" id="bgm_tv_tracker_auto_mark_watched">
+      <label for="bgm_tv_tracker_auto_mark_watched">
         播放进度大于80%时自动标记为看过
-        <input type="checkbox" style="-webkit-appearance:checkbox" v-model="config.autoMarkWatched">
       </label>
+      <br>
       <div id="bgm_tv_tracker_notification">
         <div v-for="(message, index) in messages" :key="index">
           <hr>
@@ -299,6 +300,15 @@ export default {
 <style lang="scss">
   #bgm_tv_tracker.disable .bgm_tv_tracker_info {
     display: none;
+  }
+
+  /*label {*/
+  /*width: 100px;*/
+  /*text-align: left;*/
+  /*}*/
+
+  input[type=checkbox] {
+    appearance: checkbox
   }
 
   @import "../style/scss/iqiyi";

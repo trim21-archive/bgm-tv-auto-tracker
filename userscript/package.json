@@ -6,6 +6,24 @@
     "name": "Trim21",
     "email": "trim21me@gmail.com"
   },
+  "browserslist": [
+    "last 2 version",
+    "> 1%"
+  ],
+  "eslintConfig": {
+    "extends": "standard",
+    "rules": {
+      "comma-dangle": [
+        0
+      ],
+      "standard/no-callback-literal": [
+        0
+      ],
+      "prefer-promise-reject-errors": [
+        0
+      ]
+    }
+  },
   "scripts": {
     "version": "npm run build && git add .",
     "build": "cross-env NODE_ENV=production webpack --mode production --config config/webpack.config.js",
@@ -17,6 +35,7 @@
   },
   "private": false,
   "devDependencies": {
+    "autoprefixer": "^9.0.1",
     "cross-env": "^5.2.0",
     "css-loader": "^0.28.11",
     "eslint": "^5.2.0",
@@ -30,6 +49,7 @@
     "html-loader": "^0.5.5",
     "node-gyp": "^3.7.0",
     "node-sass": "^4.9.2",
+    "postcss-loader": "^2.1.6",
     "sass-loader": "^7.0.3",
     "style-loader": "^0.21.0",
     "to-string-loader": "^1.1.5",

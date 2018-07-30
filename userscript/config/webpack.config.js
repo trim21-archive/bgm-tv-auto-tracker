@@ -39,13 +39,13 @@ let webpackConfig = {
         loader: 'vue-loader',
         options: {
           loaders: {
-            scss: 'vue-style-loader!css-loader!sass-loader', // <style lang="style">
+            scss: 'vue-style-loader!css-loader!postcss-loader!sass-loader', // <style lang="style">
           }
         }
       },
       {
         test: /\.scss$/,
-        loaders: ['style-loader', 'css-loader', 'sass-loader']
+        loaders: ['style-loader', 'css-loader', 'postcss-loader', 'sass-loader']
       },
       {
         test: /\.css$/,
@@ -56,9 +56,11 @@ let webpackConfig = {
             loader: 'css-loader',
             options: {
               modules: false,
-              minimize: true
+              minimize: true,
+              importLoaders: 1
             }
-          }
+          },
+          'postcss-loader',
         ]
       },
       {
