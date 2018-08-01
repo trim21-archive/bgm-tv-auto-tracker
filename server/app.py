@@ -1,14 +1,12 @@
 import asyncio
 import pathlib
-import time
 from os import path
-from typing import List
+from validator import Validator, StringField, IntegerField, EnumField
 
 import aiohttp_cors
 import aiohttp
 import aiohttp_jinja2
 import jinja2
-import aiofiles
 from aiohttp import web
 
 from config import APP_ID, APP_SECRET, HOST, PROTOCOL
@@ -20,43 +18,6 @@ from dateutil import parser
 base_dir = pathlib.Path(path.dirname(__file__))
 
 import json
-import functools
-
-
-def cacheFunction(key_name, collection_name, expires=60 * 60 * 3):
-    def wrapper(f):
-        @functools.wraps(f)
-        async def wrapped(request, *args, **kwargs):
-            print(args)
-            key = kwargs.get(key_name, args[0])
-            r = await request.app.mongo.bilibili_bangumi[collection_name].find_one({'_id': key})
-
-            # 已缓存
-            if r:
-                # 未过期
-                if r.get('_expires', 35029759086) > int(time.time()):
-                    return r['data']
-                # 过期
-                else:
-                    r = await f(*args, **kwargs)
-                    await request.app.mongo.bilibili_bangumi[collection_name] \
-                        .update_one({'_id': key},
-                                    {'$set': {'data'    : r,
-                                              '_expires': int(time.time()) + expires}},
-                                    upsert=True)
-                    return r
-            # 未缓存
-            else:
-                d = {}
-                d['data'] = await f(*args, **kwargs)
-                d['_expires'] = int(time.time()) + expires
-                await request.app.mongo.bilibili_bangumi[collection_name].update_one({'_id': key}, {'$set': d},
-                                                                                     upsert=True)
-                return d['data']
-
-        return wrapped
-
-    return wrapper
 
 
 def get_mongo_collection(request):
@@ -166,88 +127,11 @@ async def aio_post(url, data=None, headers=None):
             return await resp.json()
 
 
-@cacheFunction(key_name='subject_id', collection_name='eps', expires=60 * 60 * 24)
-async def getEps(subject_id):
-    response = await aio_get(f'https://api.bgm.tv/subject/{subject_id}/ep')
-    return response
-
-
-async def collectSubject(request, subject_id, user_id, access_token):
-    r = await request.app.mongo.bilibili_bangumi.user_collection.find_one({'_id': user_id, 'subject_id': subject_id})
-    if not r:
-        await aio_post(f'https://api.bgm.tv/collection/{subject_id}/update', data='status=do',
-                       headers={'Content-Type' : 'application/x-www-form-urlencoded',
-                                'authorization': f'Bearer {access_token}'})
-        await request.app.mongo.bilibili_bangumi.user_collection.update_one({'_id': user_id},
-                                                                            {'_id': user_id, 'subject_id': subject_id},
-                                                                            upsert=True)
-
-
-async def watchEpisode(request: web.Request):
-    body = await request.json()
-    website = body.get('website', None)
-    episode = body.get('episode', None)
-    bangumi_id = body.get('bangumi_id', None)
-    user_id = body.get('user_id', None)
-    access_token = body.get('access_token', None)
-
-    if not (website and episode and bangumi_id and access_token) and website != 'bilibili':
-        return web.HTTPBadRequest()
-
-    r = await request.app.mongo.bilibili_bangumi.bilibili.find_one({'_id': str(bangumi_id)})
-
-    if not r:
-        return web.HTTPNotFound(reason='bangumi not found')
-
-    subject_id = r['bangumi_id']
-    response = await getEps(request, subject_id)
-    ep = response['eps'][int(episode) - 1]['id']
-
-    if user_id:
-        r2 = await collectSubject(request, subject_id, user_id, access_token)
-    else:
-        return web.json_response({'status': 'error', 'message': 'please upgrade userscript'}, status=400)
-
-    r3 = await aio_post(f'https://api.bgm.tv/ep/{ep}/status/watched',
-                        headers={'authorization': f'Bearer {access_token}'})
-
-    print(r3)
-    if r3['error'] != 'OK':
-        return web.json_response({'status': 'error', 'message': r3['error']}, status=400)
-
-    return web.json_response({'status': 'success'})
-
-
 def _raise(exception: Exception):
-    raise exception
+    def wrapper(*args, **kwargs):
+        raise exception
 
-
-import nameToSubject
-
-
-@cacheFunction('title', 'title_parse_result', expires=60 * 60 * 24 * 365 * 10)
-async def parseTitle(title):
-    return {
-        'episode'   : nameToSubject.parse_episode(title),
-        'subject_id': nameToSubject.fromTitleToSubject(title)
-    }
-
-
-async def nameToSubjectID(request: web.Request):
-    j = await request.json()
-    title = j.get('title', None)
-    title_with_episode = j.get('title_with_episode', None)
-    if title:
-        d = await parseTitle(request, title)
-        if title_with_episode:
-            d['episode'] = nameToSubject.parse_episode(title_with_episode)
-        return web.json_response(d)
-    else:
-        raise web.HTTPBadRequest()
-
-
-async def w(request):
-    return web.json_response(await getEps(request, request.match_info.get('subject_id')))
+    return wrapper
 
 
 async def collectMissingBangumiInBilibili(request: web.Request):
@@ -277,6 +161,30 @@ async def querySubjectID(request: web.Request):
     pass
 
 
+class ReportMissingBangumiValidator(Validator):
+    bangumiID = StringField(strict=False)
+    subjectID = StringField()
+    title = StringField()
+    href = StringField()
+    website = EnumField(choices=['bilibili', 'iqiyi'])
+
+
+async def reportMissingBangumi(request: web.Request):
+    data = await request.json()
+    v = ReportMissingBangumiValidator(data)
+    if not v.is_valid():
+        return web.json_response({'message': v.str_errors, 'code': 400, 'status': 'error'}, status=400)
+    data = v.validated_data
+    try:
+        r = await request.app.mongo.bilibili_bangumi.get_collection('missing_bangumi').insert_one(data)
+        print(r.inserted_id)
+        return web.json_response({'status': 'success'}, status=201)
+    except Exception as e:
+        return web.json_response({'status': 'error', 'message': str(e)}, status=502)
+
+
+
+
 def create_app(io_loop=None):
     app = web.Application(loop=io_loop,
                           # middlewares=[error_middleware, ]
@@ -284,14 +192,10 @@ def create_app(io_loop=None):
     app.mongo = mongo
     aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader(str(base_dir / 'templates')))
     app.add_routes([
-        web.get('/', lambda request: aiohttp_jinja2.render_template('index.html', request, {})),
-        web.get('/version', lambda request: web.Response(text='0.0.3')),
-        web.get('/oauth_callback', getToken),
         web.post('/api/v0.1/refresh_token', refreshToken),
-        web.get('/query/{website}', fromPlayerUrlToBangumiSubjectID),
-        web.post('/watch_episode', watchEpisode),
-        web.get('/eps/{subject_id}', w),
-        web.post('/api/v0.1/parser/title', nameToSubjectID),
+        web.post('/api/v0.1/reportMissingBangumi', reportMissingBangumi),
+        web.get('/', _raise(web.HTTPFound('https://github.com/Trim21/bilibili-bangumi-tv-auto-tracker'))),
+        web.get('/oauth_callback', getToken),
         web.get('/api/v0.2/querySubjectID', querySubjectID),
         web.get('/api/v0.1/missingBilibili', collectMissingBangumiInBilibili),
         web.get('/auth', lambda request: _raise(web.HTTPFound(

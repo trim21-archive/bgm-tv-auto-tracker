@@ -16,8 +16,7 @@ collection = db.get_collection('bangumi_data')
 with open(base_dir / 'data.json', 'r', encoding='utf-8') as f:
     data = json.load(f)
 for item in data["items"]:
-    d = {}
-    d['title'] = item['titleTranslate'].get("zh-Hans", None)
+    d = {'title': item['titleTranslate'].get("zh-Hans", None)}
     if not d['title']:
         d['title'] = item['title']
     else:

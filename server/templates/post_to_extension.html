@@ -11,7 +11,7 @@
     {{ data }}
 </code>
 <script>
-  var data = JSON.parse('{{ data|safe }}')
+  var data = JSON.parse('{{ data|safe }}');
   data.type = 'auth'
 </script>
 </body>
