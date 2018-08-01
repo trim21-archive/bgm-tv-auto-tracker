@@ -1,14 +1,15 @@
 <template>
   <div id="bgm_tv_tracker" class="disable"
        :class="{iqiyi:this.website==='iqiyi', bilibili:this.website==='bilibili'}">
-    <div class="bgm_tv_tracker_btn bgm_tv_tracker bgm_tv_tracker_radius" :class="{}" @click="trigger">bgm.tv{{ score
-      }}
+    <div class="bgm_tv_tracker_btn bgm_tv_tracker bgm_tv_tracker_radius"
+         :class="{}"
+         @click="trigger">bgm.tv{{ score }}
     </div>
     <div class="bgm_tv_tracker_info">
       <div class="not_found" v-if="!subjectID">
         <label>
-          <input type="text" class="subject" v-model="tmpSubjectID"/>
-          <button class="notfound" @click="userSubmitSubjectID()">submit subject id</button>
+          <input type="text" class="subject" v-model="tmpSubjectID" placeholder='条目ID或者对应条目链接'/>
+          <button class="notfound" @click="userSubmitSubjectID">submit subject id</button>
         </label>
       </div>
       <br>
@@ -22,12 +23,16 @@
       </div>
       <br>
       <div id="bgm_tv_tracker_link">
-        <a :href="`https://bgm.tv/subject/${subjectID}`" target="_blank"
+        <a :href="`https://bgm.tv/subject/${subjectID}`" v-if="subjectID" target="_blank"
            rel="noopener noreferrer">subject/{{ subjectID }}</a>
+        <a :href="`https://bgm.tv/subject_search/${ title }?cat=2`" v-else target="_blank"
+           rel="noopener noreferrer">search in bgm.tv</a>
       </div>
       <br>
-      <button class="bgm_tv_tracker_radius" id="bgm_tv_tracker_mark_watch" @click="watchEps">标记本集为看过</button>
-      <button class="bgm_tv_tracker_radius" id="bgm_tv_tracker_mark_watched" @click="setWatchProgress">看到本集</button>
+      <div v-if="subjectID">
+        <button class="bgm_tv_tracker_radius" id="bgm_tv_tracker_mark_watch" @click="watchEps">标记本集为看过</button>
+        <button class="bgm_tv_tracker_radius" id="bgm_tv_tracker_mark_watched" @click="setWatchProgress">看到本集</button>
+      </div>
       <br>
       <br>
       <a href="https://github.com/Trim21/bilibili-bangumi-tv-auto-tracker/issues" target='_blank'
@@ -123,11 +128,22 @@ export default {
   },
   methods: {
     userSubmitSubjectID () {
-      this.subjectID = this.tmpSubjectID
-      let subjectID = this.tmpSubjectID
-      if (subjectID) {
-        apiServer.get('/api/v0.1/missingBilibili',
-          { params: { bangumi_id: bangumiID, subject_id: subjectID } })
+      if (this.tmpSubjectID) {
+        if (this.tmpSubjectID.startsWith('http')) {
+          const myURL = new URL(this.tmpSubjectID)
+          const p = myURL.pathname
+          const pList = p.split('/')
+          this.tmpSubjectID = pList[pList.length - 1]
+        }
+        this.subjectID = this.tmpSubjectID
+        apiServer.post('/api/v0.1/reportMissingBangumi',
+          {
+            bangumiID: this.bangumiID,
+            subjectID: this.subjectID,
+            title: this.title,
+            href: gmUnsafeWindow.location.href,
+            website: this.website
+          })
       }
     },
 
@@ -176,8 +192,8 @@ export default {
 
           eps = eps.sort(function (a, b) {
             let key = 'sort'
-            var x = a[key]
-            var y = b[key]
+            let x = a[key]
+            let y = b[key]
             return ((x < y) ? -1 : ((x > y) ? 1 : 0))
           })
 

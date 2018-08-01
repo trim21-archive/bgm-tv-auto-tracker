@@ -13,7 +13,12 @@ class bilibili {
   static init () {
     const status = gmUnsafeWindow.__INITIAL_STATE__
     const episode = gmUnsafeWindow.__INITIAL_STATE__.epList
-      .findIndex(val => val.index === gmUnsafeWindow.__INITIAL_STATE__.epInfo.index) + 1
+      .findIndex(val => {
+        console.log(val)
+        console.log(gmUnsafeWindow.__INITIAL_STATE__.epInfo.index)
+        return val.index === gmUnsafeWindow.__INITIAL_STATE__.epInfo.index
+      }) + 1
+    console.log(episode)
     const bangumiID = status.mediaInfo.season_id
     let title = status.mediaInfo.title
     let episodeStartWith = parseInt(status.epList[0].index)

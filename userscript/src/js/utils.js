@@ -4,6 +4,16 @@ import adapter from 'axios-userscript-adapter'
 
 axios.defaults.adapter = adapter
 
+function sortEps (eps) {
+  eps = JSON.parse(JSON.stringify(eps))
+  return eps.sort(function (a, b) {
+    let key = 'sort'
+    var x = a[key]
+    var y = b[key]
+    return ((x < y) ? -1 : ((x > y) ? 1 : 0))
+  })
+}
+
 class BgmApi {
   constructor ({ accessToken, serverRoot = 'https://api.bgm.tv' }) {
     this.access_token = accessToken
@@ -49,6 +59,8 @@ class BgmApi {
           // out of time
           if (Number(new Date().getTime() / 1000) - eps.time > 60 * 60 * 2) {
             noData = true
+          } else {
+            eps.eps = sortEps(eps.eps)
           }
         }
 
@@ -57,11 +69,12 @@ class BgmApi {
         } else {
           ins.getSubjectEps(subjectID).then(
             (response) => {
+              let eps = sortEps(response.data.eps)
               gmSetValue(`eps_${subjectID}`, JSON.stringify({
-                eps: response.data.eps,
+                eps,
                 time: Number(new Date().getTime() / 1000)
               }))
-              resolve(response.data)
+              resolve({ eps })
             },
             (error) => {
               reject(error)
@@ -127,7 +140,7 @@ class BgmApi {
 
 let apiServer = axios.create({
   baseURL: URLS.apiServerURL,
-  headers: { 'bgm.tv': process.env.version },
+  headers: { 'bgm-tv-auto-tracker': process.env.version },
 })
 
 function parseEpisode (title) {

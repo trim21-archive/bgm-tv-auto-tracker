@@ -79,6 +79,7 @@ let webpackConfig = {
       'PRODUCTION': JSON.stringify(production),
       'process.env': {
         'version': JSON.stringify(pkg.version),
+        'PRODUCTION': JSON.stringify(production),
         NODE_ENV: JSON.stringify(process.env.NODE_ENV)
       }
     }),

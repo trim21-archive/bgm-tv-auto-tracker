@@ -10,6 +10,6 @@ indent_size=4
 indent_style=space
 indent_size=2
 
-[{*.applejs,*.js}]
+[{*.js,*.vue}]
 indent_style=space
 indent_size=2
