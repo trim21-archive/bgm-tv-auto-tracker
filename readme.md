@@ -7,6 +7,11 @@
 在b站看番剧的同时一键在bgm.tv上标记已经看过的集数.
 
 
+## 更新日志
+
+### 0.8.0 
+- 找不到对应条目的时候允许直接输入bgm对应条目链接进行匹配
+
 ## 使用
 
 https://greasyfork.org/zh-CN/scripts/369643-bgm-tv-auto-tracker 
@@ -18,9 +23,7 @@ https://greasyfork.org/zh-CN/scripts/369643-bgm-tv-auto-tracker
 效果图 
 
 ![](./screenshot/bilibili.png) 
-![](./screenshot/iqiyi.jpg) 
-
-PS: 有添加优酷和其他什么乱七八糟网站支持的计划, 但是具体什么时候能加上就看心情了...(
+![](./screenshot/iqiyi.png) 
 
 不要试图加载`extension`文件夹, 里面是陈年代码
 
@@ -44,7 +47,7 @@ npm i #安装依赖
 npm run dev # 检测文件变动,自动重新编译
 ```
 
-原文件是`userscript/src/js/index.js`
+入口是`userscript/src/js/index.js`
 
 使用`webpack`打包
 
@@ -53,28 +56,31 @@ npm run dev # 检测文件变动,自动重新编译
 
 ```javascript
 // ==UserScript==
-// @name         dev Bgm.tv auto tracker
-// @namespace    https://trim21.me/
-// @version      0.2.0
-// @description  auto tracker your bangumi progress
-// @author       Trim21
-// @match        https://www.bilibili.com/bangumi/play/*
-// @match        http*://www.iqiyi.com/*
-// @match        https://bangumi-auto-tracker.trim21.cn/oauth_callback*
-// @match        https://bangumi-auto-tracker.trim21.cn/userscript/options*
-// @require      https://cdn.bootcss.com/jquery/3.3.1/jquery.js
-// @require      https://cdn.bootcss.com/axios/0.18.0/axios.js
-// @grant        GM_addStyle
-// @grant        GM_xmlhttpRequest
-// @grant        GM_getResourceText
-// @grant        GM_setValue
-// @grant        GM_openInTab
-// @grant        GM_getValue
-// @grant        unsafeWindow
-// @connect      localhost
-// @connect      api.bgm.tv
-// @connect      bangumi-auto-tracker.trim21.cn
-// @run-at       document-end
+// @name        dev Bgm.tv auto tracker
+// @namespace   https://trim21.me/
+// @version     0.8.0
+// @author      Trim21 <trim21me@gmail.com>
+// @source      https://github.com/Trim21/bilibili-bangumi-tv-auto-tracker
+// @license     MIT
+// @match       https://www.bilibili.com/bangumi/play/*
+// @match       http*://www.iqiyi.com/*
+// @match       https://bangumi-auto-tracker.trim21.cn/oauth_callback*
+// @match       https://bangumi-auto-tracker.trim21.cn/userscript/options*
+// @require     https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js
+// @require     https://cdn.bootcss.com/axios/0.18.0/axios.js
+// @require     https://cdn.bootcss.com/vue/2.5.16/vue.min.js
+// @require     https://cdn.bootcss.com/axios/0.18.0/axios.min.js
+// @grant       GM_addStyle
+// @grant       GM_setValue
+// @grant       GM_getValue
+// @grant       GM_openInTab
+// @grant       GM_addStyle
+// @grant       GM_xmlhttpRequest
+// @grant       unsafeWindow
+// @connect     localhost
+// @connect     api.bgm.tv
+// @connect     bangumi-auto-tracker.trim21.cn
+// @run-at      document-end
 // @require      file:///path/to/bilibili-bangumi-tv-auto-tracker/userscript/env.js
 // @require      file:///path/to/bilibili-bangumi-tv-auto-tracker/userscript/dist/latest/bgm-tv-auto-tracker.js
 // ==/UserScript==
