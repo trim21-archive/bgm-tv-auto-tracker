@@ -66,7 +66,12 @@ async def getToken(request: web.Request, ):
                                       'client_secret': APP_SECRET,
                                       'code'         : code,
                                       'redirect_uri' : callback_url}) as resp:
-            r = await resp.json()
+            try:
+                r = await resp.json()
+            except Exception as e:
+                text = await resp.text()
+                print(text)
+                raise web.HTTPError(reason='bangumi 服务器出现问题 考虑重新授权 返回不是正确的数据而是 ' + text)
         if 'error' in r:
             return web.json_response(r)
         r['auth_time'] = int(parser.parse(resp.headers['Date']).timestamp())
