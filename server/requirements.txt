@@ -5,7 +5,4 @@ aiohttp==3.3.2
 aiohttp_cors==0.7.0
 aiohttp-jinja2==1.0.0
 python-dateutil==2.7.3
-aiofiles
-fuzzywuzzy
-python-Levenshtein
 python-validator>=0.0.6,<0.1.0
