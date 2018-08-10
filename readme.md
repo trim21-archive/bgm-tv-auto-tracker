@@ -1,4 +1,4 @@
-# bilibili bangumi progress auto tracker
+# bangumi progress auto tracker
 
 暂定这么个名字吧
 
@@ -10,6 +10,7 @@
 ## 更新日志
 
 ### 0.8.0 
+- 添加选项 在播放进度大于80%的时候自动标记播放进度
 - 找不到对应条目的时候允许直接输入bgm对应条目链接进行匹配
 
 ## 使用
