@@ -203,7 +203,7 @@ def create_app(io_loop=None):
         web.get('/oauth_callback', getToken),
         web.get('/api/v0.2/querySubjectID', querySubjectID),
         web.get('/api/v0.1/missingBilibili', collectMissingBangumiInBilibili),
-        web.get('/auth', lambda request: _raise(web.HTTPFound(
+        web.get('/auth', _raise(web.HTTPFound(
             f'https://bgm.tv/oauth/authorize?client_id={APP_ID}&response_type=code&redirect_uri={callback_url}')))
     ])
     cors = aiohttp_cors.setup(app, defaults={

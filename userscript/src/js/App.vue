@@ -19,7 +19,7 @@
         </p>
         <p>第 <span id="bgm_tv_tracker_episode">{{ episode + episodeStartWith -1 }}</span> 集</p>
         <p>Bangumi ID: {{ bangumiID }}</p>
-        <p>本集观看进度: {{ watchPercent.toString().substr(0, 4) }}%</p>
+        <p>本集观看进度: {{ (watchPercent * 100).toString().substr(0, 4) }}%</p>
       </div>
       <br>
       <div id="bgm_tv_tracker_link">
