@@ -188,7 +188,8 @@ export default {
       vm.$bgmApi.getEps(this.subjectID).then(
         data => {
           let episode = vm.episode
-          let eps = data.eps.filter(val => Number.isInteger(Number(val.sort)))
+          let eps = data.eps.filter(val => Number.isInteger(Number(val.sort)) && parseInt(val.type, 10) === 0)
+
 
           eps = eps.sort(function (a, b) {
             let key = 'sort'
