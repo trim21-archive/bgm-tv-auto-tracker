@@ -4,11 +4,11 @@ from os import path
 
 import pymongo
 
-from db import mongo_uri
+from db import mongo_url
 
 base_dir = pathlib.Path(path.dirname(__file__))
 
-client = pymongo.MongoClient(mongo_uri)
+client = pymongo.MongoClient(mongo_url)
 db = client.get_database('bilibili_bangumi')
 # collection = db.get_collection('bilibili')
 collection = db.get_collection('bangumi_data')
