@@ -1,7 +1,7 @@
 {
   "name": "bgm-tv-auto-tracker",
   "description": "auto tracker your bangumi progress",
-  "version": "0.8.4",
+  "version": "0.8.5",
   "author": {
     "name": "Trim21",
     "email": "trim21me@gmail.com"
@@ -25,7 +25,7 @@
     }
   },
   "scripts": {
-    "preversion": "npm run build && git add .",
+    "postversion": "npm run build && git add .",
     "build": "cross-env NODE_ENV=production webpack --mode production --config config/webpack.config.js",
     "dev": "webpack --mode development --watch --config config/webpack.config.js"
   },
