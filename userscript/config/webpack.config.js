@@ -26,6 +26,7 @@ let webpackConfig = {
     'jquery': '$',
     'vue': 'Vue',
     axios: 'axios',
+    'axios-userscript-adapter': 'axiosGmxhrAdapter',
   },
   module: {
     rules: [
