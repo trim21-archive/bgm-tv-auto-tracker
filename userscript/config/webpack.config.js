@@ -5,6 +5,8 @@ const VueLoaderPlugin = require('vue-loader/lib/plugin')
 
 const pkg = require('../package.json')
 const config = require('./config')
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
+
 
 const production = process.env.NODE_ENV === 'production'
 
@@ -95,23 +97,8 @@ if (production) {
   webpackConfig = merge(webpackConfig, config.development)
 }
 
-// let devMeta = JSON.parse(JSON.stringify(metadata))
-// if (devMeta.require) {
-//   devMeta.require.push(path.resolve(__dirname, '../dist', config.output.filename))
-// }
+if (process.env.npm_config_report) {
+  webpackConfig.plugins.push(new BundleAnalyzerPlugin())
+}
 
-// let devConfig = {
-//   entry: '',
-//   output: {
-//     filename: 'dev.user.js',
-//     path: path.resolve(__dirname, '../dist')
-//   },
-//   plugins: [
-//     new UserScriptMetaDataPlugin({
-//       metadata: devMeta
-//     }),
-//   ]
-// }
-
-// module.exports = [config, devConfig]
 module.exports = webpackConfig
