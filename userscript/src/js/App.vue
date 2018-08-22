@@ -18,13 +18,16 @@
           <span id="bgm_tv_tracker_title">{{ bangumiName }}</span>
         </p>
         <p>第 <span id="bgm_tv_tracker_episode">{{ episode + episodeStartWith -1 }}</span> 集</p>
-        <p>Bangumi ID: {{ bangumiID }}</p>
-        <p>本集观看进度: {{ (watchPercent * 100).toString().substr(0, 4) }}%</p>
       </div>
       <br>
       <div id="bgm_tv_tracker_link">
+        <a :href="`https://bgm.tv/ep/${episodeID}`"
+           v-if="episodeID" target="_blank" rel="noopener noreferrer">吐槽本集</a>
+        <br>
+        <br>
         <a :href="`https://bgm.tv/subject/${subjectID}`" v-if="subjectID" target="_blank"
            rel="noopener noreferrer">subject/{{ subjectID }}</a>
+
         <a :href="`https://bgm.tv/subject_search/${ title }?cat=2`" v-else target="_blank"
            rel="noopener noreferrer">search in bgm.tv</a>
       </div>
@@ -35,8 +38,10 @@
       </div>
       <br>
       <br>
-      <a href="https://github.com/Trim21/bilibili-bangumi-tv-auto-tracker/issues" target='_blank'
-         rel="noopener noreferrer">报告问题</a>
+      <a :href="reportUrl" target='_blank' rel="noopener noreferrer" style="color: red"><p>报告问题</p></a>
+      <!--<br>-->
+      <!--<p>Bangumi ID: {{ bangumiID }}</p>-->
+      <!--<p>本集观看进度: {{ (watchPercent * 100).toString().substr(0, 4) }}%</p>-->
       <br>
       <input type="checkbox" v-model="config.autoMarkWatched" id="bgm_tv_tracker_auto_mark_watched">
       <label for="bgm_tv_tracker_auto_mark_watched">
@@ -92,6 +97,7 @@ export default {
       bangumiName: null,
       // is episode starts with 1, like https://www.bilibili.com/bangumi/play/ep200167
       episodeStartWith: null,
+      episodeID: null,
       episode: null,
       title: null,
       subjectID: null,
@@ -103,6 +109,29 @@ export default {
       episodeMarked: false,
       website
     }
+  },
+  computed: {
+    reportUrl () {
+      let baseURL = 'https://github.com/Trim21/bilibili-bangumi-tv-auto-tracker/issues/new'
+      let hrefWithoutHash = location.protocol + '//' + location.host + location.pathname
+      let body =
+        `问题页面: [${this.bangumiName}](${hrefWithoutHash})` + '\n' +
+        `Bangumi ID: ${this.bangumiID}` + '\n' +
+        `episode: ${this.episode}` + '\n' +
+        'bgm page: \n' +
+        `Subject: https://bgm.tv/subject/${this.subjectID}` + '\n' +
+        `episode: https://bgm.tv/ep/${this.episodeID}` + '\n' +
+        '\n<!-- 描述你遇到的问题 -->\n'
+
+      let params = {
+        labels: 'bug',
+        body
+      }
+
+      let query = $.param(params)
+
+      return baseURL + '?' + query
+    },
   },
   watch: {
     config: {
@@ -124,6 +153,31 @@ export default {
     },
     episode () {
       this.episodeMarked = false
+      let vm = this
+      this.collectSubject(this.subjectID)
+      vm.$bgmApi.getEps(this.subjectID).then(
+        data => {
+          let episode = vm.episode
+          let eps = data.eps.filter(val => Number.isInteger(Number(val.sort)) && (parseInt(val.type, 10) === 0))
+
+          eps = eps.sort(function (a, b) {
+            let key = 'sort'
+            let x = a[key]
+            let y = b[key]
+            return ((x < y) ? -1 : ((x > y) ? 1 : 0))
+          })
+          try {
+            this.episodeID = eps[episode - 1].id
+          } catch (e) {
+            vm.notify('没找到这集...')
+          }
+        },
+        error => {
+          vm.notify('233')
+          vm.notify(JSON.stringify(error))
+        }
+      )
+
     }
   },
   methods: {

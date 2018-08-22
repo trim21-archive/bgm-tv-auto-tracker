@@ -20,6 +20,10 @@
 }
 
 .iqiyi {
+    #bgm_tv_tracker_link a {
+        color: black;
+    }
+
     .bgm_tv_tracker_btn.bgm_tv_tracker {
         float: left;
         cursor: pointer;
@@ -46,7 +50,7 @@
         text-align: left;
         top: 70px;
         white-space: normal;
-        width: 300px;
+        width: 250px;
         z-index: 1000;
     }
 

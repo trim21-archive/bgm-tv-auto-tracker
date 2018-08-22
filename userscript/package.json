@@ -26,7 +26,7 @@
   },
   "scripts": {
     "postversion": "npm run build && git add .",
-    "anylize": "cross-env NODE_ENV=production npm_config_report=true npm run build",
+    "anylize": "cross-env npm_config_report=true npm run build",
     "build": "cross-env NODE_ENV=production webpack --mode production --config config/webpack.config.js",
     "dev": "webpack --mode development --watch --config config/webpack.config.js"
   },
