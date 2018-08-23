@@ -1,27 +1,36 @@
-#bgm_tv_tracker.iqiyi {
-    margin-left: 15px;
-    padding-left: 16px;
-    position: relative;
-    font-size: 15px;
-    float: left;
-    cursor: pointer;
-    display: inline;
-    user-select: none;
-}
 
 //#bgm_tv_tracker.disable .bgm_tv_tracker_info {
 //display: none;
 //}
 
-#bgm_tv_tracker.iqiyi .bgm_tv_tracker_info {
-    opacity: 1;
-    pointer-events: auto;
-    top: 100%;
-}
+
 
 .iqiyi {
+
+    &#bgm_tv_tracker {
+        margin-left: 15px;
+        padding-left: 16px;
+        position: relative;
+        font-size: 15px;
+        float: left;
+        cursor: pointer;
+        display: inline;
+        user-select: none;
+    }
+
     #bgm_tv_tracker_link a {
         color: black;
+    }
+
+    &#bgm_tv_tracker .bgm_tv_tracker_info {
+        opacity: 1;
+        pointer-events: auto;
+        top: 100%;
+    }
+
+    &.episodeMarked #bgm_tv_tracker_btn_on_page {
+        color: white;
+        background-color: #00a3d7;
     }
 
     .bgm_tv_tracker_btn.bgm_tv_tracker {
@@ -31,7 +40,7 @@
         height: 28px;
         line-height: 18px;
         text-align: center;
-        width: 80px !important;
+        width: 100px !important;
         transition: all .1s ease-in;
     }
 

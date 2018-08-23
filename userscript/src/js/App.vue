@@ -1,9 +1,15 @@
 <template>
   <div id="bgm_tv_tracker" class="disable"
-       :class="{iqiyi:this.website==='iqiyi', bilibili:this.website==='bilibili'}">
+       :class="{
+          iqiyi: this.website === 'iqiyi',
+          bilibili: this.website === 'bilibili',
+       }">
+    <!--episodeMarked: this.episodeMarked ,-->
     <div class="bgm_tv_tracker_btn bgm_tv_tracker bgm_tv_tracker_radius"
+         id="bgm_tv_tracker_btn_on_page"
          :class="{}"
-         @click="trigger">bgm.tv{{ score }}
+         @click="trigger">
+      bgm.tv{{ score }} {{episodeMarked?'✓':''}}
     </div>
     <div class="bgm_tv_tracker_info">
       <div class="not_found" v-if="!subjectID">
@@ -255,6 +261,7 @@ export default {
           try {
             let ep = eps[episode - 1].id
             vm.$bgmApi.setEpisodeWatched(ep)
+            this.episodeMarked = true
             vm.notify('mark your status successfully')
           } catch (e) {
             vm.notify(e.toString())
@@ -272,7 +279,10 @@ export default {
       let episode = this.episode
       this.collectSubject(this.subjectID)
       this.$bgmApi.setSubjectProgress(this.subjectID, episode).then(
-        () => this.notify('mark status successful'),
+        () => {
+          this.notify('mark status successful')
+          this.episodeMarked = true
+        },
         error => {
           if (error.response.data.code === 400) {
             this.notify('error: ' + error.response.data.error + ',' + '应该是因为你在bgm上的状态已经是看到本集')
