@@ -130,7 +130,7 @@ async def query_subject_id(request: WebRequest):
     else:
         await request.app.db.statistics_missing_bangumi.update_one(
             {'website': website, 'bangumi_id': bangumi_id},
-            {'$inc': {'times': 1}},
+            {'$inc': {'times': 1.0}},
             upsert=True
         )
         raise web.HTTPNotFound()
