@@ -95,8 +95,14 @@ class bilibili {
     setTimeout(detectHrefChange, 5000)
   }
 
-  static getPlayerTime () {
-    return Promise.resolve(gmUnsafeWindow.player.getCurrentTime() / gmUnsafeWindow.player.getDuration())
+  static getPlayerInfo () {
+    return Promise.resolve(
+      {
+        current: gmUnsafeWindow.player.getCurrentTime(),
+        duration: gmUnsafeWindow.player.getDuration(),
+        percent: gmUnsafeWindow.player.getCurrentTime() / gmUnsafeWindow.player.getDuration(),
+      }
+    )
   }
 }
 
@@ -150,11 +156,16 @@ class iQiyi {
     }, false)
   }
 
-  static getPlayerTime () {
+  static getPlayerInfo () {
     return new Promise((resolve) => {
       gmUnsafeWindow._player.getPlayInfo(resolve)
     }).then(info => {
-      return info.currentTime / info.totalDuration * 1000
+      return {
+        current: info.currentTime,
+        duration: info.totalDuration / 1000,
+        percent: info.currentTime / info.totalDuration * 1000,
+      }
+      // return info.currentTime / info.totalDuration * 1000
     })
   }
 }

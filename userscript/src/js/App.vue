@@ -23,7 +23,7 @@
         <p>你正在看:
           <span id="bgm_tv_tracker_title">{{ bangumiName }}</span>
         </p>
-        <p>第 <span id="bgm_tv_tracker_episode">{{ episode + episodeStartWith -1 }}</span> 集</p>
+        <p>第 <span id="bgm_tv_tracker_episode">{{ episode + (episodeStartWith?episodeStartWith:1) -1 }}</span> 集</p>
       </div>
       <br>
       <div id="bgm_tv_tracker_link">
@@ -39,14 +39,23 @@
       </div>
       <br>
       <div v-if="subjectID">
-        <button class="bgm_tv_tracker_radius" id="bgm_tv_tracker_mark_watch" @click="watchEps">标记本集为看过</button>
-        <button class="bgm_tv_tracker_radius" id="bgm_tv_tracker_mark_watched" @click="setWatchProgress">看到本集</button>
+        <button class="bgm_tv_tracker_radius"
+                id="bgm_tv_tracker_mark_watch"
+                @click="watchEps">标记本集为看过
+        </button>
+        <button class="bgm_tv_tracker_radius"
+                id="bgm_tv_tracker_mark_watched"
+                @click="setWatchProgress">看到本集
+        </button>
       </div>
-      <br>
       <br>
       <a :href="reportUrl" target='_blank' rel="noopener noreferrer" style="color: red"><p>报告问题</p></a>
       <!--<br>-->
-      <!--<p>Bangumi ID: {{ bangumiID }}</p>-->
+      <p v-if="!subjectID">"bangumi_id" : "{{ bangumiID }}",</p>
+      <p v-if="!subjectID">"title" : "{{ title }}",</p>
+      <p v-if="!subjectID">"website" : "{{ website }}",</p>
+      <p v-if="!subjectID">"subject" : "",</p>
+
       <!--<p>本集观看进度: {{ (watchPercent * 100).toString().substr(0, 4) }}%</p>-->
       <br>
       <input type="checkbox" v-model="config.autoMarkWatched" id="bgm_tv_tracker_auto_mark_watched">
@@ -296,7 +305,6 @@ export default {
   created () {
     // episode-item
     this.$website.init().then(data => {
-      console.log(data)
       let { subjectID, episode, title, bangumiID, episodeStartWith } = data
       this.subjectID = subjectID
       this.episode = episode
@@ -363,10 +371,11 @@ export default {
       return Promise.reject(error)
     })
     setInterval(() => {
-      this.$website.getPlayerTime().then(percent => {
+      this.$website.getPlayerInfo().then(info => {
+        let { percent, duration } = info
         console.log('get player percent')
         this.watchPercent = percent
-        if (percent > 0.8) {
+        if (percent > 0.8 && (duration > 120)) {
           if (this.config.autoMarkWatched && this.subjectID && !this.episodeMarked) {
             this.episodeMarked = true
             this.watchEps()
