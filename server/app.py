@@ -122,15 +122,15 @@ async def query_subject_id(request: WebRequest):
         )
     collection = request.app.db.get_collection(website)
     e = await collection.find_one({'_id': bangumi_id})
-    await request.app.db.statistics_missing_bangumi.delete_one(
-        {'website': website, 'bangumi_id': bangumi_id},
-    )
     if e:
+        await request.app.db.statistics_missing_bangumi.delete_one(
+            {'website': website, 'bangumi_id': bangumi_id},
+        )
         return web.json_response(e)
     else:
         await request.app.db.statistics_missing_bangumi.update_one(
             {'website': website, 'bangumi_id': bangumi_id},
-            {'$inc': {'times': 1.0}},
+            {'$inc': {'times': 1}},
             upsert=True
         )
         raise web.HTTPNotFound()
@@ -172,10 +172,8 @@ website_template = {
 
 
 async def statistics_missing_bangumi(request: WebRequest):
-    f = await request.app.db.statistics_missing_bangumi.find({},
-                                                             {'_id': 0}
-                                                             ).to_list(
-        500)
+    f = await request.app.db.statistics_missing_bangumi.find({}, {'_id': 0}) \
+        .sort([('times', -1)]).to_list(500)
 
     for item in f:
         item['url'] = website_template.get(item['website'], '{}').format(
