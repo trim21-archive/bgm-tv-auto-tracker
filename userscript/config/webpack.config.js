@@ -87,7 +87,7 @@ let webpackConfig = {
       }
     }),
     new VueLoaderPlugin(),
-
+    new webpack.HashedModuleIdsPlugin(),
   ]
 }
 
