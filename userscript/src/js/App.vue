@@ -58,10 +58,18 @@
 
       <!--<p>本集观看进度: {{ (watchPercent * 100).toString().substr(0, 4) }}%</p>-->
       <br>
-      <input type="checkbox" v-model="config.autoMarkWatched" id="bgm_tv_tracker_auto_mark_watched">
+      <input type="checkbox" v-model="config.autoMarkWatched"
+             id="bgm_tv_tracker_auto_mark_watched">
       <label for="bgm_tv_tracker_auto_mark_watched">
         播放进度大于80%时自动标记为看过
       </label>
+      <br>
+      <input type="checkbox" v-model="config.collectionSubjectWhenMarkStatus"
+             id="bgm_tv_tracker_collection_status_when_watch_status">
+      <label for="bgm_tv_tracker_collection_status_when_watch_status">
+        标记播放进度时把条目标记为在看
+      </label>
+
       <br>
       <div id="bgm_tv_tracker_notification">
         <div v-for="(message, index) in messages" :key="index">
@@ -101,10 +109,23 @@ export default {
     else if (gmUnsafeWindow.location.hostname === 'www.iqiyi.com') {
       website = WEBSITE.iqiyi
     }
+
+    /**
+     * @namespace
+     * @property {object} config
+     * @property {Boolean} collectionSubjectWhenMarkStatus
+     * @property {Boolean} autoMarkWatched
+     */
     let config = gmGetValue('config', false)
     if (config) {
-      config = JSON.parse(config)
+      try {
+        config = JSON.parse(config)
+      } catch (e) {
+        config = {}
+        gmSetValue('config', '{}')
+      }
     }
+
     return {
       tmpSubjectID: null,
       messages: [],
@@ -119,6 +140,7 @@ export default {
       score: '',
       config: {
         autoMarkWatched: config.autoMarkWatched,
+        collectionSubjectWhenMarkStatus: config.collectionSubjectWhenMarkStatus,
       },
       watchPercent: 0,
       episodeMarked: false,
@@ -230,6 +252,7 @@ export default {
     },
 
     collectSubject (subjectID) {
+      if (!this.config.collectionSubjectWhenMarkStatus) return
       let vm = this
       if (!collection[subjectID]) {
         this.$bgmApi.setSubjectCollectionStatus({ subjectID, status: 'do' }).then(
