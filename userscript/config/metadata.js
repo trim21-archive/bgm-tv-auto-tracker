@@ -9,7 +9,7 @@ module.exports = {
   'license': 'MIT',
   'match': [
     'https://www.bilibili.com/bangumi/play/*',
-    'http*://www.iqiyi.com/*',
+    'http*://www.iqiyi.com/*_*.html',
     'https://bangumi-auto-tracker.trim21.cn/oauth_callback*',
     'https://bangumi-auto-tracker.trim21.cn/userscript/options*'
   ],

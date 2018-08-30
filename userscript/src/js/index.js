@@ -20,8 +20,14 @@ let website
 // inject bilibili
 if (gmUnsafeWindow.location.href.startsWith('https://www.bilibili.com/bangumi/play/')) {
   website = 'bilibili'
-  $('#bangumi_detail > div > div.info-right > div.info-title.clearfix > div.func-module.clearfix')
-    .prepend(`<div id='bgm_tv_app'></div>`)
+  if ([
+    1, // 动漫
+    4, // 国创
+    5, // 电视剧
+  ].includes(gmUnsafeWindow.__INITIAL_STATE__.mediaInfo.season_type)) {
+    $('#bangumi_detail > div > div.info-right > div.info-title.clearfix > div.func-module.clearfix')
+      .prepend(`<div id='bgm_tv_app'></div>`)
+  }
 }
 
 // inject iqiyi

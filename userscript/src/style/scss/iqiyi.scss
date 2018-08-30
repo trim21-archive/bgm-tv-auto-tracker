@@ -1,9 +1,6 @@
-
 //#bgm_tv_tracker.disable .bgm_tv_tracker_info {
 //display: none;
 //}
-
-
 
 .iqiyi {
 
@@ -27,12 +24,8 @@
         top: 100%;
     }
 
-    &.episodeMarked #bgm_tv_tracker_btn_on_page {
-        color: white;
-        background-color: #00a3d7;
-    }
-
     .bgm_tv_tracker_btn.bgm_tv_tracker {
+        user-select: none;
         float: left;
         cursor: pointer;
         font-size: 14px;

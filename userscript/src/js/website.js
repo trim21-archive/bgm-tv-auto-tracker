@@ -110,8 +110,8 @@ class iQiyi {
   static init () {
     // console.log(bangumiName)
     let collectionLinkEl = $('#datainfo-navlist > a:nth-child(3)')
-    let bangumiName = collectionLinkEl.html()
-    let title = gmUnsafeWindow.document.title
+    let title = collectionLinkEl.html()
+    // let title = gmUnsafeWindow.document.title
     let collectionLink = collectionLinkEl.attr('href')
     let filename = path.basename(collectionLink)
     let bangumiID = filename.split('.').slice(0, -1).join('.')
@@ -125,15 +125,16 @@ class iQiyi {
           console.log(response)
           let subjectID = response.data.subject_id
           resolve({
-            subjectID, episode, title, bangumiName, bangumiID, episodeStartWith: 1,
+            subjectID, episode, title, bangumiID, episodeStartWith: 1,
           })
         },
-        () => reject({
+        error => reject({
+          error,
           episode,
           title,
           episodeStartWith: 1,
           bangumiID,
-          bangumiName
+          // bangumiName
         })
       )
     })
