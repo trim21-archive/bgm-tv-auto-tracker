@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Bgm.tv auto tracker
 // @namespace   https://trim21.me/
-// @version     0.9.1
+// @version     0.9.2
 // @author      Trim21 <trim21me@gmail.com>
 // @source      https://github.com/Trim21/bilibili-bangumi-tv-auto-tracker
 // @license     MIT
@@ -1353,7 +1353,7 @@ class utils_BgmApi {
 
 let apiServer = external_axios_default.a.create({
   baseURL: URLS.apiServerURL,
-  headers: { 'bgm-tv-auto-tracker': "0.9.1" },
+  headers: { 'bgm-tv-auto-tracker': "0.9.2" },
 })
 
 function parseEpisode (title) {
@@ -1612,7 +1612,7 @@ class website_iQiyi {
 
 
 
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/js/App.vue?vue&type=template&id=61af3bf4&
+// CONCATENATED MODULE: ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/js/App.vue?vue&type=template&id=2ad3bca2&
 var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"disable",class:{
         iqiyi: this.website === 'iqiyi',
         bilibili: this.website === 'bilibili',
@@ -1620,7 +1620,7 @@ var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._sel
 var staticRenderFns = []
 
 
-// CONCATENATED MODULE: ./src/js/App.vue?vue&type=template&id=61af3bf4&
+// CONCATENATED MODULE: ./src/js/App.vue?vue&type=template&id=2ad3bca2&
 
 // CONCATENATED MODULE: ./node_modules/vue-loader/lib??vue-loader-options!./src/js/App.vue?vue&type=script&lang=js&
 //
@@ -1816,7 +1816,6 @@ if (!collection) {
     episode () {
       this.episodeMarked = false
       let vm = this
-      this.collectSubject(this.subjectID)
       vm.$bgmApi.getEps(this.subjectID).then(
         data => {
           let episode = vm.episode
@@ -1900,8 +1899,8 @@ if (!collection) {
       external_$_default()('.bgm_tv_tracker_info').toggle('fast')
     },
     watchEps () {
-      let vm = this
       this.collectSubject(this.subjectID)
+      let vm = this
       vm.$bgmApi.getEps(this.subjectID).then(
         data => {
           let episode = vm.episode
