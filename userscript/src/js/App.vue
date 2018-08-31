@@ -191,7 +191,6 @@ export default {
     episode () {
       this.episodeMarked = false
       let vm = this
-      this.collectSubject(this.subjectID)
       vm.$bgmApi.getEps(this.subjectID).then(
         data => {
           let episode = vm.episode
@@ -275,8 +274,8 @@ export default {
       $('.bgm_tv_tracker_info').toggle('fast')
     },
     watchEps () {
-      let vm = this
       this.collectSubject(this.subjectID)
+      let vm = this
       vm.$bgmApi.getEps(this.subjectID).then(
         data => {
           let episode = vm.episode
