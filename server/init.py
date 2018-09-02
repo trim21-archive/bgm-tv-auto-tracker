@@ -4,14 +4,14 @@ from os import path
 
 import pymongo
 
-from db import mongo_url
+# from db import mongo_url
 
 base_dir = pathlib.Path(path.dirname(__file__))
 
-client = pymongo.MongoClient(mongo_url)
+client = pymongo.MongoClient()
 db = client.get_database('bilibili_bangumi')
 # collection = db.get_collection('bilibili')
-collection = db.get_collection('bangumi_data')
+# collection = db.get_collection('bangumi_data')
 
 with open(base_dir / 'data.json', 'r', encoding='utf-8') as f:
     data = json.load(f)
@@ -38,7 +38,36 @@ for item in data["items"]:
         d['subject_id'] = site_bangumi.get('id', None)
         if 'bangumi_id' in d:
             print(d)
-            db.get_collection(d['website']).update_one({'_id': d['bangumi_id']}, {'$set': {
-                'subject_id': d['subject_id'],
-                'title': d['title']
-            }}, upsert=True)
+            db.get_collection(d['website']).update_one(
+                {'_id': d['bangumi_id']},
+                {'$set': {
+                    'subject_id': d['subject_id'],
+                    'title'     : d['title']
+                }}, upsert=True)
+
+with open(base_dir / 'patch.json', 'r', encoding='utf-8') as f:
+    data = json.load(f)
+for website, items in data.items():
+    for item in items:
+        if item.get('subject_id'):
+            subject_id = item['subject_id']
+        elif item.get('subjectID'):
+            subject_id = item['subjectID']
+        else:
+            subject_id = item['subject'].split('/')[-1]
+        if item.get('bangumi_id'):
+            bangumi_id = item['bangumi_id']
+        elif item.get('bangumiID'):
+            bangumi_id = item['bangumiID']
+        else:
+            raise ValueError('item has no bangumi id')
+        print({
+            '_id'       : bangumi_id,
+            'subject_id': subject_id,
+            'title'     : item['title']
+        })
+        db.get_collection(website).update_one({'_id': bangumi_id},
+                                              {'$set': {
+                                                  'subject_id': subject_id,
+                                                  'title'     : item['title']
+                                              }}, upsert=True)

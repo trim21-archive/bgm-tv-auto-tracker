@@ -85,12 +85,14 @@ async def refresh_auth_token(request: WebRequest, ):
             'client_secret': APP_SECRET,
             'refresh_token': refresh_token,
             'redirect_uri' : callback_url}
-    print(data)
     async with aiohttp.ClientSession() as session:
         async with session.post('https://bgm.tv/oauth/access_token',
                                 json=data) as resp:
-            r = await resp.json()
-        print(r)
+            try:
+                r = await resp.json()
+            except aiohttp.client_exceptions.ContentTypeError:
+                print(await resp.text())
+                return web.json_response({}, status=404)
         if 'error' in r:
             return web.json_response(r)
         r['_id'] = r['user_id']
@@ -150,10 +152,14 @@ async def report_missing_bangumi(request: WebRequest):
     if not v.is_valid():
         return web.json_response(
             {'message': v.str_errors, 'code': 400, 'status': 'error'},
-            status=400)
+            status=400
+        )
     data = v.validated_data
     try:
-        await request.app.db.missing_bangumi.insert_one(data)
+        await request.app.db.statistics_missing_bangumi.update_one(
+            {'bangumi_id': data['bangumiID'], 'website': data['website']},
+            {'subject_id': data['subjectID']},
+        )
         return web.json_response({'status': 'success'}, status=201)
     except Exception as e:
         return web.json_response({'status': 'error', 'message': str(e)},
@@ -161,7 +167,9 @@ async def report_missing_bangumi(request: WebRequest):
 
 
 async def missing_bangumi(request: WebRequest):
-    f = await request.app.db.missing_bangumi.find({}, {'_id': 0}).to_list(30)
+    f = await request.app.db.missing_bangumi.find({}, {'_id': 0}).to_list(100)
+    for item in f:
+        item['subject'] = f'https://bgm.tv/subject/{item["subjectID"]}'
     return web.json_response(f)
 
 
@@ -173,7 +181,7 @@ website_template = {
 
 async def statistics_missing_bangumi(request: WebRequest):
     f = await request.app.db.statistics_missing_bangumi.find({}, {'_id': 0}) \
-        .sort([('times', -1)]).to_list(500)
+        .sort([('times', -1), ('subjectID', 1), ('subject_id', 1)]).to_list(500)
 
     for item in f:
         item['url'] = website_template.get(item['website'], '{}').format(
@@ -222,4 +230,4 @@ def create_app(io_loop=asyncio.get_event_loop()):
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
-    web.run_app(create_app(io_loop=loop), port=6003)
+    web.run_app(create_app(io_loop=loop), port=6004)

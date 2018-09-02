@@ -1,7 +1,132 @@
 {
-  "bilibili": {
+  "bilibili": [
+    {
     "bangumi_id": "25365",
     "title": "逃避虽可耻但有用",
     "subject": "https://bgm.tv/subject/188108"
-  }
+    },
+    {
+      "bangumi_id": "25052",
+      "title": "逃避虽可耻但有用",
+      "subject": "https://bgm.tv/subject/188108"
+    },
+    {
+      "bangumi_id": "24438",
+      "title": "小绿和小蓝",
+      "website": "bilibili",
+      "subject": "https://bgm.tv/subject/242736"
+    },
+    {
+      "bangumi_id": "727",
+      "title": "食梦者",
+      "website": "bilibili",
+      "subject": "https://bgm.tv/subject/3428"
+    },
+    {
+      "bangumi_id": "2915",
+      "title": "食梦者 【中文】",
+      "website": "bilibili",
+      "subject": "https://bgm.tv/subject/3428"
+    },
+    {
+      "bangumi_id": "728",
+      "title": "食梦者。2",
+      "website": "bilibili",
+      "subject": "https://bgm.tv/subject/22588"
+    },
+    {
+      "bangumi_id": "2916",
+      "title": "食梦者。2【中文】",
+      "website": "bilibili",
+      "subject": "https://bgm.tv/subject/22588"
+    },
+    {
+      "bangumi_id": "729",
+      "title": "食梦者。3",
+      "website": "bilibili",
+      "subject": "https://bgm.tv/subject/33352"
+    },
+    {
+      "bangumi_id": "2917",
+      "title": "食梦者。3【中文】",
+      "website": "bilibili",
+      "subject": "https://bgm.tv/subject/33352"
+    },
+    {
+      "bangumi_id": "24053",
+      "title": "非自然死亡",
+      "website": "bilibili",
+      "subject": "https://bgm.tv/subject/225581"
+    },
+    {
+      "bangumi_id": "25235",
+      "title": "欢迎来到加帕里公园",
+      "website": "bilibili",
+      "subject": "https://bgm.tv/subject/256543"
+    },
+    {
+      "bangumi_id": "5636",
+      "title": "RWBY 第四季",
+      "website": "bilibili",
+      "subject": "https://bgm.tv/subject/186257"
+    },
+    {
+      "bangumi_id": "6509",
+      "title": "RWBY 第五季",
+      "website": "bilibili",
+      "subject": "https://bgm.tv/subject/224720"
+    },
+    {
+      "bangumi_id": "2894",
+      "title": "RWBY 第三季",
+      "website": "bilibili",
+      "subject": "https://bgm.tv/subject/138180"
+    },
+    {
+      "bangumi_id": "334",
+      "title": "RWBY 第二季",
+      "website": "bilibili",
+      "subject": "https://bgm.tv/subject/95445"
+    },
+    {
+      "bangumi_id": "333",
+      "title": "RWBY",
+      "website": "bilibili",
+      "subject": "https://bgm.tv/subject/75055"
+    },
+    {
+      "bangumi_id": "24365",
+      "title": "喂，看见耳朵啦 日语版",
+      "website": "bilibili",
+      "subject": "https://bgm.tv/subject/249243"
+    },
+    {
+      "bangumi_id": "24364",
+      "title": "喂，看见耳朵啦",
+      "website": "bilibili",
+      "subject": "https://bgm.tv/subject/249243"
+    },
+    {
+      "bangumiID": "963",
+      "subjectID": "1014",
+      "title": "魔法禁书目录 第一季",
+      "href": "https://www.bilibili.com/bangumi/play/ep83833",
+      "website": "bilibili"
+    },
+    {
+      "bangumiID": "4033",
+      "subjectID": "182215",
+      "title": "RWBY Chibi",
+      "href": "https://www.bilibili.com/bangumi/play/ep88329",
+      "website": "bilibili"
+    }
+  ],
+  "iqiyi": [
+    {
+      "bangumi_id": "a_19rrhc0ofp",
+      "title": "三国演义 动画",
+      "website": "iqiyi",
+      "subject": "https://bgm.tv/subject/29366"
+    }
+  ]
 }
