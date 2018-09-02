@@ -92,7 +92,7 @@ async def refresh_auth_token(request: WebRequest, ):
                 r = await resp.json()
             except aiohttp.client_exceptions.ContentTypeError:
                 print(await resp.text())
-                return web.json_response({}, status=404)
+                return web.json_response({}, status=504)
         if 'error' in r:
             return web.json_response(r)
         r['_id'] = r['user_id']
@@ -166,13 +166,6 @@ async def report_missing_bangumi(request: WebRequest):
                                  status=502)
 
 
-async def missing_bangumi(request: WebRequest):
-    f = await request.app.db.missing_bangumi.find({}, {'_id': 0}).to_list(100)
-    for item in f:
-        item['subject'] = f'https://bgm.tv/subject/{item["subjectID"]}'
-    return web.json_response(f)
-
-
 website_template = {
     'bilibili': 'https://bangumi.bilibili.com/anime/{}',
     'iqiyi'   : 'https://www.iqiyi.com/{}.html'
@@ -181,12 +174,14 @@ website_template = {
 
 async def statistics_missing_bangumi(request: WebRequest):
     f = await request.app.db.statistics_missing_bangumi.find({}, {'_id': 0}) \
-        .sort([('times', -1), ('subjectID', 1), ('subject_id', 1)]).to_list(500)
+        .sort([('times', -1), ('subject_id', 1)]).to_list(500)
 
     for item in f:
-        item['url'] = website_template.get(item['website'], '{}').format(
-            item['bangumi_id']
-        )
+        item['bangumi_url'] = website_template \
+            .get(item['website'], '{}').format(item['bangumi_id'])
+        if item.get('subject_id'):
+            item['subject_url'] = 'https://bgm.tv/subject/{}' \
+                .format(item['subject_id'])
     return web.json_response(f)
 
 
@@ -211,7 +206,6 @@ def create_app(io_loop=asyncio.get_event_loop()):
         web.get('/auth', redirect(oauth_url)),
         web.get('/oauth_callback', get_token),
         web.get('/api/v0.2/querySubjectID', query_subject_id),
-        web.get('/api/v0.1/missing_bangumi', missing_bangumi),
         web.get('/statistics_missing_bangumi', statistics_missing_bangumi),
         web.post('/api/v0.1/refresh_token', refresh_auth_token),
         web.post('/api/v0.1/reportMissingBangumi', report_missing_bangumi),
@@ -230,4 +224,4 @@ def create_app(io_loop=asyncio.get_event_loop()):
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
-    web.run_app(create_app(io_loop=loop), port=6004)
+    web.run_app(create_app(io_loop=loop), port=6003)

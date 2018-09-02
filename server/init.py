@@ -71,3 +71,7 @@ for website, items in data.items():
                                                   'subject_id': subject_id,
                                                   'title'     : item['title']
                                               }}, upsert=True)
+        db.get_collection('missing_bangumi').delete_many({
+            'website'  : website,
+            'bangumiID': bangumi_id
+        })
