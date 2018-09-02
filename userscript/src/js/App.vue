@@ -111,12 +111,15 @@ export default {
     else if (gmUnsafeWindow.location.hostname === 'www.iqiyi.com') {
       website = WEBSITE.iqiyi
     }
+    /**
+     * User Config type
+     * @typedef {Object} Config
+     * @property {Boolean} autoMarkWatched - if mark episode when watch progress is greater than 80%
+     * @property {Boolean} collectionSubjectWhenMarkStatus - if add this subject to collection when mark episode
+     */
 
     /**
-     * @namespace
-     * @property {object} config
-     * @property {Boolean} collectionSubjectWhenMarkStatus
-     * @property {Boolean} autoMarkWatched
+     * @type {Config}
      */
     let config = gmGetValue('config', false)
     if (config) {
@@ -174,9 +177,8 @@ export default {
   },
   watch: {
     config: {
-      handler (val, oldVal) {
+      handler (val) {
         // this.notify(JSON.stringify(val, null, 2))
-        console.log(val)
         gmSetValue('config', JSON.stringify(val))
       },
       deep: true

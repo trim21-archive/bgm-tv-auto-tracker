@@ -1,4 +1,4 @@
-import { gmGetValue, gmSetValue, URLS } from './vars.js'
+import { gmGetValue, gmInfo, gmSetValue, URLS } from './vars.js'
 import axios from 'axios'
 import adapter from 'axios-userscript-adapter'
 
@@ -140,7 +140,7 @@ class BgmApi {
 
 let apiServer = axios.create({
   baseURL: URLS.apiServerURL,
-  headers: { 'bgm-tv-auto-tracker': process.env.version },
+  headers: { 'bgm-tv-auto-tracker': gmInfo.script.version },
 })
 
 function parseEpisode (title) {

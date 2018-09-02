@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Bgm.tv auto tracker
 // @namespace   https://trim21.me/
-// @version     0.9.2
+// @version     0.9.3
 // @author      Trim21 <trim21me@gmail.com>
 // @source      https://github.com/Trim21/bilibili-bangumi-tv-auto-tracker
 // @license     MIT
@@ -1172,11 +1172,17 @@ let gmUnsafeWindow = unsafeWindow
 let gmSetValue = GM_setValue
 let gmGetValue = GM_getValue
 let gmOpenInTab = GM_openInTab
+/**
+ * @namespace
+ * @property {object} script
+ * @property {object} script
+ * @property {string} script.version
+ */
+let gmInfo = GM_info
 /* eslint-enable no-undef, camelcase */
 
 /**
  * @namespace
- * @property {object} URLS
  * @property {string} apiServerURL access token
  * @property {string} callBackUrl
  * @property {number} apiBgmUrl
@@ -1353,7 +1359,7 @@ class utils_BgmApi {
 
 let apiServer = external_axios_default.a.create({
   baseURL: URLS.apiServerURL,
-  headers: { 'bgm-tv-auto-tracker': "0.9.2" },
+  headers: { 'bgm-tv-auto-tracker': gmInfo.script.version },
 })
 
 function parseEpisode (title) {
@@ -1612,17 +1618,19 @@ class website_iQiyi {
 
 
 
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/js/App.vue?vue&type=template&id=2ad3bca2&
+// CONCATENATED MODULE: ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/js/App.vue?vue&type=template&id=b9c1cd4c&
 var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"disable",class:{
         iqiyi: this.website === 'iqiyi',
         bilibili: this.website === 'bilibili',
-     },attrs:{"id":"bgm_tv_tracker"}},[_c('div',{staticClass:"bgm_tv_tracker_btn bgm_tv_tracker bgm_tv_tracker_radius",class:{},attrs:{"id":"bgm_tv_tracker_btn_on_page"},on:{"click":_vm.trigger}},[_vm._v("\n    bgm.tv"+_vm._s(_vm.score)+" "+_vm._s(_vm.episodeMarked?'✓':'')+"\n  ")]),_vm._v(" "),_c('div',{staticClass:"bgm_tv_tracker_info"},[(!_vm.subjectID)?_c('div',{staticClass:"not_found"},[_c('label',[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.tmpSubjectID),expression:"tmpSubjectID"}],staticClass:"subject",attrs:{"type":"text","placeholder":"条目ID或者对应条目链接"},domProps:{"value":(_vm.tmpSubjectID)},on:{"input":function($event){if($event.target.composing){ return; }_vm.tmpSubjectID=$event.target.value}}}),_vm._v(" "),_c('button',{staticClass:"notfound",on:{"click":_vm.userSubmitSubjectID}},[_vm._v("submit subject id")])])]):_vm._e(),_vm._v(" "),_c('br'),_vm._v(" "),_c('div',[_c('p',[_vm._v("你正在看:\n        "),_c('span',{attrs:{"id":"bgm_tv_tracker_title"}},[_vm._v(_vm._s(_vm.bangumiName))])]),_vm._v(" "),_c('p',[_vm._v("第 "),_c('span',{attrs:{"id":"bgm_tv_tracker_episode"}},[_vm._v(_vm._s(_vm.episode + (_vm.episodeStartWith?_vm.episodeStartWith:1) -1))]),_vm._v(" 集")])]),_vm._v(" "),_c('br'),_vm._v(" "),_c('div',{attrs:{"id":"bgm_tv_tracker_link"}},[(_vm.episodeID)?_c('a',{attrs:{"href":("https://bgm.tv/ep/" + _vm.episodeID),"target":"_blank","rel":"noopener noreferrer"}},[_vm._v("吐槽本集")]):_vm._e(),_vm._v(" "),_c('br'),_vm._v(" "),_c('br'),_vm._v(" "),(_vm.subjectID)?_c('a',{attrs:{"href":("https://bgm.tv/subject/" + _vm.subjectID),"target":"_blank","rel":"noopener noreferrer"}},[_vm._v("subject/"+_vm._s(_vm.subjectID))]):_c('a',{attrs:{"href":("https://bgm.tv/subject_search/" + _vm.title + "?cat=2"),"target":"_blank","rel":"noopener noreferrer"}},[_vm._v("search in bgm.tv")])]),_vm._v(" "),_c('br'),_vm._v(" "),(_vm.subjectID)?_c('div',[_c('button',{staticClass:"bgm_tv_tracker_radius",attrs:{"id":"bgm_tv_tracker_mark_watch"},on:{"click":_vm.watchEps}},[_vm._v("标记本集为看过\n      ")]),_vm._v(" "),_c('button',{staticClass:"bgm_tv_tracker_radius",attrs:{"id":"bgm_tv_tracker_mark_watched"},on:{"click":_vm.setWatchProgress}},[_vm._v("看到本集\n      ")])]):_vm._e(),_vm._v(" "),_c('br'),_vm._v(" "),_c('a',{staticStyle:{"color":"red"},attrs:{"href":_vm.reportUrl,"target":"_blank","rel":"noopener noreferrer"}},[_c('p',[_vm._v("报告问题")])]),_vm._v(" "),(!_vm.subjectID)?_c('p',[_vm._v("\"bangumi_id\" : \""+_vm._s(_vm.bangumiID)+"\",")]):_vm._e(),_vm._v(" "),(!_vm.subjectID)?_c('p',[_vm._v("\"title\" : \""+_vm._s(_vm.title)+"\",")]):_vm._e(),_vm._v(" "),(!_vm.subjectID)?_c('p',[_vm._v("\"website\" : \""+_vm._s(_vm.website)+"\",")]):_vm._e(),_vm._v(" "),(!_vm.subjectID)?_c('p',[_vm._v("\"subject\" : \"\",")]):_vm._e(),_vm._v(" "),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.config.autoMarkWatched),expression:"config.autoMarkWatched"}],attrs:{"type":"checkbox","id":"bgm_tv_tracker_auto_mark_watched"},domProps:{"checked":Array.isArray(_vm.config.autoMarkWatched)?_vm._i(_vm.config.autoMarkWatched,null)>-1:(_vm.config.autoMarkWatched)},on:{"change":function($event){var $$a=_vm.config.autoMarkWatched,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(_vm.config, "autoMarkWatched", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(_vm.config, "autoMarkWatched", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(_vm.config, "autoMarkWatched", $$c)}}}}),_vm._v(" "),_c('label',{attrs:{"for":"bgm_tv_tracker_auto_mark_watched"}},[_vm._v("\n      播放进度大于80%时自动标记为看过\n    ")]),_vm._v(" "),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.config.collectionSubjectWhenMarkStatus),expression:"config.collectionSubjectWhenMarkStatus"}],attrs:{"type":"checkbox","id":"bgm_tv_tracker_collection_status_when_watch_status"},domProps:{"checked":Array.isArray(_vm.config.collectionSubjectWhenMarkStatus)?_vm._i(_vm.config.collectionSubjectWhenMarkStatus,null)>-1:(_vm.config.collectionSubjectWhenMarkStatus)},on:{"change":function($event){var $$a=_vm.config.collectionSubjectWhenMarkStatus,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(_vm.config, "collectionSubjectWhenMarkStatus", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(_vm.config, "collectionSubjectWhenMarkStatus", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(_vm.config, "collectionSubjectWhenMarkStatus", $$c)}}}}),_vm._v(" "),_c('label',{attrs:{"for":"bgm_tv_tracker_collection_status_when_watch_status"}},[_vm._v("\n      标记播放进度时把条目标记为在看\n    ")]),_vm._v(" "),_c('br'),_vm._v(" "),_c('div',{attrs:{"id":"bgm_tv_tracker_notification"}},_vm._l((_vm.messages),function(message,index){return _c('div',{key:index},[_c('hr'),_vm._v(" "),_c('div',[_c('p',[_vm._v("\n          "+_vm._s(message.time.getHours())+":"+_vm._s(message.time.getMinutes())+":"+_vm._s(message.time.getSeconds())+"\n        ")]),_vm._v(" "),_c('pre',[_c('code',[_vm._v(_vm._s(message.text))])])])])}))])])}
-var staticRenderFns = []
+     },attrs:{"id":"bgm_tv_tracker"}},[_c('div',{staticClass:"bgm_tv_tracker_btn bgm_tv_tracker bgm_tv_tracker_radius",class:{},attrs:{"id":"bgm_tv_tracker_btn_on_page"},on:{"click":_vm.trigger}},[_vm._v("\n    bgm.tv"+_vm._s(_vm.score)+" "+_vm._s(_vm.episodeMarked?'✓':'')+"\n  ")]),_vm._v(" "),_c('div',{staticClass:"bgm_tv_tracker_info"},[(!_vm.subjectID)?_c('div',{staticClass:"not_found"},[_c('label',[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.tmpSubjectID),expression:"tmpSubjectID"}],staticClass:"subject",attrs:{"type":"text","placeholder":"条目ID或者对应条目链接"},domProps:{"value":(_vm.tmpSubjectID)},on:{"input":function($event){if($event.target.composing){ return; }_vm.tmpSubjectID=$event.target.value}}}),_vm._v(" "),_c('button',{staticClass:"notfound",on:{"click":_vm.userSubmitSubjectID}},[_vm._v("submit subject id")])])]):_vm._e(),_vm._v(" "),_c('br'),_vm._v(" "),_c('div',[_c('p',[_vm._v("你正在看:\n        "),_c('span',{attrs:{"id":"bgm_tv_tracker_title"}},[_vm._v(_vm._s(_vm.bangumiName))])]),_vm._v(" "),_c('p',[_vm._v("第 "),_c('span',{attrs:{"id":"bgm_tv_tracker_episode"}},[_vm._v(_vm._s(_vm.episode + (_vm.episodeStartWith?_vm.episodeStartWith:1) -1))]),_vm._v(" 集")])]),_vm._v(" "),_c('br'),_vm._v(" "),_c('div',{attrs:{"id":"bgm_tv_tracker_link"}},[(_vm.episodeID)?_c('a',{attrs:{"href":("https://bgm.tv/ep/" + _vm.episodeID),"target":"_blank","rel":"noopener noreferrer"}},[_vm._v("吐槽本集")]):_vm._e(),_vm._v(" "),_c('br'),_vm._v(" "),_c('br'),_vm._v(" "),(_vm.subjectID)?_c('a',{attrs:{"href":("https://bgm.tv/subject/" + _vm.subjectID),"target":"_blank","rel":"noopener noreferrer"}},[_vm._v("subject/"+_vm._s(_vm.subjectID))]):_c('a',{attrs:{"href":("https://bgm.tv/subject_search/" + _vm.title + "?cat=2"),"target":"_blank","rel":"noopener noreferrer"}},[_vm._v("search in bgm.tv")])]),_vm._v(" "),_c('br'),_vm._v(" "),(_vm.subjectID)?_c('div',[_c('button',{staticClass:"bgm_tv_tracker_radius",attrs:{"id":"bgm_tv_tracker_mark_watch"},on:{"click":_vm.watchEps}},[_vm._v("标记本集为看过\n      ")]),_vm._v(" "),_c('button',{staticClass:"bgm_tv_tracker_radius",attrs:{"id":"bgm_tv_tracker_mark_watched"},on:{"click":_vm.setWatchProgress}},[_vm._v("看到本集\n      ")])]):_vm._e(),_vm._v(" "),_c('br'),_vm._v(" "),_c('a',{staticStyle:{"color":"red"},attrs:{"href":_vm.reportUrl,"target":"_blank","rel":"noopener noreferrer"}},[_c('p',[_vm._v("报告问题")])]),_vm._v(" "),_vm._m(0),_vm._v(" "),(!_vm.subjectID)?_c('p',[_vm._v("\"bangumi_id\" : \""+_vm._s(_vm.bangumiID)+"\",")]):_vm._e(),_vm._v(" "),(!_vm.subjectID)?_c('p',[_vm._v("\"title\" : \""+_vm._s(_vm.title)+"\",")]):_vm._e(),_vm._v(" "),(!_vm.subjectID)?_c('p',[_vm._v("\"website\" : \""+_vm._s(_vm.website)+"\",")]):_vm._e(),_vm._v(" "),(!_vm.subjectID)?_c('p',[_vm._v("\"subject\" : \"\",")]):_vm._e(),_vm._v(" "),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.config.autoMarkWatched),expression:"config.autoMarkWatched"}],attrs:{"type":"checkbox","id":"bgm_tv_tracker_auto_mark_watched"},domProps:{"checked":Array.isArray(_vm.config.autoMarkWatched)?_vm._i(_vm.config.autoMarkWatched,null)>-1:(_vm.config.autoMarkWatched)},on:{"change":function($event){var $$a=_vm.config.autoMarkWatched,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(_vm.config, "autoMarkWatched", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(_vm.config, "autoMarkWatched", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(_vm.config, "autoMarkWatched", $$c)}}}}),_vm._v(" "),_c('label',{attrs:{"for":"bgm_tv_tracker_auto_mark_watched"}},[_vm._v("\n      播放进度大于80%时自动标记为看过\n    ")]),_vm._v(" "),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.config.collectionSubjectWhenMarkStatus),expression:"config.collectionSubjectWhenMarkStatus"}],attrs:{"type":"checkbox","id":"bgm_tv_tracker_collection_status_when_watch_status"},domProps:{"checked":Array.isArray(_vm.config.collectionSubjectWhenMarkStatus)?_vm._i(_vm.config.collectionSubjectWhenMarkStatus,null)>-1:(_vm.config.collectionSubjectWhenMarkStatus)},on:{"change":function($event){var $$a=_vm.config.collectionSubjectWhenMarkStatus,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(_vm.config, "collectionSubjectWhenMarkStatus", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(_vm.config, "collectionSubjectWhenMarkStatus", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(_vm.config, "collectionSubjectWhenMarkStatus", $$c)}}}}),_vm._v(" "),_c('label',{attrs:{"for":"bgm_tv_tracker_collection_status_when_watch_status"}},[_vm._v("\n      标记播放进度时把条目标记为在看\n    ")]),_vm._v(" "),_c('br'),_vm._v(" "),_c('div',{attrs:{"id":"bgm_tv_tracker_notification"}},_vm._l((_vm.messages),function(message,index){return _c('div',{key:index},[_c('hr'),_vm._v(" "),_c('div',[_c('p',[_vm._v("\n          "+_vm._s(message.time.getHours())+":"+_vm._s(message.time.getMinutes())+":"+_vm._s(message.time.getSeconds())+"\n        ")]),_vm._v(" "),_c('pre',[_c('code',[_vm._v(_vm._s(message.text))])])])])}))])])}
+var staticRenderFns = [function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('a',{staticStyle:{"color":"red"},attrs:{"href":"https://github.com/Trim21/bgm-tv-auto-tracker/blob/master/docs/user_info_collection.md","target":"_blank","rel":"noopener noreferrer"}},[_c('p',[_vm._v("关于信息收集")])])}]
 
 
-// CONCATENATED MODULE: ./src/js/App.vue?vue&type=template&id=2ad3bca2&
+// CONCATENATED MODULE: ./src/js/App.vue?vue&type=template&id=b9c1cd4c&
 
 // CONCATENATED MODULE: ./node_modules/vue-loader/lib??vue-loader-options!./src/js/App.vue?vue&type=script&lang=js&
+//
+//
 //
 //
 //
@@ -1734,12 +1742,15 @@ if (!collection) {
     else if (gmUnsafeWindow.location.hostname === 'www.iqiyi.com') {
       website = WEBSITE.iqiyi
     }
+    /**
+     * User Config type
+     * @typedef {Object} Config
+     * @property {Boolean} autoMarkWatched - if mark episode when watch progress is greater than 80%
+     * @property {Boolean} collectionSubjectWhenMarkStatus - if add this subject to collection when mark episode
+     */
 
     /**
-     * @namespace
-     * @property {object} config
-     * @property {Boolean} collectionSubjectWhenMarkStatus
-     * @property {Boolean} autoMarkWatched
+     * @type {Config}
      */
     let config = gmGetValue('config', false)
     if (config) {
@@ -1797,9 +1808,8 @@ if (!collection) {
   },
   watch: {
     config: {
-      handler (val, oldVal) {
+      handler (val) {
         // this.notify(JSON.stringify(val, null, 2))
-        console.log(val)
         gmSetValue('config', JSON.stringify(val))
       },
       deep: true
@@ -1813,8 +1823,12 @@ if (!collection) {
           vm.bangumiName = response.data.name_cn || response.data.name
         })
     },
+    bangumiID () {
+      this.episodeMarked = false
+    },
     episode () {
       this.episodeMarked = false
+      if (!this.subjectID) return
       let vm = this
       vm.$bgmApi.getEps(this.subjectID).then(
         data => {
@@ -1983,10 +1997,11 @@ if (!collection) {
         console.log(error)
         vm.episode = error.episode
         if (error.bangumiID !== vm.bangumiID) {
-          if (!error.subjectID) {
-            this.subjectID = undefined
-          }
+          vm.subjectID = undefined
           vm.bangumiID = error.bangumiID
+          vm.title = error.title
+          vm.episodeStartWith = error.episodeStartWith
+          vm.episode = error.episode
         }
       })
 

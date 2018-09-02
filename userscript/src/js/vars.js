@@ -3,11 +3,17 @@ let gmUnsafeWindow = unsafeWindow
 let gmSetValue = GM_setValue
 let gmGetValue = GM_getValue
 let gmOpenInTab = GM_openInTab
+/**
+ * @namespace
+ * @property {object} script
+ * @property {object} script
+ * @property {string} script.version
+ */
+let gmInfo = GM_info
 /* eslint-enable no-undef, camelcase */
 
 /**
  * @namespace
- * @property {object} URLS
  * @property {string} apiServerURL access token
  * @property {string} callBackUrl
  * @property {number} apiBgmUrl
@@ -35,4 +41,4 @@ const WEBSITE = {
   iqiyi: 'iqiyi',
 }
 
-export { WEBSITE, gmSetValue, gmGetValue, gmOpenInTab, gmUnsafeWindow, URLS }
+export { WEBSITE, gmSetValue, gmGetValue, gmOpenInTab, gmUnsafeWindow, URLS, gmInfo }

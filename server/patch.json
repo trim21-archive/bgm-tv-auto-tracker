@@ -2,411 +2,115 @@
   "bilibili": [
     {
       "bangumi_id": "25365",
-      "title": "逃避虽可耻但有用",
-      "subject": "https://bgm.tv/subject/188108"
+      "subject_id": "188108",
+      "title": "逃避虽可耻但有用"
     },
     {
       "bangumi_id": "25052",
-      "title": "逃避虽可耻但有用",
-      "subject": "https://bgm.tv/subject/188108"
+      "subject_id": "188108",
+      "title": "逃避虽可耻但有用"
     },
     {
       "bangumi_id": "24438",
-      "title": "小绿和小蓝",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/242736"
-    },
-    {
-      "bangumi_id": "727",
-      "title": "食梦者",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/3428"
-    },
-    {
-      "bangumi_id": "2915",
-      "title": "食梦者 【中文】",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/3428"
-    },
-    {
-      "bangumi_id": "728",
-      "title": "食梦者。2",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/22588"
-    },
-    {
-      "bangumi_id": "2916",
-      "title": "食梦者。2【中文】",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/22588"
-    },
-    {
-      "bangumi_id": "729",
-      "title": "食梦者。3",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/33352"
-    },
-    {
-      "bangumi_id": "2917",
-      "title": "食梦者。3【中文】",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/33352"
+      "subject_id": "242736",
+      "title": "小绿和小蓝"
     },
     {
       "bangumi_id": "24053",
-      "title": "非自然死亡",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/225581"
-    },
-    {
-      "bangumi_id": "25235",
-      "title": "欢迎来到加帕里公园",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/256543"
+      "subject_id": "225581",
+      "title": "非自然死亡"
     },
     {
       "bangumi_id": "333",
-      "title": "RWBY",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/75055"
+      "subject_id": "75055",
+      "title": "RWBY"
     },
     {
       "bangumi_id": "334",
-      "title": "RWBY 第二季",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/95445"
+      "subject_id": "95445",
+      "title": "RWBY 第二季"
     },
     {
       "bangumi_id": "2894",
-      "title": "RWBY 第三季",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/138180"
+      "subject_id": "138180",
+      "title": "RWBY 第三季"
     },
     {
       "bangumi_id": "5636",
-      "title": "RWBY 第四季",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/186257"
+      "subject_id": "186257",
+      "title": "RWBY 第四季"
     },
     {
       "bangumi_id": "6509",
-      "title": "RWBY 第五季",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/224720"
+      "subject_id": "224720",
+      "title": "RWBY 第五季"
     },
     {
       "bangumi_id": "24365",
-      "title": "喂，看见耳朵啦 日语版",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/249243"
+      "subject_id": "249243",
+      "title": "喂，看见耳朵啦 日语版"
     },
     {
       "bangumi_id": "24364",
-      "title": "喂，看见耳朵啦",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/249243"
+      "subject_id": "249243",
+      "title": "喂，看见耳朵啦"
     },
     {
-      "bangumiID": "963",
-      "subjectID": "1014",
-      "title": "魔法禁书目录 第一季",
-      "href": "https://www.bilibili.com/bangumi/play/ep83833",
-      "website": "bilibili"
+      "bangumi_id": "3795",
+      "subject_id": "35679",
+      "title": "魔法少女奈叶 The MOVIE 2nd A’s"
     },
     {
-      "bangumiID": "4033",
-      "subjectID": "182215",
-      "title": "RWBY Chibi",
-      "href": "https://www.bilibili.com/bangumi/play/ep88329",
-      "website": "bilibili"
+      "bangumi_id": "1180",
+      "subject_id": "37874",
+      "title": "CLANNAD ～AFTER STORY～另一个世界 杏篇"
     },
     {
-      "bangumiID": "3795",
-      "subjectID": "35679",
-      "title": "魔法少女奈叶 The MOVIE 2nd A’s",
-      "href": "https://www.bilibili.com/bangumi/play/ep86542",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/35679"
+      "bangumi_id": "5051",
+      "subject_id": "178884",
+      "title": "星之梦～星之人～"
     },
     {
-      "bangumiID": "1632",
-      "subjectID": "23681",
-      "title": "DOG DAYS'",
-      "href": "https://www.bilibili.com/bangumi/play/ep116086",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/23681"
+      "bangumi_id": "20302",
+      "subject_id": "211906",
+      "title": "地球脉动"
     },
     {
-      "bangumiID": "645",
-      "subjectID": "55110",
-      "title": "我的妹妹是大阪大妈",
-      "href": "https://www.bilibili.com/bangumi/play/ep11710",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/55110"
+      "bangumi_id": "24709",
+      "subject_id": "253831",
+      "title": "百鬼幼儿园"
     },
     {
-      "bangumiID": "2688",
-      "subjectID": "927",
-      "title": "秒速五厘米",
-      "href": "https://www.bilibili.com/bangumi/play/ep86701",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/927"
+      "bangumi_id": "2844",
+      "subject_id": "118908",
+      "title": "境界的彼方 -I'LL BE HERE- 未来篇"
     },
     {
-      "bangumiID": "1180",
-      "subjectID": "37874",
-      "title": "CLANNAD ～AFTER STORY～另一个世界 杏篇",
-      "href": "https://www.bilibili.com/bangumi/play/ep34518",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/37874"
+      "bangumi_id": "6373",
+      "subject_id": "44461",
+      "title": "纳米核心 第一季"
     },
     {
-      "bangumiID": "1293",
-      "subjectID": "276",
-      "title": "幸运星",
-      "href": "https://www.bilibili.com/bangumi/play/ep35624",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/276"
+      "bangumi_id": "2990",
+      "subject_id": "145734",
+      "title": "恐怖！僵尸猫"
     },
     {
-      "bangumiID": "4181",
-      "subjectID": "84873",
-      "title": "漆黑的子弹",
-      "href": "https://www.bilibili.com/bangumi/play/ep102179",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/84873"
+      "bangumi_id": "3366",
+      "subject_id": "107476",
+      "title": "境界的彼方 -I'LL BE HERE- 过去篇"
     },
     {
-      "bangumiID": "5051",
-      "subjectID": "178884",
-      "title": "星之梦～星之人～",
-      "href": "https://www.bilibili.com/bangumi/play/ep102180",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/178884"
-    },
-    {
-      "bangumiID": "20302",
-      "subjectID": "211906",
-      "title": "地球脉动",
-      "href": "https://www.bilibili.com/bangumi/play/ep121262?from=search&seid=8813470976562077122",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/211906"
-    },
-    {
-      "bangumiID": "451",
-      "subjectID": "58850",
-      "title": "恋爱研究所",
-      "href": "https://www.bilibili.com/bangumi/play/ep8326",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/58850"
-    },
-    {
-      "bangumiID": "5402",
-      "subjectID": "148361",
-      "title": "当女孩遇到熊",
-      "href": "https://www.bilibili.com/bangumi/play/ep212306",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/148361"
-    },
-    {
-      "bangumiID": "24709",
-      "subjectID": "253831",
-      "title": "百鬼幼儿园",
-      "href": "https://www.bilibili.com/bangumi/play/ep244425",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/253831"
-    },
-    {
-      "bangumiID": "6012",
-      "subjectID": "210811",
-      "title": "快把我哥带走",
-      "href": "https://www.bilibili.com/bangumi/play/ep106770",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/210811"
-    },
-    {
-      "bangumiID": "686",
-      "subjectID": "23685",
-      "title": "加速世界",
-      "href": "https://www.bilibili.com/bangumi/play/ep62728",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/23685"
-    },
-    {
-      "bangumiID": "930",
-      "subjectID": "19021",
-      "title": "+TIC模型姐妹",
-      "href": "https://www.bilibili.com/bangumi/play/ep89482",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/19021"
-    },
-    {
-      "bangumiID": "4524",
-      "subjectID": "42253",
-      "title": "是魔法使的话就吃味噌",
-      "href": "https://www.bilibili.com/bangumi/play/ep88976",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/42253"
-    },
-    {
-      "bangumiID": "1332",
-      "subjectID": "2982",
-      "title": "出租魔法使",
-      "href": "https://www.bilibili.com/bangumi/play/ep24677",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/2982"
-    },
-    {
-      "bangumiID": "3135",
-      "subjectID": "75702",
-      "title": "归宅部活动记录",
-      "href": "https://www.bilibili.com/bangumi/play/ep80880",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/75702"
-    },
-    {
-      "bangumiID": "2677",
-      "subjectID": "29307",
-      "title": "境界线上的地平线II",
-      "href": "https://www.bilibili.com/bangumi/play/ep65620",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/29307"
-    },
-    {
-      "bangumiID": "2844",
-      "subjectID": "118908",
-      "title": "境界的彼方 -I'LL BE HERE- 未来篇",
-      "href": "https://www.bilibili.com/bangumi/play/ep86059",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/118908"
-    },
-    {
-      "bangumiID": "3467",
-      "subjectID": "23119",
-      "title": "命运石之门 负荷领域的既视感",
-      "href": "https://www.bilibili.com/bangumi/play/ep85276",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/23119"
-    },
-    {
-      "bangumiID": "3242",
-      "subjectID": "38040",
-      "title": "Little Busters!",
-      "href": "https://www.bilibili.com/bangumi/play/ep82086",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/38040"
-    },
-    {
-      "bangumiID": "2660",
-      "subjectID": "5436",
-      "title": "我的妹妹不可能那么可爱 第一季",
-      "href": "https://www.bilibili.com/bangumi/play/ep65144",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/5436"
-    },
-    {
-      "bangumiID": "2661",
-      "subjectID": "37898",
-      "title": "我的妹妹不可能那么可爱 第二季",
-      "href": "https://www.bilibili.com/bangumi/play/ep65191",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/37898"
-    },
-    {
-      "bangumiID": "6373",
-      "subjectID": "44461",
-      "title": "纳米核心 第一季",
-      "href": "https://www.bilibili.com/bangumi/play/ep113569",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/44461"
-    },
-    {
-      "bangumiID": "2450",
-      "subjectID": "28288",
-      "title": "铁臂阿童木 2003",
-      "href": "https://www.bilibili.com/bangumi/play/ep59545",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/28288"
-    },
-    {
-      "bangumiID": "2990",
-      "subjectID": "145734",
-      "title": "恐怖！僵尸猫",
-      "href": "https://www.bilibili.com/bangumi/play/ep82685",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/145734"
-    },
-    {
-      "bangumiID": "4388",
-      "subjectID": "61962",
-      "title": "机巧少女不会受伤",
-      "href": "https://www.bilibili.com/bangumi/play/ep100819",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/61962"
-    },
-    {
-      "bangumiID": "1181",
-      "subjectID": "799",
-      "title": "悠久之翼",
-      "href": "https://www.bilibili.com/bangumi/play/ep21472",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/799"
-    },
-    {
-      "bangumiID": "1302",
-      "subjectID": "798",
-      "title": "SOLA",
-      "href": "https://www.bilibili.com/bangumi/play/ep102457",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/798"
-    },
-    {
-      "bangumiID": "5854",
-      "subjectID": "204251",
-      "title": "超游世界",
-      "href": "https://www.bilibili.com/bangumi/play/ep107548",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/204251"
-    },
-    {
-      "bangumiID": "1920",
-      "subjectID": "973",
-      "title": "月咏-MOON PHASE-",
-      "href": "https://www.bilibili.com/bangumi/play/ep41446",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/973"
-    },
-    {
-      "bangumiID": "1539",
-      "subjectID": "54433",
-      "title": "我的青春恋爱物语果然有问题。",
-      "href": "https://www.bilibili.com/bangumi/play/ep32242",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/54433"
-    },
-    {
-      "bangumiID": "3489",
-      "subjectID": "68022",
-      "title": "Infinite Stratos 2",
-      "href": "https://www.bilibili.com/bangumi/play/ep85433",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/68022"
-    },
-    {
-      "bangumiID": "3366",
-      "subjectID": "107476",
-      "title": "境界的彼方 -I'LL BE HERE- 过去篇",
-      "href": "https://www.bilibili.com/bangumi/play/ep85692",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/107476"
+      "bangumi_id": "25443",
+      "subject_id": "170415",
+      "title": "小马宝莉：友谊的魔力 第六季 (中配）"
     }
   ],
   "iqiyi": [
     {
       "bangumi_id": "a_19rrhc0ofp",
-      "title": "三国演义 动画",
-      "website": "iqiyi",
-      "subject": "https://bgm.tv/subject/29366"
+      "subject_id": "29366",
+      "title": "三国演义 动画"
     }
   ]
 }
