@@ -50,6 +50,8 @@
       </div>
       <br>
       <a :href="reportUrl" target='_blank' rel="noopener noreferrer" style="color: red"><p>报告问题</p></a>
+      <a href="https://github.com/Trim21/bgm-tv-auto-tracker/blob/master/docs/user_info_collection.md"
+         target='_blank' rel="noopener noreferrer" style="color: red"><p>关于信息收集</p></a>
       <!--<br>-->
       <p v-if="!subjectID">"bangumi_id" : "{{ bangumiID }}",</p>
       <p v-if="!subjectID">"title" : "{{ title }}",</p>
