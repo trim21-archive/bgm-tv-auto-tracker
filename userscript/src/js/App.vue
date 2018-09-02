@@ -188,8 +188,12 @@ export default {
           vm.bangumiName = response.data.name_cn || response.data.name
         })
     },
+    bangumiID () {
+      this.episodeMarked = false
+    },
     episode () {
       this.episodeMarked = false
+      if (!this.subjectID) return
       let vm = this
       vm.$bgmApi.getEps(this.subjectID).then(
         data => {
@@ -358,10 +362,11 @@ export default {
         console.log(error)
         vm.episode = error.episode
         if (error.bangumiID !== vm.bangumiID) {
-          if (!error.subjectID) {
-            this.subjectID = undefined
-          }
+          vm.subjectID = undefined
           vm.bangumiID = error.bangumiID
+          vm.title = error.title
+          vm.episodeStartWith = error.episodeStartWith
+          vm.episode = error.episode
         }
       })
 
