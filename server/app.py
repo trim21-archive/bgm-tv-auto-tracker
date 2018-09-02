@@ -158,7 +158,9 @@ async def report_missing_bangumi(request: WebRequest):
     try:
         await request.app.db.statistics_missing_bangumi.update_one(
             {'bangumi_id': data['bangumiID'], 'website': data['website']},
-            {'subject_id': data['subjectID']},
+            {'$set': {'subject_id': data['subjectID'],
+                      'title'     : data['title'],
+                      'href'      : data['href']}},
         )
         return web.json_response({'status': 'success'}, status=201)
     except Exception as e:

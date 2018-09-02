@@ -1,9 +1,9 @@
 {
   "bilibili": [
     {
-    "bangumi_id": "25365",
-    "title": "逃避虽可耻但有用",
-    "subject": "https://bgm.tv/subject/188108"
+      "bangumi_id": "25365",
+      "title": "逃避虽可耻但有用",
+      "subject": "https://bgm.tv/subject/188108"
     },
     {
       "bangumi_id": "25052",
@@ -65,6 +65,24 @@
       "subject": "https://bgm.tv/subject/256543"
     },
     {
+      "bangumi_id": "333",
+      "title": "RWBY",
+      "website": "bilibili",
+      "subject": "https://bgm.tv/subject/75055"
+    },
+    {
+      "bangumi_id": "334",
+      "title": "RWBY 第二季",
+      "website": "bilibili",
+      "subject": "https://bgm.tv/subject/95445"
+    },
+    {
+      "bangumi_id": "2894",
+      "title": "RWBY 第三季",
+      "website": "bilibili",
+      "subject": "https://bgm.tv/subject/138180"
+    },
+    {
       "bangumi_id": "5636",
       "title": "RWBY 第四季",
       "website": "bilibili",
@@ -75,24 +93,6 @@
       "title": "RWBY 第五季",
       "website": "bilibili",
       "subject": "https://bgm.tv/subject/224720"
-    },
-    {
-      "bangumi_id": "2894",
-      "title": "RWBY 第三季",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/138180"
-    },
-    {
-      "bangumi_id": "334",
-      "title": "RWBY 第二季",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/95445"
-    },
-    {
-      "bangumi_id": "333",
-      "title": "RWBY",
-      "website": "bilibili",
-      "subject": "https://bgm.tv/subject/75055"
     },
     {
       "bangumi_id": "24365",
