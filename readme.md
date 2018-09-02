@@ -1,38 +1,38 @@
-# bangumi progress auto tracker
-
-暂定这么个名字吧
+# bgm.tv auto tracker
 
 ## 介绍
 
-在b站看番剧的同时一键在bgm.tv上标记已经看过的集数.
+在b站看番剧的同时一键在[bgm.tv](https://bgm.tv/)上标记已经看过的集数.
 
 ## 使用
 
+首先安装[tampermonkey](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo)
+
+然后安装此脚本
 https://greasyfork.org/zh-CN/scripts/369643-bgm-tv-auto-tracker 
 
-安装后去 
-[https://bgm.tv/oauth/authorize](https://bgm.tv/oauth/authorize?client_id=bgm2775b2797b4d958b&response_type=code&redirect_uri=https://bangumi-auto-tracker.trim21.cn/oauth_callback)
-进行授权 
+去[https://bgm.tv/oauth/authorize](https://bgm
+.tv/oauth/authorize?client_id=bgm2775b2797b4d958b&response_type=code&redirect_uri=https://bangumi-auto-tracker.trim21.cn/oauth_callback)
+进行授权, 授权后即可正常使用。
 
 效果图 
 
 ![](./screenshot/bilibili.png) 
 ![](./screenshot/iqiyi.png) 
 
-不要试图加载`extension`文件夹, 里面是陈年代码
+## 信息收集
+
+在你的使用过程中, bgm.tv auto tracker会收集有限的信息来帮助自己变得更好.
+
+[更多详情](./docs/user_info_collection.md)
 
 ## 开发
 
-现在bangumi提供了官方api,又可以继续施工了.
-
-bilibili部分已经完工了
-现已支持iqiyi
+现已支持bilibili和iqiyi
 
 欢迎贡献代码
 
-
-
-server文件夹内是python服务端,基于python3.6.5的aiohttp
+server文件夹内是python服务端,基于python>=3.6.5的aiohttp
 
 ```bash
 cd userscript
