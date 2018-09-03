@@ -18,10 +18,13 @@ python:
 
 install:
 - pip install -r server/requirements.txt
-
+- pip install pytest-aiohttp pytest-mock codecov
 before_script:
 #- sleep 15
 - mongo bilibili_bangumi --eval 'db.createUser({user:"travis",pwd:"test",roles:["readWrite"]});'
 
 script:
-- python -m unittest server_tests/test_api.py
+- coverage run -m pytest server_tests
+
+after_success:
+- codecov

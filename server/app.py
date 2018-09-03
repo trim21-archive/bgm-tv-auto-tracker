@@ -39,8 +39,9 @@ class TypeMongoClient(object):
 
 
 class TypeApp(web.Application):
-    mongo: TypeMongoClient
     db: TypeDatabase
+    mongo: TypeMongoClient
+    client_session: aiohttp.ClientSession
 
 
 class WebRequest(web.Request):
@@ -53,25 +54,26 @@ async def get_token(request: WebRequest, ):
     if not code:
         raise web.HTTPFound(location=oauth_url)
 
-    async with aiohttp.ClientSession() as session:
-        async with session.post('https://bgm.tv/oauth/access_token',
-                                data={'grant_type'   : 'authorization_code',
-                                      'client_id'    : APP_ID,
-                                      'client_secret': APP_SECRET,
-                                      'code'         : code,
-                                      'redirect_uri' : callback_url}) as resp:
-            try:
-                r = await resp.json()
-            except aiohttp.client_exceptions.ContentTypeError:
-                raise web.HTTPFound(oauth_url)
-        if 'error' in r:
-            return web.json_response(r, status=400)
-        r['auth_time'] = int(parser.parse(resp.headers['Date']).timestamp())
-
-        await request.app.db.token.update_one({'_id': r['user_id']},
-                                              {'$set': r}, upsert=True)
-        return aiohttp_jinja2.render_template('post_to_extension.html', request,
-                                              {'data': json.dumps(r), })
+    async with request.app.client_session.post(
+        'https://bgm.tv/oauth/access_token',
+        data={'grant_type'   : 'authorization_code',
+              'client_id'    : APP_ID,
+              'client_secret': APP_SECRET,
+              'code'         : code,
+              'redirect_uri' : callback_url}) as resp:
+        try:
+            r = await resp.json()
+        except aiohttp.client_exceptions.ContentTypeError:
+            raise web.HTTPFound(oauth_url)
+    if 'error' in r:
+        return web.json_response(r, status=400)
+    r['auth_time'] = int(parser.parse(resp.headers['Date']).timestamp())
+    await request.app.db.token.find_one({'_id': r['user_id']})
+    await request.app.db.token.update_one({'_id': r['user_id']},
+                                          {'$set': r},
+                                          upsert=True)
+    return aiohttp_jinja2.render_template('post_to_extension.html', request,
+                                          {'data': json.dumps(r), })
 
 
 async def refresh_auth_token(request: WebRequest, ):
@@ -85,34 +87,19 @@ async def refresh_auth_token(request: WebRequest, ):
             'client_secret': APP_SECRET,
             'refresh_token': refresh_token,
             'redirect_uri' : callback_url}
-    async with aiohttp.ClientSession() as session:
-        async with session.post('https://bgm.tv/oauth/access_token',
-                                json=data) as resp:
-            try:
-                r = await resp.json()
-            except aiohttp.client_exceptions.ContentTypeError:
-                print(await resp.text())
-                return web.json_response({}, status=504)
-        if 'error' in r:
-            return web.json_response(r)
-        r['_id'] = r['user_id']
-        r['auth_time'] = int(parser.parse(resp.headers['Date']).timestamp())
-
-        await request.app.db.token.update_one({'_id': r['_id']}, {'$set': r},
-                                              upsert=True)
+    async with request.app.client_session \
+        .post('https://bgm.tv/oauth/access_token', json=data) as resp:
+        try:
+            r = await resp.json()
+        except aiohttp.client_exceptions.ContentTypeError:
+            return web.json_response({}, status=504)
+    if 'error' in r:
         return web.json_response(r)
-
-
-async def aio_get(url, headers=None):
-    async with aiohttp.ClientSession(headers=headers) as session:
-        async with session.get(url) as resp:
-            return await resp.json()
-
-
-async def aio_post(url, data=None, headers=None):
-    async with aiohttp.ClientSession(headers=headers) as session:
-        async with session.post(url, data=data) as resp:
-            return await resp.json()
+    r['_id'] = r['user_id']
+    r['auth_time'] = int(parser.parse(resp.headers['Date']).timestamp())
+    await request.app.db.token.update_one({'_id': r['_id']}, {'$set': r},
+                                          upsert=True)
+    return web.json_response(r)
 
 
 async def query_subject_id(request: WebRequest):
@@ -139,19 +126,22 @@ async def query_subject_id(request: WebRequest):
 
 
 class ReportMissingBangumiValidator(Validator):
-    bangumiID = StringField(strict=False)
-    subjectID = StringField()
-    title = StringField()
-    href = StringField()
-    website = EnumField(choices=['bilibili', 'iqiyi'])
+    bangumiID = StringField(strict=False, required=True)
+    subjectID = StringField(required=True)
+    title = StringField(required=True)
+    href = StringField(required=True)
+    website = EnumField(choices=['bilibili', 'iqiyi'], required=True)
 
 
 async def report_missing_bangumi(request: WebRequest):
     data = await request.json()
     v = ReportMissingBangumiValidator(data)
+
     if not v.is_valid():
         return web.json_response(
-            {'message': v.str_errors, 'code': 400, 'status': 'error'},
+            {'message': v.str_errors,
+             'code'   : 400,
+             'status' : 'error'},
             status=400
         )
     data = v.validated_data
@@ -162,9 +152,10 @@ async def report_missing_bangumi(request: WebRequest):
                       'title'     : data['title'],
                       'href'      : data['href']}},
         )
-        return web.json_response({'status': 'success'}, status=201)
+        return web.json_response({'status': 'success'})
     except Exception as e:
-        return web.json_response({'status': 'error', 'message': str(e)},
+        return web.json_response({'status' : 'error',
+                                  'message': str(e)},
                                  status=502)
 
 
@@ -194,10 +185,20 @@ def redirect(location):
     return r
 
 
+import aiohttp.http
+
+
+async def clean_up(app):
+    await app.client_session.close()
+
+
 def create_app(io_loop=asyncio.get_event_loop()):
     app = web.Application(
         # middlewares=[error_middleware, ]
     )
+
+    app.on_cleanup.append(clean_up)
+    app.client_session = aiohttp.ClientSession(loop=io_loop)
     setup_mongo(app, io_loop)
     aiohttp_jinja2.setup(app,
                          loader=jinja2.FileSystemLoader(
