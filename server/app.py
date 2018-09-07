@@ -166,7 +166,14 @@ website_template = {
 
 
 async def statistics_missing_bangumi(request: WebRequest):
-    f = await request.app.db.statistics_missing_bangumi.find({}, {'_id': 0}) \
+    subject = request.query.get('subject_id')
+    condition = {}
+    if subject == 'true':
+        condition['subject_id'] = {'$exists': True}
+    elif subject == 'false':
+        condition['subject_id'] = {'$exists': False}
+    f = await request.app.db.statistics_missing_bangumi \
+        .find(condition, {'_id': 0}) \
         .sort([('times', -1), ('subject_id', 1)]).to_list(500)
 
     for item in f:
