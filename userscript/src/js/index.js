@@ -39,20 +39,31 @@ if (gmUnsafeWindow.location.hostname === 'www.iqiyi.com') {
   }
 }
 
+/**
+ *
+ * @param {string} websiteName
+ * @returns {iQiyi|bilibili}
+ */
+function getWebsiteClass (websiteName) {
+  if (website === 'iqiyi') return iQiyi
+  if (website === 'bilibili') return bilibili
+}
+
 if ($('#bgm_tv_app')) {
   getAuth().then(
     auth => {
-      if (auth) {
+      if (auth && auth.hasOwnProperty('access_token')) {
+        console.log(auth)
         /* eslint-disable unused-def */
         /**
          * @type {BgmApi}
          */
         Vue.prototype.$bgmApi = new BgmApi({ accessToken: auth.access_token })
+        // Vue.prototype.$bgmApi = new BgmApi({ accessToken: undefined })
         Vue.prototype.$http = axios
         /* eslint-enable unused-def */
         if (website) {
-          if (website === 'bilibili') Vue.prototype.$website = bilibili
-          if (website === 'iqiyi') Vue.prototype.$website = iQiyi
+          Vue.prototype.$website = getWebsiteClass(website)
           // eslint-disable-next-line no-new
           new Vue({
             el: '#bgm_tv_app',

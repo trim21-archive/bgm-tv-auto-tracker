@@ -1,3 +1,16 @@
+/**
+ * @typedef {Object} AxiosResponse
+ * @property {Object} data
+ * @property {Object} headers
+ * @property {Object} config
+ * @property {Object} request
+ * @property {number} code
+ * @property {string} statusText
+ */
+/**
+ * @typedef {Object} AxiosError
+ * @property {AxiosResponse} response
+ */
 import { gmGetValue, gmInfo, gmSetValue, URLS } from './vars.js'
 import axios from 'axios'
 import adapter from 'axios-userscript-adapter'
@@ -17,6 +30,14 @@ function sortEps (eps) {
 class BgmApi {
   constructor ({ accessToken, serverRoot = 'https://api.bgm.tv' }) {
     this.access_token = accessToken
+    /**
+     * @namespace
+     * @property {Object} interceptors
+     * @property {Object} interceptors.response
+     * @property {Object} interceptors.request
+     * @property {function} interceptors.response.use
+     * @property {function} interceptors.request.use
+     */
     this.http = axios.create({
       baseURL: serverRoot,
       headers: { Authorization: 'Bearer ' + this.access_token },
@@ -106,6 +127,20 @@ class BgmApi {
     })
   }
 
+  /**
+   * @typedef {AxiosResponse} SubjectResponse
+   * @property {Object} data
+   * @property {Object} data.rating
+   * @property {string} data.name_cn
+   * @property {string} data.name
+   * @property {number} data.rating.score
+   */
+
+  /**
+   *
+   * @param subjectID
+   * @returns {Promise<SubjectResponse, AxiosError>}
+   */
   getSubject (subjectID) {
     return new Promise((resolve, reject) => {
       this.http.get(`/subject/${subjectID}`).then(
@@ -217,4 +252,28 @@ function getAuth () {
   // return auth
 }
 
-export { BgmApi, axios, apiServer, parseEpisode, saveAuth, getAuth }
+/**
+ * User Config type
+ * @typedef {Object} Config
+ * @property {Boolean} autoMarkWatched - if mark episode when watch progress is greater than 80%
+ * @property {Boolean} collectionSubjectWhenMarkStatus - if add this subject to collection when mark episode
+ */
+
+/**
+ *
+ * @returns {Config}
+ */
+function getConfig () {
+  let rawConfig = gmGetValue('config', false)
+  if (rawConfig) {
+    try {
+      rawConfig = JSON.parse(rawConfig)
+    } catch (e) {
+      gmSetValue('config', '{}')
+      rawConfig = {}
+    }
+  }
+  return rawConfig
+}
+
+export { BgmApi, axios, apiServer, parseEpisode, saveAuth, getAuth, getConfig }

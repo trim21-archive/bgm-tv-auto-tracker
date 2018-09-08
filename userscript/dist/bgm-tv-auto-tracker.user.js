@@ -13,7 +13,6 @@
 // @require     https://cdn.bootcss.com/axios/0.18.0/axios.min.js
 // @require     https://cdn.jsdelivr.net/npm/axios-userscript-adapter@0.0.3/dist/axiosGmxhrAdapter.min.js
 // @require     https://cdn.bootcss.com/vue/2.5.16/vue.min.js
-// @require     https://cdn.bootcss.com/axios/0.18.0/axios.min.js
 // @grant       GM_addStyle
 // @grant       GM_setValue
 // @grant       GM_getValue
@@ -114,429 +113,6 @@
 /******/ })
 /************************************************************************/
 /******/ ({
-
-/***/ "33yf":
-/***/ (function(module, exports, __webpack_require__) {
-
-/* WEBPACK VAR INJECTION */(function(process) {// Copyright Joyent, Inc. and other Node contributors.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to permit
-// persons to whom the Software is furnished to do so, subject to the
-// following conditions:
-//
-// The above copyright notice and this permission notice shall be included
-// in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-// USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-// resolves . and .. elements in a path array with directory names there
-// must be no slashes, empty elements, or device names (c:\) in the array
-// (so also no leading and trailing slashes - it does not distinguish
-// relative and absolute paths)
-function normalizeArray(parts, allowAboveRoot) {
-  // if the path tries to go above the root, `up` ends up > 0
-  var up = 0;
-  for (var i = parts.length - 1; i >= 0; i--) {
-    var last = parts[i];
-    if (last === '.') {
-      parts.splice(i, 1);
-    } else if (last === '..') {
-      parts.splice(i, 1);
-      up++;
-    } else if (up) {
-      parts.splice(i, 1);
-      up--;
-    }
-  }
-
-  // if the path is allowed to go above the root, restore leading ..s
-  if (allowAboveRoot) {
-    for (; up--; up) {
-      parts.unshift('..');
-    }
-  }
-
-  return parts;
-}
-
-// Split a filename into [root, dir, basename, ext], unix version
-// 'root' is just a slash, or nothing.
-var splitPathRe =
-    /^(\/?|)([\s\S]*?)((?:\.{1,2}|[^\/]+?|)(\.[^.\/]*|))(?:[\/]*)$/;
-var splitPath = function(filename) {
-  return splitPathRe.exec(filename).slice(1);
-};
-
-// path.resolve([from ...], to)
-// posix version
-exports.resolve = function() {
-  var resolvedPath = '',
-      resolvedAbsolute = false;
-
-  for (var i = arguments.length - 1; i >= -1 && !resolvedAbsolute; i--) {
-    var path = (i >= 0) ? arguments[i] : process.cwd();
-
-    // Skip empty and invalid entries
-    if (typeof path !== 'string') {
-      throw new TypeError('Arguments to path.resolve must be strings');
-    } else if (!path) {
-      continue;
-    }
-
-    resolvedPath = path + '/' + resolvedPath;
-    resolvedAbsolute = path.charAt(0) === '/';
-  }
-
-  // At this point the path should be resolved to a full absolute path, but
-  // handle relative paths to be safe (might happen when process.cwd() fails)
-
-  // Normalize the path
-  resolvedPath = normalizeArray(filter(resolvedPath.split('/'), function(p) {
-    return !!p;
-  }), !resolvedAbsolute).join('/');
-
-  return ((resolvedAbsolute ? '/' : '') + resolvedPath) || '.';
-};
-
-// path.normalize(path)
-// posix version
-exports.normalize = function(path) {
-  var isAbsolute = exports.isAbsolute(path),
-      trailingSlash = substr(path, -1) === '/';
-
-  // Normalize the path
-  path = normalizeArray(filter(path.split('/'), function(p) {
-    return !!p;
-  }), !isAbsolute).join('/');
-
-  if (!path && !isAbsolute) {
-    path = '.';
-  }
-  if (path && trailingSlash) {
-    path += '/';
-  }
-
-  return (isAbsolute ? '/' : '') + path;
-};
-
-// posix version
-exports.isAbsolute = function(path) {
-  return path.charAt(0) === '/';
-};
-
-// posix version
-exports.join = function() {
-  var paths = Array.prototype.slice.call(arguments, 0);
-  return exports.normalize(filter(paths, function(p, index) {
-    if (typeof p !== 'string') {
-      throw new TypeError('Arguments to path.join must be strings');
-    }
-    return p;
-  }).join('/'));
-};
-
-
-// path.relative(from, to)
-// posix version
-exports.relative = function(from, to) {
-  from = exports.resolve(from).substr(1);
-  to = exports.resolve(to).substr(1);
-
-  function trim(arr) {
-    var start = 0;
-    for (; start < arr.length; start++) {
-      if (arr[start] !== '') break;
-    }
-
-    var end = arr.length - 1;
-    for (; end >= 0; end--) {
-      if (arr[end] !== '') break;
-    }
-
-    if (start > end) return [];
-    return arr.slice(start, end - start + 1);
-  }
-
-  var fromParts = trim(from.split('/'));
-  var toParts = trim(to.split('/'));
-
-  var length = Math.min(fromParts.length, toParts.length);
-  var samePartsLength = length;
-  for (var i = 0; i < length; i++) {
-    if (fromParts[i] !== toParts[i]) {
-      samePartsLength = i;
-      break;
-    }
-  }
-
-  var outputParts = [];
-  for (var i = samePartsLength; i < fromParts.length; i++) {
-    outputParts.push('..');
-  }
-
-  outputParts = outputParts.concat(toParts.slice(samePartsLength));
-
-  return outputParts.join('/');
-};
-
-exports.sep = '/';
-exports.delimiter = ':';
-
-exports.dirname = function(path) {
-  var result = splitPath(path),
-      root = result[0],
-      dir = result[1];
-
-  if (!root && !dir) {
-    // No dirname whatsoever
-    return '.';
-  }
-
-  if (dir) {
-    // It has a dirname, strip trailing slash
-    dir = dir.substr(0, dir.length - 1);
-  }
-
-  return root + dir;
-};
-
-
-exports.basename = function(path, ext) {
-  var f = splitPath(path)[2];
-  // TODO: make this comparison case-insensitive on windows?
-  if (ext && f.substr(-1 * ext.length) === ext) {
-    f = f.substr(0, f.length - ext.length);
-  }
-  return f;
-};
-
-
-exports.extname = function(path) {
-  return splitPath(path)[3];
-};
-
-function filter (xs, f) {
-    if (xs.filter) return xs.filter(f);
-    var res = [];
-    for (var i = 0; i < xs.length; i++) {
-        if (f(xs[i], i, xs)) res.push(xs[i]);
-    }
-    return res;
-}
-
-// String.prototype.substr - negative index don't work in IE8
-var substr = 'ab'.substr(-1) === 'b'
-    ? function (str, start, len) { return str.substr(start, len) }
-    : function (str, start, len) {
-        if (start < 0) start = str.length + start;
-        return str.substr(start, len);
-    }
-;
-
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__("8oxB")))
-
-/***/ }),
-
-/***/ "8oxB":
-/***/ (function(module, exports) {
-
-// shim for using process in browser
-var process = module.exports = {};
-
-// cached from whatever global is present so that test runners that stub it
-// don't break things.  But we need to wrap it in a try catch in case it is
-// wrapped in strict mode code which doesn't define any globals.  It's inside a
-// function because try/catches deoptimize in certain engines.
-
-var cachedSetTimeout;
-var cachedClearTimeout;
-
-function defaultSetTimout() {
-    throw new Error('setTimeout has not been defined');
-}
-function defaultClearTimeout () {
-    throw new Error('clearTimeout has not been defined');
-}
-(function () {
-    try {
-        if (typeof setTimeout === 'function') {
-            cachedSetTimeout = setTimeout;
-        } else {
-            cachedSetTimeout = defaultSetTimout;
-        }
-    } catch (e) {
-        cachedSetTimeout = defaultSetTimout;
-    }
-    try {
-        if (typeof clearTimeout === 'function') {
-            cachedClearTimeout = clearTimeout;
-        } else {
-            cachedClearTimeout = defaultClearTimeout;
-        }
-    } catch (e) {
-        cachedClearTimeout = defaultClearTimeout;
-    }
-} ())
-function runTimeout(fun) {
-    if (cachedSetTimeout === setTimeout) {
-        //normal enviroments in sane situations
-        return setTimeout(fun, 0);
-    }
-    // if setTimeout wasn't available but was latter defined
-    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
-        cachedSetTimeout = setTimeout;
-        return setTimeout(fun, 0);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedSetTimeout(fun, 0);
-    } catch(e){
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
-            return cachedSetTimeout.call(null, fun, 0);
-        } catch(e){
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
-            return cachedSetTimeout.call(this, fun, 0);
-        }
-    }
-
-
-}
-function runClearTimeout(marker) {
-    if (cachedClearTimeout === clearTimeout) {
-        //normal enviroments in sane situations
-        return clearTimeout(marker);
-    }
-    // if clearTimeout wasn't available but was latter defined
-    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
-        cachedClearTimeout = clearTimeout;
-        return clearTimeout(marker);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedClearTimeout(marker);
-    } catch (e){
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
-            return cachedClearTimeout.call(null, marker);
-        } catch (e){
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
-            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
-            return cachedClearTimeout.call(this, marker);
-        }
-    }
-
-
-
-}
-var queue = [];
-var draining = false;
-var currentQueue;
-var queueIndex = -1;
-
-function cleanUpNextTick() {
-    if (!draining || !currentQueue) {
-        return;
-    }
-    draining = false;
-    if (currentQueue.length) {
-        queue = currentQueue.concat(queue);
-    } else {
-        queueIndex = -1;
-    }
-    if (queue.length) {
-        drainQueue();
-    }
-}
-
-function drainQueue() {
-    if (draining) {
-        return;
-    }
-    var timeout = runTimeout(cleanUpNextTick);
-    draining = true;
-
-    var len = queue.length;
-    while(len) {
-        currentQueue = queue;
-        queue = [];
-        while (++queueIndex < len) {
-            if (currentQueue) {
-                currentQueue[queueIndex].run();
-            }
-        }
-        queueIndex = -1;
-        len = queue.length;
-    }
-    currentQueue = null;
-    draining = false;
-    runClearTimeout(timeout);
-}
-
-process.nextTick = function (fun) {
-    var args = new Array(arguments.length - 1);
-    if (arguments.length > 1) {
-        for (var i = 1; i < arguments.length; i++) {
-            args[i - 1] = arguments[i];
-        }
-    }
-    queue.push(new Item(fun, args));
-    if (queue.length === 1 && !draining) {
-        runTimeout(drainQueue);
-    }
-};
-
-// v8 likes predictible objects
-function Item(fun, array) {
-    this.fun = fun;
-    this.array = array;
-}
-Item.prototype.run = function () {
-    this.fun.apply(null, this.array);
-};
-process.title = 'browser';
-process.browser = true;
-process.env = {};
-process.argv = [];
-process.version = ''; // empty string to avoid regexp issues
-process.versions = {};
-
-function noop() {}
-
-process.on = noop;
-process.addListener = noop;
-process.once = noop;
-process.off = noop;
-process.removeListener = noop;
-process.removeAllListeners = noop;
-process.emit = noop;
-process.prependListener = noop;
-process.prependOnceListener = noop;
-
-process.listeners = function (name) { return [] }
-
-process.binding = function (name) {
-    throw new Error('process.binding is not supported');
-};
-
-process.cwd = function () { return '/' };
-process.chdir = function (dir) {
-    throw new Error('process.chdir is not supported');
-};
-process.umask = function() { return 0; };
-
-
-/***/ }),
 
 /***/ "9tPo":
 /***/ (function(module, exports) {
@@ -1168,6 +744,45 @@ var external_$_default = /*#__PURE__*/__webpack_require__.n(external_$_);
 
 // CONCATENATED MODULE: ./src/js/vars.js
 /* eslint-disable no-undef, camelcase */
+/**
+ * @typedef {window} Window
+ * @property {boolean|undefined} bgm_tv_debug
+ * @property {function(string, function)} addEventListener
+ * @property {Object} document
+ * @property {string} document.title
+ * @property {Object} location
+ * @property {string} location.href
+ * @property {string} location.protocol
+ * @property {string} location.host
+ * @property {string} location.pathname
+ */
+
+/**
+ * @typedef {Window} BiliWindow
+ * @property {Object} __INITIAL_STATE__
+ * @property {string} __INITIAL_STATE__.mediaInfo.season_id
+ * @property {Object[]} __INITIAL_STATE__.epList
+ * @property {Object} __INITIAL_STATE__.epInfo
+ */
+
+/**
+ * @typedef {Object} iQiyiVideoInfo
+ * @property {number} currentTime
+ * @property {number} totalDuration
+ */
+
+/**
+ * @typedef {Window} IqiyiWindow
+ * @property {Object} player
+ * @property {function} player.getCurrentTime
+ * @property {function} player.getDuration
+ * @property {Object} _player
+ * @property {function(function) : iQiyiVideoInfo} _player.getPlayInfo
+ */
+
+/**
+ * @type {BiliWindow|IqiyiWindow}
+ */
 let gmUnsafeWindow = unsafeWindow
 let gmSetValue = GM_setValue
 let gmGetValue = GM_getValue
@@ -1193,7 +808,7 @@ const URLS = {
   callBackUrl: 'https://bangumi-auto-tracker.trim21.cn/oauth_callback',
   apiBgmUrl: 'https://api.bgm.tv',
   authURL: 'https://bgm.tv/oauth/authorize?client_id=bgm2775b2797b4d958b&response_type=code&redirect_uri' +
-    '=https://bangumi-auto-tracker.trim21.cn/oauth_callback',
+  '=https://bangumi-auto-tracker.trim21.cn/oauth_callback',
 }
 
 if (window.TM_ENV === 'dev') {
@@ -1202,7 +817,7 @@ if (window.TM_ENV === 'dev') {
     callBackUrl: 'http://localhost:6001/oauth_callback',
     apiBgmUrl: 'https://api.bgm.tv',
     authURL: 'https://bgm.tv/oauth/authorize?client_id=bgm2955b3b3050e7bf2&response_type=code&redirect_uri' +
-      '=http://localhost:6001/oauth_callback',
+    '=http://localhost:6001/oauth_callback',
   })
 }
 const WEBSITE = {
@@ -1217,6 +832,19 @@ var external_axiosGmxhrAdapter_ = __webpack_require__("CFBl");
 var external_axiosGmxhrAdapter_default = /*#__PURE__*/__webpack_require__.n(external_axiosGmxhrAdapter_);
 
 // CONCATENATED MODULE: ./src/js/utils.js
+/**
+ * @typedef {Object} AxiosResponse
+ * @property {Object} data
+ * @property {Object} headers
+ * @property {Object} config
+ * @property {Object} request
+ * @property {number} code
+ * @property {string} statusText
+ */
+/**
+ * @typedef {Object} AxiosError
+ * @property {AxiosResponse} response
+ */
 
 
 
@@ -1236,6 +864,14 @@ function sortEps (eps) {
 class utils_BgmApi {
   constructor ({ accessToken, serverRoot = 'https://api.bgm.tv' }) {
     this.access_token = accessToken
+    /**
+     * @namespace
+     * @property {Object} interceptors
+     * @property {Object} interceptors.response
+     * @property {Object} interceptors.request
+     * @property {function} interceptors.response.use
+     * @property {function} interceptors.request.use
+     */
     this.http = external_axios_default.a.create({
       baseURL: serverRoot,
       headers: { Authorization: 'Bearer ' + this.access_token },
@@ -1325,6 +961,20 @@ class utils_BgmApi {
     })
   }
 
+  /**
+   * @typedef {AxiosResponse} SubjectResponse
+   * @property {Object} data
+   * @property {Object} data.rating
+   * @property {string} data.name_cn
+   * @property {string} data.name
+   * @property {number} data.rating.score
+   */
+
+  /**
+   *
+   * @param subjectID
+   * @returns {Promise<SubjectResponse, AxiosError>}
+   */
   getSubject (subjectID) {
     return new Promise((resolve, reject) => {
       this.http.get(`/subject/${subjectID}`).then(
@@ -1436,14 +1086,33 @@ function getAuth () {
   // return auth
 }
 
+/**
+ * User Config type
+ * @typedef {Object} Config
+ * @property {Boolean} autoMarkWatched - if mark episode when watch progress is greater than 80%
+ * @property {Boolean} collectionSubjectWhenMarkStatus - if add this subject to collection when mark episode
+ */
+
+/**
+ *
+ * @returns {Config}
+ */
+function getConfig () {
+  let rawConfig = gmGetValue('config', false)
+  if (rawConfig) {
+    try {
+      rawConfig = JSON.parse(rawConfig)
+    } catch (e) {
+      gmSetValue('config', '{}')
+      rawConfig = {}
+    }
+  }
+  return rawConfig
+}
 
 
-// EXTERNAL MODULE: ./node_modules/path-browserify/index.js
-var path_browserify = __webpack_require__("33yf");
-var path_browserify_default = /*#__PURE__*/__webpack_require__.n(path_browserify);
 
 // CONCATENATED MODULE: ./src/js/website.js
-
 
 
 
@@ -1459,8 +1128,6 @@ class website_bilibili {
     const status = gmUnsafeWindow.__INITIAL_STATE__
     const episode = gmUnsafeWindow.__INITIAL_STATE__.epList
       .findIndex(val => {
-        console.log(val)
-        console.log(gmUnsafeWindow.__INITIAL_STATE__.epInfo.index)
         return val.index === gmUnsafeWindow.__INITIAL_STATE__.epInfo.index
       }) + 1
     console.log(episode)
@@ -1558,7 +1225,8 @@ class website_iQiyi {
     let title = collectionLinkEl.html()
     // let title = gmUnsafeWindow.document.title
     let collectionLink = collectionLinkEl.attr('href')
-    let filename = path_browserify_default.a.basename(collectionLink)
+    let filename = collectionLink.split('/')
+    filename = filename[filename.length - 1]
     let bangumiID = filename.split('.').slice(0, -1).join('.')
     let episode = parseEpisode(title)
 
@@ -1618,7 +1286,7 @@ class website_iQiyi {
 
 
 
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/js/App.vue?vue&type=template&id=b9c1cd4c&
+// CONCATENATED MODULE: ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/js/App.vue?vue&type=template&id=7ffa48ec&
 var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"disable",class:{
         iqiyi: this.website === 'iqiyi',
         bilibili: this.website === 'bilibili',
@@ -1626,7 +1294,7 @@ var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._sel
 var staticRenderFns = [function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('a',{staticStyle:{"color":"red"},attrs:{"href":"https://github.com/Trim21/bgm-tv-auto-tracker/blob/master/docs/user_info_collection.md","target":"_blank","rel":"noopener noreferrer"}},[_c('p',[_vm._v("关于信息收集")])])}]
 
 
-// CONCATENATED MODULE: ./src/js/App.vue?vue&type=template&id=b9c1cd4c&
+// CONCATENATED MODULE: ./src/js/App.vue?vue&type=template&id=7ffa48ec&
 
 // CONCATENATED MODULE: ./node_modules/vue-loader/lib??vue-loader-options!./src/js/App.vue?vue&type=script&lang=js&
 //
@@ -1742,25 +1410,7 @@ if (!collection) {
     else if (gmUnsafeWindow.location.hostname === 'www.iqiyi.com') {
       website = WEBSITE.iqiyi
     }
-    /**
-     * User Config type
-     * @typedef {Object} Config
-     * @property {Boolean} autoMarkWatched - if mark episode when watch progress is greater than 80%
-     * @property {Boolean} collectionSubjectWhenMarkStatus - if add this subject to collection when mark episode
-     */
-
-    /**
-     * @type {Config}
-     */
-    let config = gmGetValue('config', false)
-    if (config) {
-      try {
-        config = JSON.parse(config)
-      } catch (e) {
-        config = {}
-        gmSetValue('config', '{}')
-      }
-    }
+    let config = getConfig()
 
     return {
       tmpSubjectID: null,
@@ -1786,7 +1436,8 @@ if (!collection) {
   computed: {
     reportUrl () {
       let baseURL = 'https://github.com/Trim21/bilibili-bangumi-tv-auto-tracker/issues/new'
-      let hrefWithoutHash = location.protocol + '//' + location.host + location.pathname
+      let hrefWithoutHash = gmUnsafeWindow.location.protocol + '//'
+        + gmUnsafeWindow.location.host + gmUnsafeWindow.location.pathname
       let body =
         `问题页面: [${this.bangumiName}](${hrefWithoutHash})` + '\n' +
         `Bangumi ID: ${this.bangumiID}` + '\n' +
@@ -1912,55 +1563,47 @@ if (!collection) {
     trigger () {
       external_$_default()('.bgm_tv_tracker_info').toggle('fast')
     },
-    watchEps () {
+    async watchEps () {
       this.collectSubject(this.subjectID)
       let vm = this
-      vm.$bgmApi.getEps(this.subjectID).then(
-        data => {
-          let episode = vm.episode
-          let eps = data.eps.filter(val => Number.isInteger(Number(val.sort)) && (parseInt(val.type, 10) === 0))
-
-
-          eps = eps.sort(function (a, b) {
+      try {
+        let data = await vm.$bgmApi.getEps(this.subjectID)
+        let episode = vm.episode
+        let eps = data.eps
+          .filter(val => Number.isInteger(Number(val.sort)) && (parseInt(val.type, 10) === 0))
+          .sort(function (a, b) {
             let key = 'sort'
             let x = a[key]
             let y = b[key]
             return ((x < y) ? -1 : ((x > y) ? 1 : 0))
           })
-
-          try {
-            let ep = eps[episode - 1].id
-            vm.$bgmApi.setEpisodeWatched(ep)
-            this.episodeMarked = true
-            vm.notify('mark your status successfully')
-          } catch (e) {
-            vm.notify(e.toString())
-          }
-
-        },
-        error => {
-          vm.notify('233')
-          vm.notify(JSON.stringify(error))
-        })
-      // .catch(reason => vm.notify(JSON.stringify(reason)))
-
+        let ep = eps[episode - 1].id
+        await vm.$bgmApi.setEpisodeWatched(ep)
+        this.episodeMarked = true
+        vm.notify('mark your status successfully')
+      } catch (error) {
+        if (error.response.status === 401) {
+          vm.notify('授权已过期 请重新授权')
+          gmOpenInTab(URLS.authURL, { active: true })
+        }
+        vm.notify(error.toString())
+        vm.notify(JSON.stringify(error))
+      }
     },
-    setWatchProgress () {
+    async setWatchProgress () {
       let episode = this.episode
       this.collectSubject(this.subjectID)
-      this.$bgmApi.setSubjectProgress(this.subjectID, episode).then(
-        () => {
-          this.notify('mark status successful')
-          this.episodeMarked = true
-        },
-        error => {
-          if (error.response.data.code === 400) {
-            this.notify('error: ' + error.response.data.error + ',' + '应该是因为你在bgm上的状态已经是看到本集')
-          } else {
-            this.notify('error: ' + JSON.stringify(error.response))
-          }
+      try {
+        await this.$bgmApi.setSubjectProgress(this.subjectID, episode)
+        this.notify('mark status successful')
+        this.episodeMarked = true
+      } catch (error) {
+        if (error.response.data.code === 400) {
+          this.notify('error: ' + error.response.data.error + ',' + '应该是因为你在bgm上的状态已经是看到本集')
+        } else {
+          this.notify('error: ' + JSON.stringify(error.response))
         }
-      )
+      }
     }
   },
   created () {
@@ -2007,13 +1650,13 @@ if (!collection) {
 
     this.$bgmApi.http.interceptors.request.use(function (config) {
       //在发送请求之前做某事
-      if (gmUnsafeWindow.bgm_tv_debug || window.bgm_tv_debug) {
+      if (gmUnsafeWindow.bgm_tv_debug) {
         vm.notify('config: ' + JSON.stringify(config, null, 2))
       }
       return config
     }, function (error) {
       //请求错误时做些事
-      if (gmUnsafeWindow.bgm_tv_debug || window.bgm_tv_debug) {
+      if (gmUnsafeWindow.bgm_tv_debug) {
         vm.notify('response: ' + JSON.stringify(response, null, 2))
       }
       return Promise.reject(error)
@@ -2021,13 +1664,13 @@ if (!collection) {
 
     this.$bgmApi.http.interceptors.response.use(function (response) {
       //对响应数据做些事
-      if (gmUnsafeWindow.bgm_tv_debug || window.bgm_tv_debug) {
+      if (gmUnsafeWindow.bgm_tv_debug) {
         vm.notify('response: ' + JSON.stringify(response, null, 2))
       }
       return response
     }, function (error) {
       //请求错误时做些事
-      if (gmUnsafeWindow.bgm_tv_debug || window.bgm_tv_debug) {
+      if (gmUnsafeWindow.bgm_tv_debug) {
         vm.notify('error: ' + JSON.stringify(error, null, 2))
       }
       return Promise.reject(error)
@@ -2169,6 +1812,7 @@ var component = normalizeComponent(
   
 )
 
+component.options.__file = "App.vue"
 /* harmony default export */ var App = (component.exports);
 // CONCATENATED MODULE: ./src/js/index.js
 
@@ -2212,20 +1856,31 @@ if (gmUnsafeWindow.location.hostname === 'www.iqiyi.com') {
   }
 }
 
+/**
+ *
+ * @param {string} websiteName
+ * @returns {iQiyi|bilibili}
+ */
+function getWebsiteClass (websiteName) {
+  if (js_website === 'iqiyi') return website_iQiyi
+  if (js_website === 'bilibili') return website_bilibili
+}
+
 if (external_$_default()('#bgm_tv_app')) {
   getAuth().then(
     auth => {
-      if (auth) {
+      if (auth && auth.hasOwnProperty('access_token')) {
+        console.log(auth)
         /* eslint-disable unused-def */
         /**
          * @type {BgmApi}
          */
         external_Vue_default.a.prototype.$bgmApi = new utils_BgmApi({ accessToken: auth.access_token })
+        // Vue.prototype.$bgmApi = new BgmApi({ accessToken: undefined })
         external_Vue_default.a.prototype.$http = external_axios_default.a
         /* eslint-enable unused-def */
         if (js_website) {
-          if (js_website === 'bilibili') external_Vue_default.a.prototype.$website = website_bilibili
-          if (js_website === 'iqiyi') external_Vue_default.a.prototype.$website = website_iQiyi
+          external_Vue_default.a.prototype.$website = getWebsiteClass(js_website)
           // eslint-disable-next-line no-new
           new external_Vue_default.a({
             el: '#bgm_tv_app',

@@ -1,4 +1,3 @@
-import path from 'path'
 import $ from 'jquery'
 import { gmUnsafeWindow } from './vars'
 import { apiServer, parseEpisode } from './utils'
@@ -14,8 +13,6 @@ class bilibili {
     const status = gmUnsafeWindow.__INITIAL_STATE__
     const episode = gmUnsafeWindow.__INITIAL_STATE__.epList
       .findIndex(val => {
-        console.log(val)
-        console.log(gmUnsafeWindow.__INITIAL_STATE__.epInfo.index)
         return val.index === gmUnsafeWindow.__INITIAL_STATE__.epInfo.index
       }) + 1
     console.log(episode)
@@ -113,7 +110,8 @@ class iQiyi {
     let title = collectionLinkEl.html()
     // let title = gmUnsafeWindow.document.title
     let collectionLink = collectionLinkEl.attr('href')
-    let filename = path.basename(collectionLink)
+    let filename = collectionLink.split('/')
+    filename = filename[filename.length - 1]
     let bangumiID = filename.split('.').slice(0, -1).join('.')
     let episode = parseEpisode(title)
 

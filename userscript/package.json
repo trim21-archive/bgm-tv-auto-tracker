@@ -10,6 +10,9 @@
     "last 2 version",
     "> 1%"
   ],
+  "eslintIgnore": [
+    "dist/*.js"
+  ],
   "eslintConfig": {
     "extends": "standard",
     "rules": {
@@ -70,6 +73,7 @@
     "axios": "^0.18.0",
     "axios-userscript-adapter": "^0.0.2",
     "jquery": "^3.3.1",
+    "path-browserify": "^1.0.0",
     "vue": "^2.5.16"
   }
 }

@@ -6,11 +6,14 @@ const VueLoaderPlugin = require('vue-loader/lib/plugin')
 const pkg = require('../package.json')
 const config = require('./config')
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
-
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
 const production = process.env.NODE_ENV === 'production'
 
 let webpackConfig = {
+  node: {
+    Buffer: false
+  },
   resolve: {
     extensions: ['.js', '.vue']
   },
@@ -18,13 +21,18 @@ let webpackConfig = {
     hints: false
   },
   optimization: {
-    minimize: false
+    minimize: false,
+    removeEmptyChunks: true,
+    namedChunks: true,
+    removeAvailableModules: false,
+    mergeDuplicateChunks: false,
   },
   entry: './src/js/index.js',
   output: {
     path: path.resolve(__dirname, '../dist')
   },
   externals: {
+    'path-browserify': 'path-browserify',
     'jquery': '$',
     'vue': 'Vue',
     axios: 'axios',

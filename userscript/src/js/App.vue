@@ -88,8 +88,8 @@
 </template>
 <script>
 import $ from 'jquery'
-import { gmGetValue, gmSetValue, gmUnsafeWindow, WEBSITE } from './vars'
-import { apiServer } from './utils'
+import { gmGetValue, gmOpenInTab, gmSetValue, gmUnsafeWindow, URLS, WEBSITE } from './vars'
+import { apiServer, getConfig } from './utils'
 
 /**
  * @type {Object}
@@ -111,25 +111,7 @@ export default {
     else if (gmUnsafeWindow.location.hostname === 'www.iqiyi.com') {
       website = WEBSITE.iqiyi
     }
-    /**
-     * User Config type
-     * @typedef {Object} Config
-     * @property {Boolean} autoMarkWatched - if mark episode when watch progress is greater than 80%
-     * @property {Boolean} collectionSubjectWhenMarkStatus - if add this subject to collection when mark episode
-     */
-
-    /**
-     * @type {Config}
-     */
-    let config = gmGetValue('config', false)
-    if (config) {
-      try {
-        config = JSON.parse(config)
-      } catch (e) {
-        config = {}
-        gmSetValue('config', '{}')
-      }
-    }
+    let config = getConfig()
 
     return {
       tmpSubjectID: null,
@@ -155,7 +137,8 @@ export default {
   computed: {
     reportUrl () {
       let baseURL = 'https://github.com/Trim21/bilibili-bangumi-tv-auto-tracker/issues/new'
-      let hrefWithoutHash = location.protocol + '//' + location.host + location.pathname
+      let hrefWithoutHash = gmUnsafeWindow.location.protocol + '//'
+        + gmUnsafeWindow.location.host + gmUnsafeWindow.location.pathname
       let body =
         `问题页面: [${this.bangumiName}](${hrefWithoutHash})` + '\n' +
         `Bangumi ID: ${this.bangumiID}` + '\n' +
@@ -281,55 +264,47 @@ export default {
     trigger () {
       $('.bgm_tv_tracker_info').toggle('fast')
     },
-    watchEps () {
+    async watchEps () {
       this.collectSubject(this.subjectID)
       let vm = this
-      vm.$bgmApi.getEps(this.subjectID).then(
-        data => {
-          let episode = vm.episode
-          let eps = data.eps.filter(val => Number.isInteger(Number(val.sort)) && (parseInt(val.type, 10) === 0))
-
-
-          eps = eps.sort(function (a, b) {
+      try {
+        let data = await vm.$bgmApi.getEps(this.subjectID)
+        let episode = vm.episode
+        let eps = data.eps
+          .filter(val => Number.isInteger(Number(val.sort)) && (parseInt(val.type, 10) === 0))
+          .sort(function (a, b) {
             let key = 'sort'
             let x = a[key]
             let y = b[key]
             return ((x < y) ? -1 : ((x > y) ? 1 : 0))
           })
-
-          try {
-            let ep = eps[episode - 1].id
-            vm.$bgmApi.setEpisodeWatched(ep)
-            this.episodeMarked = true
-            vm.notify('mark your status successfully')
-          } catch (e) {
-            vm.notify(e.toString())
-          }
-
-        },
-        error => {
-          vm.notify('233')
-          vm.notify(JSON.stringify(error))
-        })
-      // .catch(reason => vm.notify(JSON.stringify(reason)))
-
+        let ep = eps[episode - 1].id
+        await vm.$bgmApi.setEpisodeWatched(ep)
+        this.episodeMarked = true
+        vm.notify('mark your status successfully')
+      } catch (error) {
+        if (error.response.status === 401) {
+          vm.notify('授权已过期 请重新授权')
+          gmOpenInTab(URLS.authURL, { active: true })
+        }
+        vm.notify(error.toString())
+        vm.notify(JSON.stringify(error))
+      }
     },
-    setWatchProgress () {
+    async setWatchProgress () {
       let episode = this.episode
       this.collectSubject(this.subjectID)
-      this.$bgmApi.setSubjectProgress(this.subjectID, episode).then(
-        () => {
-          this.notify('mark status successful')
-          this.episodeMarked = true
-        },
-        error => {
-          if (error.response.data.code === 400) {
-            this.notify('error: ' + error.response.data.error + ',' + '应该是因为你在bgm上的状态已经是看到本集')
-          } else {
-            this.notify('error: ' + JSON.stringify(error.response))
-          }
+      try {
+        await this.$bgmApi.setSubjectProgress(this.subjectID, episode)
+        this.notify('mark status successful')
+        this.episodeMarked = true
+      } catch (error) {
+        if (error.response.data.code === 400) {
+          this.notify('error: ' + error.response.data.error + ',' + '应该是因为你在bgm上的状态已经是看到本集')
+        } else {
+          this.notify('error: ' + JSON.stringify(error.response))
         }
-      )
+      }
     }
   },
   created () {
@@ -376,13 +351,13 @@ export default {
 
     this.$bgmApi.http.interceptors.request.use(function (config) {
       //在发送请求之前做某事
-      if (gmUnsafeWindow.bgm_tv_debug || window.bgm_tv_debug) {
+      if (gmUnsafeWindow.bgm_tv_debug) {
         vm.notify('config: ' + JSON.stringify(config, null, 2))
       }
       return config
     }, function (error) {
       //请求错误时做些事
-      if (gmUnsafeWindow.bgm_tv_debug || window.bgm_tv_debug) {
+      if (gmUnsafeWindow.bgm_tv_debug) {
         vm.notify('response: ' + JSON.stringify(response, null, 2))
       }
       return Promise.reject(error)
@@ -390,13 +365,13 @@ export default {
 
     this.$bgmApi.http.interceptors.response.use(function (response) {
       //对响应数据做些事
-      if (gmUnsafeWindow.bgm_tv_debug || window.bgm_tv_debug) {
+      if (gmUnsafeWindow.bgm_tv_debug) {
         vm.notify('response: ' + JSON.stringify(response, null, 2))
       }
       return response
     }, function (error) {
       //请求错误时做些事
-      if (gmUnsafeWindow.bgm_tv_debug || window.bgm_tv_debug) {
+      if (gmUnsafeWindow.bgm_tv_debug) {
         vm.notify('error: ' + JSON.stringify(error, null, 2))
       }
       return Promise.reject(error)
