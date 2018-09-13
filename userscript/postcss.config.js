@@ -4,6 +4,7 @@ module.exports = {
     // 'postcss-import': {},
     // 'postcss-cssnext': {},
     'cssnano': {
+      zindex: false,
       autoprefixer: false
     },
     'autoprefixer': {}

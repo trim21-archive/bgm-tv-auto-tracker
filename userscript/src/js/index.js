@@ -22,10 +22,11 @@ if (gmUnsafeWindow.location.href.startsWith('https://www.bilibili.com/bangumi/pl
   website = 'bilibili'
   if ([
     1, // 动漫
+    2, // 电影
     4, // 国创
     5, // 电视剧
   ].includes(gmUnsafeWindow.__INITIAL_STATE__.mediaInfo.season_type)) {
-    $('#bangumi_detail > div > div.info-right > div.info-title.clearfix > div.func-module.clearfix')
+    $('#bangumi_detail div.func-module.clearfix')
       .prepend(`<div id='bgm_tv_app'></div>`)
   }
 }
@@ -49,7 +50,7 @@ function getWebsiteClass (websiteName) {
   if (website === 'bilibili') return bilibili
 }
 
-if ($('#bgm_tv_app')) {
+if ($('#bgm_tv_app').length) {
   getAuth().then(
     auth => {
       if (auth && auth.hasOwnProperty('access_token')) {

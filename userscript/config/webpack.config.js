@@ -6,7 +6,6 @@ const VueLoaderPlugin = require('vue-loader/lib/plugin')
 const pkg = require('../package.json')
 const config = require('./config')
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
 const production = process.env.NODE_ENV === 'production'
 
@@ -51,37 +50,18 @@ let webpackConfig = {
         options: {
           loaders: {
             scss: 'vue-style-loader!css-loader!postcss-loader!sass-loader', // <style lang="style">
+            // scss: 'vue-style-loader!css-loader!sass-loader', // <style lang="style">
           }
         }
       },
       {
         test: /\.scss$/,
-        loaders: ['style-loader', 'css-loader', 'postcss-loader', 'sass-loader']
-      },
-      {
-        test: /\.css$/,
-        use: [
-          'to-string-loader',
-          // 'style-loader',
-          {
-            loader: 'css-loader',
-            options: {
-              modules: false,
-              minimize: true,
-              importLoaders: 1
-            }
-          },
+        loaders: [
+          'style-loader',
+          'css-loader',
           'postcss-loader',
+          'sass-loader'
         ]
-      },
-      {
-        test: /\.html$/,
-        use: [{
-          loader: 'html-loader',
-          options: {
-            minimize: true
-          }
-        }],
       }
     ]
   },
