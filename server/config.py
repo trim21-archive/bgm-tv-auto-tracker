@@ -10,8 +10,8 @@ PROTOCOL = os.environ.get('PROTOCOL', 'http')
 
 
 class MongoConfig(object):
-    host = '127.0.0.1'
-    port = '27017'
+    host = os.environ.get('MONGO_HOST', '127.0.0.1')
+    port = os.environ.get('MONGO_PORT', '27017')
     username = os.environ.get('MONGO_USERNAME', '')
     password = os.environ.get('MONGO_PASSWORD', '')
 
