@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Bgm.tv auto tracker
 // @namespace   https://trim21.me/
-// @version     0.9.4
+// @version     0.9.5
 // @author      Trim21 <trim21me@gmail.com>
 // @source      https://github.com/Trim21/bilibili-bangumi-tv-auto-tracker
 // @license     MIT
@@ -9,10 +9,10 @@
 // @match       http*://www.iqiyi.com/*_*.html
 // @match       https://bangumi-auto-tracker.trim21.cn/oauth_callback*
 // @match       https://bangumi-auto-tracker.trim21.cn/userscript/options*
-// @require     https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js
-// @require     https://cdn.bootcss.com/axios/0.18.0/axios.min.js
+// @require     https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js
+// @require     https://cdn.jsdelivr.net/npm/axios@0.18.0/index.min.js
 // @require     https://cdn.jsdelivr.net/npm/axios-userscript-adapter@0.0.3/dist/axiosGmxhrAdapter.min.js
-// @require     https://cdn.bootcss.com/vue/2.5.16/vue.min.js
+// @require     https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.min.js
 // @grant       GM_addStyle
 // @grant       GM_setValue
 // @grant       GM_getValue
