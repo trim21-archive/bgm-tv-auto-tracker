@@ -14,10 +14,10 @@ module.exports = {
     'https://bangumi-auto-tracker.trim21.cn/userscript/options*'
   ],
   'require': [
-    'https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js',
-    'https://cdn.bootcss.com/axios/0.18.0/axios.min.js',
+    'https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js',
+    'https://cdn.jsdelivr.net/npm/axios@0.18.0/index.min.js',
     'https://cdn.jsdelivr.net/npm/axios-userscript-adapter@0.0.3/dist/axiosGmxhrAdapter.min.js',
-    'https://cdn.bootcss.com/vue/2.5.16/vue.min.js'
+    'https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.min.js'
   ],
   'grant': [
     'GM_addStyle',
