@@ -1,4 +1,6 @@
 # bgm.tv auto tracker
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2FTrim21%2Fbgm-tv-auto-tracker.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2FTrim21%2Fbgm-tv-auto-tracker?ref=badge_shield)
+
 
 ## 介绍
 
@@ -88,3 +90,7 @@ console.log('hello world')
 
 如果bgm的某个番没有对应条目(比如柯南的900+集),`看过本集会报错`
 
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2FTrim21%2Fbgm-tv-auto-tracker.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2FTrim21%2Fbgm-tv-auto-tracker?ref=badge_large)
