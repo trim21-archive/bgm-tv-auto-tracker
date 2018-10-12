@@ -9,10 +9,10 @@
 // @match       http*://www.iqiyi.com/*_*.html
 // @match       https://bangumi-auto-tracker.trim21.cn/oauth_callback*
 // @match       https://bangumi-auto-tracker.trim21.cn/userscript/options*
-// @require     https://cdn.bootcss.com/jquery/3.3.1/jquery.js
-// @require     https://cdn.bootcss.com/axios/0.18.0/axios.js
-// @require     https://cdn.jsdelivr.net/npm/axios-userscript-adapter@0.0.3/dist/axiosGmxhrAdapter.js
-// @require     https://cdn.bootcss.com/vue/2.5.16/vue.js
+// @require     https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js
+// @require     https://cdn.jsdelivr.net/npm/axios@0.18.0/dist/axios.min.js
+// @require     https://cdn.jsdelivr.net/npm/axios-userscript-adapter@0.0.3/dist/axiosGmxhrAdapter.min.js
+// @require     https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.min.js
 // @grant       GM_addStyle
 // @grant       GM_setValue
 // @grant       GM_getValue

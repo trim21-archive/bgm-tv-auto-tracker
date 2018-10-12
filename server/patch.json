@@ -1,116 +1,394 @@
-{
-  "bilibili": [
-    {
-      "bangumi_id": "25365",
-      "subject_id": "188108",
-      "title": "逃避虽可耻但有用"
-    },
-    {
-      "bangumi_id": "25052",
-      "subject_id": "188108",
-      "title": "逃避虽可耻但有用"
-    },
-    {
-      "bangumi_id": "24438",
-      "subject_id": "242736",
-      "title": "小绿和小蓝"
-    },
-    {
-      "bangumi_id": "24053",
-      "subject_id": "225581",
-      "title": "非自然死亡"
-    },
-    {
-      "bangumi_id": "333",
-      "subject_id": "75055",
-      "title": "RWBY"
-    },
-    {
-      "bangumi_id": "334",
-      "subject_id": "95445",
-      "title": "RWBY 第二季"
-    },
-    {
-      "bangumi_id": "2894",
-      "subject_id": "138180",
-      "title": "RWBY 第三季"
-    },
-    {
-      "bangumi_id": "5636",
-      "subject_id": "186257",
-      "title": "RWBY 第四季"
-    },
-    {
-      "bangumi_id": "6509",
-      "subject_id": "224720",
-      "title": "RWBY 第五季"
-    },
-    {
-      "bangumi_id": "24365",
-      "subject_id": "249243",
-      "title": "喂，看见耳朵啦 日语版"
-    },
-    {
-      "bangumi_id": "24364",
-      "subject_id": "249243",
-      "title": "喂，看见耳朵啦"
-    },
-    {
-      "bangumi_id": "3795",
-      "subject_id": "35679",
-      "title": "魔法少女奈叶 The MOVIE 2nd A’s"
-    },
-    {
-      "bangumi_id": "1180",
-      "subject_id": "37874",
-      "title": "CLANNAD ～AFTER STORY～另一个世界 杏篇"
-    },
-    {
-      "bangumi_id": "5051",
-      "subject_id": "178884",
-      "title": "星之梦～星之人～"
-    },
-    {
-      "bangumi_id": "20302",
-      "subject_id": "211906",
-      "title": "地球脉动"
-    },
-    {
-      "bangumi_id": "24709",
-      "subject_id": "253831",
-      "title": "百鬼幼儿园"
-    },
-    {
-      "bangumi_id": "2844",
-      "subject_id": "118908",
-      "title": "境界的彼方 -I'LL BE HERE- 未来篇"
-    },
-    {
-      "bangumi_id": "6373",
-      "subject_id": "44461",
-      "title": "纳米核心 第一季"
-    },
-    {
-      "bangumi_id": "2990",
-      "subject_id": "145734",
-      "title": "恐怖！僵尸猫"
-    },
-    {
-      "bangumi_id": "3366",
-      "subject_id": "107476",
-      "title": "境界的彼方 -I'LL BE HERE- 过去篇"
-    },
-    {
-      "bangumi_id": "25443",
-      "subject_id": "170415",
-      "title": "小马宝莉：友谊的魔力 第六季 (中配）"
-    }
-  ],
-  "iqiyi": [
-    {
-      "bangumi_id": "a_19rrhc0ofp",
-      "subject_id": "29366",
-      "title": "三国演义 动画"
-    }
-  ]
-}
+[
+  {
+    "bangumi_id": "25365",
+    "subject_id": "188108",
+    "title": "逃避虽可耻但有用",
+    "website": "bilibili"
+  },
+  {
+    "bangumi_id": "25052",
+    "subject_id": "188108",
+    "title": "逃避虽可耻但有用",
+    "website": "bilibili"
+  },
+  {
+    "bangumi_id": "24438",
+    "subject_id": "242736",
+    "title": "小绿和小蓝",
+    "website": "bilibili"
+  },
+  {
+    "bangumi_id": "24053",
+    "subject_id": "225581",
+    "title": "非自然死亡",
+    "website": "bilibili"
+  },
+  {
+    "bangumi_id": "333",
+    "subject_id": "75055",
+    "title": "RWBY",
+    "website": "bilibili"
+  },
+  {
+    "bangumi_id": "334",
+    "subject_id": "95445",
+    "title": "RWBY 第二季",
+    "website": "bilibili"
+  },
+  {
+    "bangumi_id": "2894",
+    "subject_id": "138180",
+    "title": "RWBY 第三季",
+    "website": "bilibili"
+  },
+  {
+    "bangumi_id": "5636",
+    "subject_id": "186257",
+    "title": "RWBY 第四季",
+    "website": "bilibili"
+  },
+  {
+    "bangumi_id": "6509",
+    "subject_id": "224720",
+    "title": "RWBY 第五季",
+    "website": "bilibili"
+  },
+  {
+    "bangumi_id": "24365",
+    "subject_id": "249243",
+    "title": "喂，看见耳朵啦 日语版",
+    "website": "bilibili"
+  },
+  {
+    "bangumi_id": "24364",
+    "subject_id": "249243",
+    "title": "喂，看见耳朵啦",
+    "website": "bilibili"
+  },
+  {
+    "bangumi_id": "3795",
+    "subject_id": "35679",
+    "title": "魔法少女奈叶 The MOVIE 2nd A’s",
+    "website": "bilibili"
+  },
+  {
+    "bangumi_id": "1180",
+    "subject_id": "37874",
+    "title": "CLANNAD ～AFTER STORY～另一个世界 杏篇",
+    "website": "bilibili"
+  },
+  {
+    "bangumi_id": "5051",
+    "subject_id": "178884",
+    "title": "星之梦～星之人～",
+    "website": "bilibili"
+  },
+  {
+    "bangumi_id": "20302",
+    "subject_id": "211906",
+    "title": "地球脉动",
+    "website": "bilibili"
+  },
+  {
+    "bangumi_id": "24709",
+    "subject_id": "253831",
+    "title": "百鬼幼儿园",
+    "website": "bilibili"
+  },
+  {
+    "bangumi_id": "2844",
+    "subject_id": "118908",
+    "title": "境界的彼方 -I'LL BE HERE- 未来篇",
+    "website": "bilibili"
+  },
+  {
+    "bangumi_id": "6373",
+    "subject_id": "44461",
+    "title": "纳米核心 第一季",
+    "website": "bilibili"
+  },
+  {
+    "bangumi_id": "2990",
+    "subject_id": "145734",
+    "title": "恐怖！僵尸猫",
+    "website": "bilibili"
+  },
+  {
+    "bangumi_id": "3366",
+    "subject_id": "107476",
+    "title": "境界的彼方 -I'LL BE HERE- 过去篇",
+    "website": "bilibili"
+  },
+  {
+    "bangumi_id": "25443",
+    "subject_id": "170415",
+    "title": "小马宝莉：友谊的魔力 第六季 (中配）",
+    "website": "bilibili"
+  },
+  {
+    "bangumi_id": "25689",
+    "website": "bilibili",
+    "times": 50,
+    "href": "https://www.bilibili.com/bangumi/play/ep251255",
+    "subject_id": "252655",
+    "title": "佐賀偶像是傳奇（僅限港澳台地區）",
+    "bangumi_url": "https://bangumi.bilibili.com/anime/25689",
+    "subject_url": "https://bgm.tv/subject/252655"
+  },
+  {
+    "bangumi_id": "25605",
+    "website": "bilibili",
+    "times": 25,
+    "href": "https://www.bilibili.com/bangumi/play/ss25605/",
+    "subject_id": "234761",
+    "title": "Double Decker! 道格&基里爾（僅限港澳台地區）",
+    "bangumi_url": "https://bangumi.bilibili.com/anime/25605",
+    "subject_url": "https://bgm.tv/subject/234761"
+  },
+  {
+    "bangumi_id": "11890",
+    "website": "bilibili",
+    "times": 16,
+    "href": "https://www.bilibili.com/bangumi/play/ep118109",
+    "subject_id": "14830",
+    "title": "大鱼海棠",
+    "bangumi_url": "https://bangumi.bilibili.com/anime/11890",
+    "subject_url": "https://bgm.tv/subject/14830"
+  },
+  {
+    "bangumi_id": "5398",
+    "website": "bilibili",
+    "times": 15,
+    "href": "https://www.bilibili.com/bangumi/play/ep251335",
+    "subject_id": "150490",
+    "title": "JOJO的奇妙冒险 不灭钻石",
+    "bangumi_url": "https://bangumi.bilibili.com/anime/5398",
+    "subject_url": "https://bgm.tv/subject/150490"
+  },
+  {
+    "bangumi_id": "25730",
+    "website": "bilibili",
+    "times": 13,
+    "href": "https://www.bilibili.com/bangumi/play/ss25730/?spm_id_from=333.334.bili_bangumi.37",
+    "subject_id": "234059",
+    "title": "火之丸相扑",
+    "bangumi_url": "https://bangumi.bilibili.com/anime/25730",
+    "subject_url": "https://bgm.tv/subject/234059"
+  },
+  {
+    "bangumi_id": "12116",
+    "website": "bilibili",
+    "times": 11,
+    "href": "https://www.bilibili.com/bangumi/play/ep118317",
+    "subject_id": "117777",
+    "title": "声之形",
+    "bangumi_url": "https://bangumi.bilibili.com/anime/12116",
+    "subject_url": "https://bgm.tv/subject/117777"
+  },
+  {
+    "bangumi_id": "6038",
+    "website": "bilibili",
+    "times": 10,
+    "href": "https://www.bilibili.com/bangumi/play/ep250984",
+    "subject_id": "212333",
+    "title": "风灵玉秀",
+    "bangumi_url": "https://bangumi.bilibili.com/anime/6038",
+    "subject_url": "https://bgm.tv/subject/212333"
+  },
+  {
+    "bangumi_id": "25788",
+    "website": "bilibili",
+    "times": 10,
+    "href": "https://www.bilibili.com/bangumi/play/ss25788",
+    "subject_id": "252430",
+    "title": "动物世界",
+    "bangumi_url": "https://bangumi.bilibili.com/anime/25788",
+    "subject_url": "https://bgm.tv/subject/252430"
+  },
+  {
+    "bangumi_id": "866",
+    "website": "bilibili",
+    "times": 6,
+    "href": "https://www.bilibili.com/bangumi/play/ep64014",
+    "subject_id": "4255",
+    "title": "迷糊餐厅 WORKING!!",
+    "bangumi_url": "https://bangumi.bilibili.com/anime/866",
+    "subject_url": "https://bgm.tv/subject/4255"
+  },
+  {
+    "bangumi_id": "867",
+    "website": "bilibili",
+    "times": 4,
+    "href": "https://www.bilibili.com/bangumi/play/ep15566",
+    "subject_id": "20547",
+    "title": "迷糊餐厅 WORKING’!!",
+    "bangumi_url": "https://bangumi.bilibili.com/anime/867",
+    "subject_url": "https://bgm.tv/subject/20547"
+  },
+  {
+    "bangumi_id": "6184",
+    "website": "bilibili",
+    "times": 4,
+    "href": "https://www.bilibili.com/bangumi/play/ep113911",
+    "subject_id": "215096",
+    "title": "RWBY Chibi 第二季",
+    "bangumi_url": "https://bangumi.bilibili.com/anime/6184",
+    "subject_url": "https://bgm.tv/subject/215096"
+  },
+  {
+    "bangumi_id": "6407",
+    "website": "bilibili",
+    "times": 3,
+    "href": "https://www.bilibili.com/bangumi/play/ep114425",
+    "subject_id": "129960",
+    "title": "长门有希酱的消失 OAD",
+    "bangumi_url": "https://bangumi.bilibili.com/anime/6407",
+    "subject_url": "https://bgm.tv/subject/129960"
+  },
+  {
+    "bangumi_id": "24667",
+    "website": "bilibili",
+    "times": 3,
+    "href": "https://www.bilibili.com/bangumi/play/ep234728",
+    "subject_id": "226632",
+    "title": "天谕 第二季：苍古之绊",
+    "bangumi_url": "https://bangumi.bilibili.com/anime/24667",
+    "subject_url": "https://bgm.tv/subject/226632"
+  },
+  {
+    "bangumi_id": "714",
+    "website": "bilibili",
+    "times": 3,
+    "href": "https://www.bilibili.com/bangumi/play/ep247796",
+    "subject_id": "25444",
+    "title": "要听爸爸的话！",
+    "bangumi_url": "https://bangumi.bilibili.com/anime/714",
+    "subject_url": "https://bgm.tv/subject/25444"
+  },
+  {
+    "bangumi_id": "25210",
+    "website": "bilibili",
+    "times": 2,
+    "href": "https://www.bilibili.com/bangumi/play/ep239607",
+    "subject_id": "290",
+    "title": "Fate/stay night  06版",
+    "bangumi_url": "https://bangumi.bilibili.com/anime/25210",
+    "subject_url": "https://bgm.tv/subject/290"
+  },
+  {
+    "bangumi_id": "1187",
+    "website": "bilibili",
+    "times": 2,
+    "href": "https://www.bilibili.com/bangumi/play/ep21596",
+    "subject_id": "3166",
+    "title": "超时空要塞 Macross",
+    "bangumi_url": "https://bangumi.bilibili.com/anime/1187",
+    "subject_url": "https://bgm.tv/subject/3166"
+  },
+  {
+    "bangumi_id": "3151",
+    "website": "bilibili",
+    "times": 2,
+    "href": "https://www.bilibili.com/bangumi/play/ep81230",
+    "subject_id": "4014",
+    "title": "异邦人 无皇刃谭",
+    "bangumi_url": "https://bangumi.bilibili.com/anime/3151",
+    "subject_url": "https://bgm.tv/subject/4014"
+  },
+  {
+    "bangumi_id": "4114",
+    "website": "bilibili",
+    "times": 2,
+    "href": "https://www.bilibili.com/bangumi/play/ep88546",
+    "subject_id": "72266",
+    "title": "少女与战车 剧场版",
+    "bangumi_url": "https://bangumi.bilibili.com/anime/4114",
+    "subject_url": "https://bgm.tv/subject/72266"
+  },
+  {
+    "bangumi_id": "23677",
+    "website": "bilibili",
+    "times": 1,
+    "href": "https://www.bilibili.com/bangumi/play/ep196735/",
+    "subject_id": "211865",
+    "title": "Thunderbolt Fantasy 东离剑游纪 生死一剑",
+    "bangumi_url": "https://bangumi.bilibili.com/anime/23677",
+    "subject_url": "https://bgm.tv/subject/211865"
+  },
+  {
+    "bangumi_id": "24569",
+    "website": "bilibili",
+    "times": 6,
+    "href": "https://www.bilibili.com/bangumi/play/ep249946",
+    "subject_id": "246431",
+    "title": "BanG Dream! 少女乐团派对☆PICO",
+    "bangumi_url": "https://bangumi.bilibili.com/anime/24569",
+    "subject_url": "https://bgm.tv/subject/246431"
+  },
+  {
+    "bangumi_id": "a_19rrhc0ofp",
+    "subject_id": "29366",
+    "title": "三国演义 动画",
+    "website": "iqiyi"
+  },
+  {
+    "bangumi_id": "a_19rrh707nd",
+    "website": "iqiyi",
+    "times": 1,
+    "href": "https://www.iqiyi.com/v_19rr5s9668.html",
+    "subject_id": "239816",
+    "title": "关于我转生变成史莱姆这档事",
+    "bangumi_url": "https://www.iqiyi.com/a_19rrh707nd.html",
+    "subject_url": "https://bgm.tv/subject/239816"
+  },
+  {
+    "bangumi_id": "a_19rrh70aed",
+    "website": "iqiyi",
+    "times": 2,
+    "href": "https://www.iqiyi.com/v_19rr59t708.html",
+    "subject_id": "225850",
+    "title": "书店里的骷髅店员本田",
+    "bangumi_url": "https://www.iqiyi.com/a_19rrh70aed.html",
+    "subject_url": "https://bgm.tv/subject/225850"
+  },
+  {
+    "bangumi_id": "a_19rrgy43lh",
+    "website": "iqiyi",
+    "times": 4,
+    "href": "https://www.iqiyi.com/v_19rr1kjnv0.html",
+    "subject_id": "260587",
+    "title": "口水良山",
+    "bangumi_url": "https://www.iqiyi.com/a_19rrgy43lh.html",
+    "subject_url": "https://bgm.tv/subject/260587"
+  },
+  {
+    "bangumi_id": "a_19rrh709x1",
+    "website": "iqiyi",
+    "times": 4,
+    "href": "https://www.iqiyi.com/v_19rr5a1lx4.html",
+    "subject_id": "238006",
+    "title": "哥布林猎人",
+    "bangumi_url": "https://www.iqiyi.com/a_19rrh709x1.html",
+    "subject_url": "https://bgm.tv/subject/238006"
+  },
+  {
+    "bangumi_id": "a_19rrh70a9p",
+    "website": "iqiyi",
+    "times": 15,
+    "href": "https://www.iqiyi.com/v_19rr5c08b8.html",
+    "subject_id": "240562",
+    "title": "来自多彩世界的明天",
+    "bangumi_url": "https://www.iqiyi.com/a_19rrh70a9p.html",
+    "subject_url": "https://bgm.tv/subject/240562"
+  },
+  {
+    "bangumi_id": "a_19rrh6vl2l",
+    "website": "iqiyi",
+    "times": 41,
+    "href": "https://www.iqiyi.com/v_19rr4pvioo.html",
+    "subject_id": "260733",
+    "title": "小花仙 第4季 守护天使2",
+    "bangumi_url": "https://www.iqiyi.com/a_19rrh6vl2l.html",
+    "subject_url": "https://bgm.tv/subject/260733"
+  }
+]

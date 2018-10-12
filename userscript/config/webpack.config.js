@@ -50,7 +50,6 @@ let webpackConfig = {
         options: {
           loaders: {
             scss: 'vue-style-loader!css-loader!postcss-loader!sass-loader', // <style lang="style">
-            // scss: 'vue-style-loader!css-loader!sass-loader', // <style lang="style">
           }
         }
       },
