@@ -9,15 +9,15 @@
 首先安装[tampermonkey](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo)
 
 然后安装此脚本
-https://greasyfork.org/zh-CN/scripts/369643-bgm-tv-auto-tracker 
+https://greasyfork.org/zh-CN/scripts/369643-bgm-tv-auto-tracker
 
 去[https://bgm.tv/oauth/authorize](https://bgm.tv/oauth/authorize?client_id=bgm2775b2797b4d958b&response_type=code&redirect_uri=https://bangumi-auto-tracker.trim21.cn/oauth_callback)
 进行授权, 授权后即可正常使用。
 
-效果图 
+效果图
 
-![](./screenshot/bilibili.png) 
-![](./screenshot/iqiyi.png) 
+![](./screenshot/bilibili.png)
+![](./screenshot/iqiyi.png)
 
 ## 信息收集
 
@@ -31,7 +31,7 @@ https://greasyfork.org/zh-CN/scripts/369643-bgm-tv-auto-tracker
 
 欢迎贡献代码
 
-server文件夹内是python服务端,基于python>=3.6.5的aiohttp
+server文件夹内是python服务端, 基于python>=3.6.5的aiohttp(正在使用typescript重写服务端)
 
 ```bash
 cd userscript
