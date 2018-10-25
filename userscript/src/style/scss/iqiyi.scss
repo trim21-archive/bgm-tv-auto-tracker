@@ -4,6 +4,36 @@
 
 .iqiyi {
 
+    #bgm_tv_tracker_btn_on_page {
+        color: #797979;
+        border-top-left-radius: 5px;
+        border-top-right-radius: 5px;
+        cursor: pointer;
+        display: block;
+        font-weight: bold;
+        font-family: PingFangSC-Regular, Helvetica, Arial, "Microsoft Yahei", sans-serif;
+        font-size: 16px;
+        font-stretch: 100%;
+        font-style: normal;
+        font-variant-caps: normal;
+        font-variant-east-asian: normal;
+        font-variant-ligatures: normal;
+        font-variant-numeric: normal;
+        height: 38px;
+        line-height: 38px;
+        margin-bottom: 0;
+        margin-left: 0;
+        margin-right: 0;
+        margin-top: 0;
+        max-width: 77px;
+        overflow-x: hidden;
+        overflow-y: hidden;
+        padding-bottom: 0;
+        padding-left: 10px;
+        padding-right: 10px;
+        padding-top: 0;
+    }
+
     &#bgm_tv_tracker {
         margin-left: 15px;
         padding-left: 16px;

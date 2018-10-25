@@ -41,20 +41,28 @@ def add_website(d: dict, website, bangumi_id):
         return True
 
 
+def get_subject_id(d: dict):
+    b = [x for x in d['sites'] if x['site'] == 'bangumi']
+    if b:
+        return b[0]['id']
+
+
 class MatchedSubjectFile():
+    subject_to_file_map = {}
+    for file in file_list:
+        with open(file, 'r', encoding='utf8') as f:
+            j = json.load(f)
+            for item in j:
+                s = get_subject_id(item)
+                if s:
+                    subject_to_file_map[s] = file
 
     def __init__(self, subject_id, mode):
         self.filename = None
         self.mode = mode
-        for file in file_list:
-            with open(file, 'r', encoding='utf8') as f:
-                j = json.load(f)
-                if match_item_by_subject(j, subject_id):
-                    # for item in j:
-                    #     if match_subject(item, subject_id):
-                    self.filename = file
-        if not self.filename:
+        if subject_id not in self.subject_to_file_map:
             raise FileNotFoundError(subject_id)
+        self.filename = self.subject_to_file_map[subject_id]
 
     def __enter__(self):
         self.open_file = open(self.filename, self.mode, encoding='utf8')
@@ -81,6 +89,6 @@ for item in data:
     except FileNotFoundError as e:
         l.append(item)
         print(e)
-
-with open(server_dir / 'patch.json', 'w', encoding='utf8') as f:
-    json.dump(l, f, ensure_ascii=False, indent=2)
+#
+# with open(server_dir / 'patch.json', 'w', encoding='utf8') as f:
+#     json.dump(l, f, ensure_ascii=False, indent=2)
