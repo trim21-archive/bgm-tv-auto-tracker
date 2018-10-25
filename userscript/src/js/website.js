@@ -106,8 +106,8 @@ class bilibili {
 class iQiyi {
   static init () {
     // console.log(bangumiName)
-    let collectionLinkEl = $('#datainfo-navlist > a:nth-child(3)')
-    let title = collectionLinkEl.html()
+    let collectionLinkEl = $('#block-C > div.qy-player-detail > div > div > div > div > div.qy-player-title > h1 > a')
+    let title = gmUnsafeWindow.document.title
     // let title = gmUnsafeWindow.document.title
     let collectionLink = collectionLinkEl.attr('href')
     let filename = collectionLink.split('/')
@@ -156,16 +156,21 @@ class iQiyi {
   }
 
   static getPlayerInfo () {
-    return new Promise((resolve) => {
-      gmUnsafeWindow._player.getPlayInfo(resolve)
-    }).then(info => {
-      return {
-        current: info.currentTime,
-        duration: info.totalDuration / 1000,
-        percent: info.currentTime / info.totalDuration * 1000,
-      }
-      // return info.currentTime / info.totalDuration * 1000
+    return Promise.resolve({
+      current: 0,
+      duration: 0,
+      percent: 0,
     })
+    // return new Promise((resolve) => {
+    //   gmUnsafeWindow._player.getPlayInfo(resolve)
+    // }).then(info => {
+    //   return {
+    //     current: info.currentTime,
+    //     duration: info.totalDuration / 1000,
+    //     percent: info.currentTime / info.totalDuration * 1000,
+    //   }
+    //   // return info.currentTime / info.totalDuration * 1000
+    // })
   }
 }
 

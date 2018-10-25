@@ -378,17 +378,21 @@ export default {
     })
     setInterval(() => {
       this.$website.getPlayerInfo().then(info => {
-        let { percent, duration } = info
-        console.log('get player percent')
-        this.watchPercent = percent
-        if (percent > 0.8 && (duration > 120)) {
-          if (this.config.autoMarkWatched && this.subjectID && !this.episodeMarked) {
-            this.episodeMarked = true
-            this.watchEps()
+          let { percent, duration } = info
+          console.log('get player percent')
+          this.watchPercent = percent
+          if (percent > 0.8 && (duration > 120)) {
+            if (this.config.autoMarkWatched && this.subjectID && !this.episodeMarked) {
+              this.episodeMarked = true
+              this.watchEps()
+            }
           }
-        }
-      })
+        })
+        .catch(e => {
+          console.log('can\'t get play time')
+        })
     }, 30 * 1000)
+    console.log('finish bgm_tv_auto_tracker vue components init')
   }
 }
 
