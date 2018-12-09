@@ -2,7 +2,7 @@ import Vue from 'vue'
 import axios from 'axios'
 import $ from 'jquery'
 
-import { gmOpenInTab, gmUnsafeWindow, URLS } from './vars'
+import { gmOpenInTab, gmUnsafeWindow, URLS, WEBSITE } from './vars'
 import { BgmApi, getAuth, saveAuth } from './utils'
 import { bilibili, iQiyi } from './website'
 import App from './App'
@@ -26,13 +26,21 @@ let website
  * @returns {iQiyi|bilibili}
  */
 function getWebsiteClass (websiteName) {
-  if (websiteName === 'iqiyi') return iQiyi
-  if (websiteName === 'bilibili') return bilibili
+  if (websiteName === WEBSITE.iqiyi) return iQiyi
+  if (websiteName === WEBSITE.bilibili) return bilibili
+}
+
+if (gmUnsafeWindow.location.href.startsWith('https://www.bilibili.com/bangumi/play/')) {
+  website = WEBSITE.bilibili
+}
+
+// inject iqiyi
+if (gmUnsafeWindow.location.hostname === 'www.iqiyi.com') {
+  website = WEBSITE.iqiyi
 }
 
 function init () {
-  if (gmUnsafeWindow.location.href.startsWith('https://www.bilibili.com/bangumi/play/')) {
-    website = 'bilibili'
+  if (website === 'bilibili') {
     if ([
       1, // 动漫
       2, // 电影
@@ -44,10 +52,9 @@ function init () {
   }
 
   // inject iqiyi
-  if (gmUnsafeWindow.location.hostname === 'www.iqiyi.com') {
+  if (website === 'iqiyi') {
     if (gmUnsafeWindow.Q.PageInfo.playPageInfo.categoryName === '动漫') {
-      website = 'iqiyi'
-      $('.qy-flash-func').prepend(`<div id='bgm_tv_tracker'></div>`)
+      $('div.qy-player-title ').append(`<div id='bgm_tv_tracker'></div>`)
     }
   }
 
@@ -82,6 +89,14 @@ function init () {
   }
 }
 
+function initWrapper () {
+  if (website === WEBSITE.bilibili) {
+    init()
+  } else if (website === WEBSITE.iqiyi) {
+    setTimeout(init, 1000 * 10)
+  }
+}
+
 $(gmUnsafeWindow).ready(function () {
-  setTimeout(init, 1000 * 5)
+  initWrapper()
 })

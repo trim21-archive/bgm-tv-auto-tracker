@@ -33,5 +33,5 @@ module.exports = {
     'api.bgm.tv',
     'bangumi-auto-tracker.trim21.cn'
   ],
-  'run-at': 'document-end'
+  'run-at': 'document-idle'
 }
