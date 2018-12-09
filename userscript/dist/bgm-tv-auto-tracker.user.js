@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Bgm.tv auto tracker
 // @namespace   https://trim21.me/
-// @version     0.9.7
+// @version     0.9.8
 // @author      Trim21 <trim21me@gmail.com>
 // @source      https://github.com/Trim21/bilibili-bangumi-tv-auto-tracker
 // @license     MIT
@@ -23,7 +23,7 @@
 // @connect     localhost
 // @connect     api.bgm.tv
 // @connect     bangumi-auto-tracker.trim21.cn
-// @run-at      document-end
+// @run-at      document-idle
 // ==/UserScript==
 
 /******/ (function(modules) { // webpackBootstrap
@@ -1291,7 +1291,7 @@ class website_iQiyi {
 
 
 
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/js/App.vue?vue&type=template&id=6bb29f53&
+// CONCATENATED MODULE: ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/js/App.vue?vue&type=template&id=e3007ca2&
 var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"disable",class:{
         iqiyi: this.website === 'iqiyi',
         bilibili: this.website === 'bilibili',
@@ -1299,7 +1299,7 @@ var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._sel
 var staticRenderFns = [function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('a',{staticStyle:{"color":"red"},attrs:{"href":"https://github.com/Trim21/bgm-tv-auto-tracker/blob/master/docs/user_info_collection.md","target":"_blank","rel":"noopener noreferrer"}},[_c('p',[_vm._v("关于信息收集")])])}]
 
 
-// CONCATENATED MODULE: ./src/js/App.vue?vue&type=template&id=6bb29f53&
+// CONCATENATED MODULE: ./src/js/App.vue?vue&type=template&id=e3007ca2&
 
 // CONCATENATED MODULE: ./node_modules/vue-loader/lib??vue-loader-options!./src/js/App.vue?vue&type=script&lang=js&
 //
@@ -1852,13 +1852,21 @@ let js_website
  * @returns {iQiyi|bilibili}
  */
 function getWebsiteClass (websiteName) {
-  if (websiteName === 'iqiyi') return website_iQiyi
-  if (websiteName === 'bilibili') return website_bilibili
+  if (websiteName === WEBSITE.iqiyi) return website_iQiyi
+  if (websiteName === WEBSITE.bilibili) return website_bilibili
+}
+
+if (gmUnsafeWindow.location.href.startsWith('https://www.bilibili.com/bangumi/play/')) {
+  js_website = WEBSITE.bilibili
+}
+
+// inject iqiyi
+if (gmUnsafeWindow.location.hostname === 'www.iqiyi.com') {
+  js_website = WEBSITE.iqiyi
 }
 
 function init () {
-  if (gmUnsafeWindow.location.href.startsWith('https://www.bilibili.com/bangumi/play/')) {
-    js_website = 'bilibili'
+  if (js_website === 'bilibili') {
     if ([
       1, // 动漫
       2, // 电影
@@ -1870,10 +1878,9 @@ function init () {
   }
 
   // inject iqiyi
-  if (gmUnsafeWindow.location.hostname === 'www.iqiyi.com') {
+  if (js_website === 'iqiyi') {
     if (gmUnsafeWindow.Q.PageInfo.playPageInfo.categoryName === '动漫') {
-      js_website = 'iqiyi'
-      external_$_default()('.qy-flash-func').prepend(`<div id='bgm_tv_tracker'></div>`)
+      external_$_default()('div.qy-player-title ').append(`<div id='bgm_tv_tracker'></div>`)
     }
   }
 
@@ -1908,8 +1915,16 @@ function init () {
   }
 }
 
+function initWrapper () {
+  if (js_website === WEBSITE.bilibili) {
+    init()
+  } else if (js_website === WEBSITE.iqiyi) {
+    setTimeout(init, 1000 * 10)
+  }
+}
+
 external_$_default()(gmUnsafeWindow).ready(function () {
-  setTimeout(init, 1000 * 5)
+  initWrapper()
 })
 
 
