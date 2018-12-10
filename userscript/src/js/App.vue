@@ -79,7 +79,7 @@
           <div><p>
             {{ message.time.getHours() }}:{{ message.time.getMinutes() }}:{{ message.time.getSeconds() }}
           </p>
-            <pre><code>{{ message.text }}</code></pre>
+            <p>{{ message.text }}</p>
           </div>
         </div>
       </div>
@@ -398,19 +398,19 @@ export default {
 
 </script>
 <style lang="scss">
-  #bgm_tv_tracker.disable .bgm_tv_tracker_info {
-    display: none;
-  }
+#bgm_tv_tracker.disable .bgm_tv_tracker_info {
+  display: none;
+}
 
-  /*label {*/
-  /*width: 100px;*/
-  /*text-align: left;*/
-  /*}*/
+/*label {*/
+/*width: 100px;*/
+/*text-align: left;*/
+/*}*/
 
-  input[type=checkbox] {
-    appearance: checkbox
-  }
+input[type=checkbox] {
+  appearance: checkbox
+}
 
-  @import "../style/scss/iqiyi";
-  @import "../style/scss/bilibili";
+@import "../style/scss/iqiyi";
+@import "../style/scss/bilibili";
 </style>

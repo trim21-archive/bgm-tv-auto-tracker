@@ -1,8 +1,12 @@
 import $ from 'jquery'
-import { gmUnsafeWindow } from './vars'
+import { gmUnsafeWindow, WEBSITE } from './vars'
 import { apiServer, parseEpisode } from './utils'
 
 class bilibili {
+  static get name () {
+    return WEBSITE.bilibili
+  }
+
   /**
    * Init Website Data.
    *
@@ -104,6 +108,10 @@ class bilibili {
 }
 
 class iQiyi {
+  static get name () {
+    return WEBSITE.iqiyi
+  }
+
   static init () {
     // console.log(bangumiName)
     let collectionLinkEl = $('#block-C > div.qy-player-detail > div > div > div > div > div.qy-player-title > h1 > a')
@@ -150,27 +158,30 @@ class iQiyi {
       }
     }
 
-    gmUnsafeWindow.addEventListener('hashchange', function () {
-      setTimeout(onEpisodeChange, 500)
-    }, false)
+    let href = gmUnsafeWindow.location.href
+    const detectHrefChange = function () {
+      if (href !== gmUnsafeWindow.location.href) {
+        onEpisodeChange({
+          episode: true
+        })
+      }
+      href = gmUnsafeWindow.location.href
+    }
+
+    setInterval(detectHrefChange, 10 * 1000)
+    setTimeout(detectHrefChange, 5000)
   }
 
   static getPlayerInfo () {
-    return Promise.resolve({
-      current: 0,
-      duration: 0,
-      percent: 0,
+    return new Promise((resolve) => {
+      gmUnsafeWindow.playerObject.getPlayInfo(resolve)
+    }).then(info => {
+      return {
+        current: info.currentTime,
+        duration: info.totalDuration / 1000,
+        percent: info.currentTime / info.totalDuration * 1000,
+      }
     })
-    // return new Promise((resolve) => {
-    //   gmUnsafeWindow._player.getPlayInfo(resolve)
-    // }).then(info => {
-    //   return {
-    //     current: info.currentTime,
-    //     duration: info.totalDuration / 1000,
-    //     percent: info.currentTime / info.totalDuration * 1000,
-    //   }
-    //   // return info.currentTime / info.totalDuration * 1000
-    // })
   }
 }
 
