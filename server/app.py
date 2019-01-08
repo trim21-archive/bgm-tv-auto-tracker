@@ -271,7 +271,6 @@ async def collect_episode_info(request: WebRequest):
     d = await request.json()
     v = InitialStateValidator(d)
     if v.is_valid():
-        print(v.validated_data)
         await request.app.db.episode_info.update_one({'_id': v.validated_data['mediaInfo']['media_id']},
                                                      {'$set': v.validated_data}, upsert=True)
     return web.json_response({'message': 'hello world', 'correct': v.is_valid(), 'data': v.validated_data})
