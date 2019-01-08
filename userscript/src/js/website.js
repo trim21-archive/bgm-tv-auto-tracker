@@ -24,9 +24,21 @@ class bilibili {
     let title = status.mediaInfo.title
     let episodeStartWith = parseInt(status.epList[0].index)
 
+    apiServer.post('/api/v0.1/collect_episode_info', {
+      mediaInfo: gmUnsafeWindow.__INITIAL_STATE__.mediaInfo,
+      epInfo: gmUnsafeWindow.__INITIAL_STATE__.epInfo,
+      epList: gmUnsafeWindow.__INITIAL_STATE__.epList,
+    }).then(
+      res => {
+        console.log(res)
+      },
+      err => {
+        console.log(err)
+      })
+
     return new Promise((resolve, reject) => {
       apiServer.get('/api/v0.2/querySubjectID', {
-        params: { bangumiID, website: 'bilibili' }
+        params: {bangumiID, website: 'bilibili'}
       }).then(
         response => resolve({
           subjectID: response.data.subject_id,
@@ -52,7 +64,7 @@ class bilibili {
     let bangumiID = status.mediaInfo.season_id
     let INNER_EPISODE = gmUnsafeWindow.__INITIAL_STATE__.epInfo.index
 
-    function onEpisodeChange ({ season = false, episode = false }) {
+    function onEpisodeChange ({season = false, episode = false}) {
       if (season) {
         cls.init().then(
           data => {
@@ -125,7 +137,7 @@ class iQiyi {
 
     return new Promise((resolve, reject) => {
       apiServer.get('/api/v0.2/querySubjectID', {
-        params: { bangumiID, website: 'iqiyi' }
+        params: {bangumiID, website: 'iqiyi'}
       }).then(
         response => {
           console.log(response)
@@ -152,7 +164,7 @@ class iQiyi {
       let title = gmUnsafeWindow.document.title
       let episode = parseEpisode(title)
       if (episode) {
-        cb({ episode })
+        cb({episode})
       } else {
         notfound()
       }
