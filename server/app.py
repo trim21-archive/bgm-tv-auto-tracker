@@ -276,6 +276,11 @@ async def collect_episode_info(request: WebRequest):
     return web.json_response({'message': 'hello world', 'correct': v.is_valid(), 'data': v.validated_data})
 
 
+async def collected_episode_info(request: WebRequest):
+    return web.json_response(
+        {'message': 'hello world', 'data': await request.app.db.episode_info.find().to_list(500)})
+
+
 def create_app(io_loop=asyncio.get_event_loop()):
     app = web.Application(
         # middlewares=[error_middleware, ]
@@ -284,10 +289,7 @@ def create_app(io_loop=asyncio.get_event_loop()):
     app.on_cleanup.append(clean_up)
     app.client_session = aiohttp.ClientSession(loop=io_loop)
     setup_mongo(app, io_loop)
-    aiohttp_jinja2.setup(app,
-                         loader=jinja2.FileSystemLoader(
-                             str(base_dir / 'templates')
-                         ))
+    aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader(str(base_dir / 'templates')))
     app.add_routes([
         web.get('/', redirect(github_url)),
         web.get('/dump', dump_website),
@@ -297,7 +299,9 @@ def create_app(io_loop=asyncio.get_event_loop()):
         web.get('/statistics_missing_bangumi', statistics_missing_bangumi),
         web.post('/api/v0.1/refresh_token', refresh_auth_token),
         web.post('/api/v0.1/reportMissingBangumi', report_missing_bangumi),
+        web.get('/api/v0.1/collected_episode_info', collected_episode_info),
         web.post('/api/v0.1/collect_episode_info', collect_episode_info),
+
     ])
     cors = aiohttp_cors.setup(app, defaults={
         "*": aiohttp_cors.ResourceOptions(
