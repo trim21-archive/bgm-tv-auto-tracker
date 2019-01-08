@@ -3,6 +3,7 @@ import pathlib
 from os import path
 
 import pymongo
+import requests
 
 # from db import mongo_url
 
@@ -47,31 +48,33 @@ for item in data["items"]:
 
 with open(base_dir / 'patch.json', 'r', encoding='utf-8') as f:
     data = json.load(f)
-for website, items in data.items():
-    for item in items:
-        if item.get('subject_id'):
-            subject_id = item['subject_id']
-        elif item.get('subjectID'):
-            subject_id = item['subjectID']
-        else:
-            subject_id = item['subject'].split('/')[-1]
-        if item.get('bangumi_id'):
-            bangumi_id = item['bangumi_id']
-        elif item.get('bangumiID'):
-            bangumi_id = item['bangumiID']
-        else:
-            raise ValueError('item has no bangumi id')
-        print({
-            '_id'       : bangumi_id,
-            'subject_id': subject_id,
-            'title'     : item['title']
-        })
-        db.get_collection(website).update_one({'_id': bangumi_id},
-                                              {'$set': {
-                                                  'subject_id': subject_id,
-                                                  'title'     : item['title']
-                                              }}, upsert=True)
-        db.get_collection('missing_bangumi').delete_many({
-            'website'  : website,
-            'bangumiID': bangumi_id
-        })
+
+for item in data:
+    # for item in items:
+    website = item['website']
+    if item.get('subject_id'):
+        subject_id = item['subject_id']
+    elif item.get('subjectID'):
+        subject_id = item['subjectID']
+    else:
+        subject_id = item['subject'].split('/')[-1]
+    if item.get('bangumi_id'):
+        bangumi_id = item['bangumi_id']
+    elif item.get('bangumiID'):
+        bangumi_id = item['bangumiID']
+    else:
+        raise ValueError('item has no bangumi id')
+    print({
+        '_id'       : bangumi_id,
+        'subject_id': subject_id,
+        'title'     : item['title']
+    })
+    db.get_collection(website).update_one({'_id': bangumi_id},
+                                          {'$set': {
+                                              'subject_id': subject_id,
+                                              'title'     : item['title']
+                                          }}, upsert=True)
+    db.get_collection('missing_bangumi').delete_many({
+        'website'   : website,
+        'bangumi_id': bangumi_id
+    })

@@ -10,3 +10,8 @@ bgm.tv auto tracker将会在如下的情况下收集如下的信息:
 - 网站: `bilibili`或者`iqiyi`
 - 番剧id: 参考[bangumi-data](https://github.com/bangumi-data/bangumi-data/blob/master/CONTRIBUTING.md#%E7%AB%99%E7%82%B9-url-%E6%8B%BC%E6%8E%A5). b站的`番剧id`为`window.__INITIAL_STATE__.mediaInfo.season_id`
 - 条目id: bgm.tv网页中, 对应条目网址最后的数字. example: [https://bgm.tv/subject/`226677`](https://bgm.tv/subject/226677)
+
+
+2019.1.8新增:
+因为b站和bgm.tv的许多剧集不是完全对应的 (比如许多sp剧集), 所以为了提高标记的准确性, 需要知道b站番剧具体的分集信息.
+现在bgm会在你观看b站番剧的时候收集b站的番剧和分集信息, 具体为`__INITIAL_STATE__.mediaInfo`, `__INITIAL_STATE__.epInfo`和`__INITIAL_STATE__.epList`.

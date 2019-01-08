@@ -1,18 +1,18 @@
 import asyncio
-import pathlib
 import json
+import pathlib
 from os import path
 from typing import Callable
 
-import motor.core
-from validator import Validator, StringField, EnumField
-
-import aiohttp_cors
 import aiohttp
+import aiohttp.http
+import aiohttp_cors
 import aiohttp_jinja2
 import jinja2
+import motor.core
 from aiohttp import web
 from dateutil import parser
+from validator import Validator, StringField, EnumField, ListField, IntegerField, DictField
 
 from config import APP_ID, APP_SECRET, HOST, PROTOCOL
 from db import setup_mongo
@@ -20,7 +20,7 @@ from db import setup_mongo
 github_url = 'https://github.com/Trim21/bilibili-bangumi-tv-auto-tracker'
 callback_url = f'{PROTOCOL}://{HOST}/oauth_callback'
 oauth_url = f'https://bgm.tv/oauth/authorize?client_id={APP_ID}' \
-            f'&response_type=code&redirect_uri={callback_url}'
+    f'&response_type=code&redirect_uri={callback_url}'
 
 base_dir = pathlib.Path(path.dirname(__file__))
 
@@ -31,6 +31,7 @@ class TypeDatabase(object):
     missing_bangumi: motor.core.AgnosticCollection
     get_collection: Callable[[str], motor.core.AgnosticCollection]
     statistics_missing_bangumi: motor.core.AgnosticCollection
+    episode_info: motor.core.AgnosticCollection
 
 
 class TypeMongoClient(object):
@@ -185,6 +186,14 @@ async def statistics_missing_bangumi(request: WebRequest):
     return web.json_response(f)
 
 
+async def dump_website(request: WebRequest):
+    website = request.query.get('website')
+    if not website or website not in ['bilibili', 'iqiyi']:
+        raise web.HTTPBadRequest(reason='need a query `website`')
+    l = await request.app.db.get_collection(website).find().to_list(5000)
+    return web.json_response(l)
+
+
 def redirect(location):
     async def r(*args):
         raise web.HTTPFound(location)
@@ -192,11 +201,80 @@ def redirect(location):
     return r
 
 
-import aiohttp.http
-
-
 async def clean_up(app):
     await app.client_session.close()
+
+
+class EpisodeItemValidator(Validator):
+    aid = IntegerField()
+    badge = StringField()
+    badge_type = IntegerField()
+    cid = IntegerField()
+    cover = StringField()  #: "http://i1.hdslb.com/bfs/archive/ee4a86efc84a667783de4ee77b4229c751569237.jpg"
+    duration = IntegerField()  #: 1434005
+    ep_id = IntegerField()  #: 114966
+    episode_status = IntegerField()  #: 13
+    index = StringField()  #: "1"
+    index_title = StringField()  #: "亚斯塔与尤诺"
+    mid = IntegerField()  #: 21453565
+    page = IntegerField()  #: 1
+    pub_real_time = StringField()  #: "2017-10-03 18:25:00"
+    section_id = IntegerField()  #: 23405
+    section_type = IntegerField()  #: 0
+    vid = StringField()  #: ""
+    # from = StringField()  #: "bangumi"
+
+
+setattr(EpisodeItemValidator, 'from', StringField())
+
+
+class EpisodeInfoValidator(EpisodeItemValidator):
+    pass
+
+
+class MediaInfoValidator(Validator):
+    actors = StringField()  #:
+    # "亚斯塔：梶原岳人↵尤诺：岛崎信长↵夜见介大：诹访部顺一↵诺艾儿·西尔法：优木加奈↵芬拉尔·尔拉凯斯：福山润↵玛格那·斯威格：室元气↵拉克·鲍尔提亚：村濑步↵葛修·亚德雷：日野聪↵"
+    alias = StringField()  #: "黑色五叶草,BLACK CLOVER,黑五,黑色三叶草,黑色四叶草"
+    areas = ListField()  #: Array(1)
+    cover = StringField()  #: "http://i0.hdslb.com/bfs/bangumi/c345335f3cc395f7cfbe7e7e0a4913f9b1671fe2.jpg"
+    evaluate = StringField()  #: \
+    # "曾经险些遭到魔神毁灭的世界，拯救它的是一位被后世称为“魔法帝”的魔导士……两位被遗弃在教堂的少年，一位是有卓越魔力跟魔法才能的四叶草魔导书的尤诺，另一位魔法值为零但却意外获得黑色五叶草的魔法书的亚斯塔……这是关于一位没魔法能力的少年却想要成为魔法帝的故事。"
+    is_paster_ads = IntegerField()  #: 0
+    jp_title = StringField()  #: "ブラッククローバー"
+    link = StringField()  #: "http://www.bilibili.com/bangumi/media/md6422/"
+    media_id = IntegerField()  #: 6422
+    mode = IntegerField()  #: 2
+    paster_text = StringField()  #: ""
+    season_id = IntegerField()  #: 6422
+    season_status = IntegerField()  #: 13
+    season_title = StringField()  #: "TV"
+    season_type = IntegerField()  #: 1
+    series_title = StringField()  #: "黑色四叶草"
+    square_cover = StringField()  #: "http://i0.hdslb.com/bfs/bangumi/1d703634cd3ee35b625bf882f27289db301cae63.jpg"
+    staff = StringField()  #: "原作：田畠裕基（集英社《周刊少年JUMP" \
+    #
+    #  "》连载）↵监督：吉原达矢↵系列构成：笔安一幸↵角色设计：竹田逸子↵次要角色设计：德永久美子↵道具设计：高桥恒星↵美术监督：前田有纪↵摄影监督：国井智行↵色彩设计：篠原爱子↵编辑：奥田浩史↵音乐：关美奈子↵音响监督：高桑一↵动画制作：studio pierrot↵制作：黑色五叶草制作委员会"
+    stat = DictField()  #: Object
+    style = ListField()  #: Array(4)
+    title = StringField()  #: "黑色四叶草"
+    total_ep = IntegerField()  #: 0
+
+
+class InitialStateValidator(Validator):
+    epList = ListField(DictField(EpisodeItemValidator))
+    epInfo = DictField(EpisodeInfoValidator)
+    mediaInfo = DictField(MediaInfoValidator)
+
+
+async def collect_episode_info(request: WebRequest):
+    d = await request.json()
+    v = InitialStateValidator(d)
+    if v.is_valid():
+        print(v.validated_data)
+        await request.app.db.episode_info.update_one({'_id': v.validated_data['mediaInfo']['media_id']},
+                                                     {'$set': v.validated_data}, upsert=True)
+    return web.json_response({'message': 'hello world', 'correct': v.is_valid(), 'data': v.validated_data})
 
 
 def create_app(io_loop=asyncio.get_event_loop()):
@@ -213,12 +291,14 @@ def create_app(io_loop=asyncio.get_event_loop()):
                          ))
     app.add_routes([
         web.get('/', redirect(github_url)),
+        web.get('/dump', dump_website),
         web.get('/auth', redirect(oauth_url)),
         web.get('/oauth_callback', get_token),
         web.get('/api/v0.2/querySubjectID', query_subject_id),
         web.get('/statistics_missing_bangumi', statistics_missing_bangumi),
         web.post('/api/v0.1/refresh_token', refresh_auth_token),
         web.post('/api/v0.1/reportMissingBangumi', report_missing_bangumi),
+        web.post('/api/v0.1/collect_episode_info', collect_episode_info),
     ])
     cors = aiohttp_cors.setup(app, defaults={
         "*": aiohttp_cors.ResourceOptions(
