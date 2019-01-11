@@ -10,6 +10,7 @@ import aiohttp_cors
 import aiohttp_jinja2
 import jinja2
 import motor.core
+import pytz
 from aiohttp import web
 from dateutil import parser
 from validator import Validator, StringField, EnumField, ListField, IntegerField, DictField
@@ -32,6 +33,8 @@ class TypeDatabase(object):
     get_collection: Callable[[str], motor.core.AgnosticCollection]
     statistics_missing_bangumi: motor.core.AgnosticCollection
     episode_info: motor.core.AgnosticCollection
+    bilibili_episode_map: motor.core.AgnosticCollection
+    bilibili_missing_episode: motor.core.AgnosticCollection
 
 
 class TypeMongoClient(object):
@@ -40,6 +43,7 @@ class TypeMongoClient(object):
 
 
 class TypeApp(web.Application):
+    tz: pytz.timezone
     db: TypeDatabase
     mongo: TypeMongoClient
     client_session: aiohttp.ClientSession
@@ -267,25 +271,61 @@ class InitialStateValidator(Validator):
     mediaInfo = DictField(MediaInfoValidator)
 
 
+import datetime
+import pytz
+
+
 async def collect_episode_info(request: WebRequest):
     d = await request.json()
     v = InitialStateValidator(d)
     if v.is_valid():
         await request.app.db.episode_info.update_one({'_id': v.validated_data['mediaInfo']['media_id']},
                                                      {'$set': v.validated_data}, upsert=True)
+        f = await request.app.db.bilibili_episode_map.find_one({
+            'ep_id'   : v.validated_data['epInfo']['ep_id'],
+            'media_id': v.validated_data['mediaInfo']['media_id'],
+        })
+        if not f:
+            await request.app.db.bilibili_missing_episode.update_one({
+                '_id'     : v.validated_data['epInfo']['ep_id'],
+                'ep_id'   : v.validated_data['epInfo']['ep_id'],
+                'media_id': v.validated_data['mediaInfo']['media_id'],
+            }, {'$set': {'time': datetime.datetime.now(request.app.tz)}}, upsert=True)
     return web.json_response({'message': 'hello world', 'correct': v.is_valid(), 'data': v.validated_data})
 
 
+async def try_get_ep_info(request: WebRequest):
+    j = await request.json()
+    media_id = j.get('media_id')
+    ep_id = j.get('ep_id')
+    if not (media_id and ep_id):
+        return web.HTTPBadRequest()
+    return web.json_response({'message': '',
+                              'data'   : {
+                                  'ep_id'  : 123,
+                                  'episode': 1,
+                                  'sort'   : 1
+                              }})
+
+
+async def ep_map(request: WebRequest):
+    media_id = request.query.get('media_id', None)
+    m = await request.app.db.get_collection('bilibili_episode_map').find({'media_id': int(media_id)}).to_list(None)
+    d = {'eps': {}}
+    for i in m:
+        d['eps'][i['ep_id']] = {'id': i['bgm_tv_ep_id'], 'rank': i.get('index', 1)}
+    return web.json_response(d)
+
+
 async def collected_episode_info(request: WebRequest):
-    return web.json_response(
-        {'message': 'hello world', 'data': await request.app.db.episode_info.find().to_list(500)})
+    return web.json_response({'message': 'hello world', 'data': await request.app.db.episode_info.find().to_list()})
 
 
 def create_app(io_loop=asyncio.get_event_loop()):
     app = web.Application(
         # middlewares=[error_middleware, ]
     )
-
+    app.tz = pytz.timezone('Asia/Shanghai')
     app.on_cleanup.append(clean_up)
     app.client_session = aiohttp.ClientSession(loop=io_loop)
     setup_mongo(app, io_loop)
@@ -295,7 +335,9 @@ def create_app(io_loop=asyncio.get_event_loop()):
         web.get('/dump', dump_website),
         web.get('/auth', redirect(oauth_url)),
         web.get('/oauth_callback', get_token),
+        web.get('/api/v0.1/ep_map', ep_map),
         web.get('/api/v0.2/querySubjectID', query_subject_id),
+        web.get('/api/v0.1/bilibili/queryEpID', try_get_ep_info),
         web.get('/statistics_missing_bangumi', statistics_missing_bangumi),
         web.post('/api/v0.1/refresh_token', refresh_auth_token),
         web.post('/api/v0.1/reportMissingBangumi', report_missing_bangumi),
