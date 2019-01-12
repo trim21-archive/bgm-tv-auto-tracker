@@ -343,6 +343,119 @@ async def missing_episode(request: WebRequest):
     })
 
 
+async def tinygrail_episode_api(request: WebRequest):
+    subject_id = request.match_info.get('subject_id')
+    f = await request.app.db.get_collection('bilibili').find_one({'subject_id': subject_id})
+    if not f:
+        return web.HTTPNotFound()
+    e = await request.app.db.episode_info.find_one({'mediaInfo.season_id': int(f['_id'])})
+    if not e:
+        return web.HTTPNotFound()
+    d = []
+    for i in (await request.app.db.bilibili_episode_map.find({'media_id': e['mediaInfo']['media_id']}).to_list(None)):
+        d.append({
+            "EpisodeId"   : i['bgm_tv_ep_id'],
+            "Id"          : 13681,
+            "LastModified": "\/Date(1531239807000)\/",
+            "Link"        : "https://www.bilibili.com/bangumi/play/ep{}".format(i['ep_id']),
+            "Name"        : "肺炎链球菌",
+            "OnAir"       : "\/Date(1531009800000)\/",
+            "State"       : 1,
+            "SubjectId"   : int(subject_id),
+            "Type"        : 1,
+            "UserId"      : 702,
+            "Site"        : "bilibili"
+        })
+    return web.json_response({
+        "State": 0,
+        "Value": d
+    })
+
+
+async def tinygrail_single_episode(request: WebRequest):
+    ep_id = request.match_info.get('ep_id')
+    f = await request.app.db.bilibili_episode_map.find_one({'bgm_tv_ep_id': int(ep_id)})
+    if not f:
+        return web.json_response({"State": 0, "Value": []})
+    return web.json_response({
+        "State": 0,
+        "Value": [{
+            "EpisodeId"   : f['bgm_tv_ep_id'],
+            "Id"          : 13681,
+            "LastModified": "\/Date(1531239807000)\/",
+            "Link"        : "https://www.bilibili.com/bangumi/play/ep{}".format(f['ep_id']),
+            "Name"        : "肺炎链球菌",
+            "OnAir"       : "\/Date(1531009800000)\/",
+            "State"       : 1,
+            "SubjectId"   : 235612,
+            "Type"        : 1,
+            "UserId"      : 702,
+            "Site"        : "bilibili"
+        }, ]
+    })
+
+
+async def tinygrail_box_episode(request: WebRequest):
+    ep_id = request.match_info.get('ep_id')
+    f = await request.app.db.bilibili_episode_map.find_one({'bgm_tv_ep_id': int(ep_id)})
+    if not f:
+        return web.Response(text="""
+<div id="playbox" class="grp_box clearit">
+    <div class="clearit">
+            <span class="tip_j">暂无播放源</span>
+        <div style="float:right"><a href="#" onclick="document.loadEditBox(-1)" class="l">[修改]</a></div>
+    </div>
+</div>
+        """)
+    return aiohttp_jinja2.render_template('box.html', request, {'f': f, })
+
+
+async def tinygrail_edit(request: WebRequest):
+    edit_id = request.match_info.get('edit_id')
+    if int(edit_id) == -1:
+        return """<!DOCTYPE html><html><head>    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="keywords" content="小圣杯,Tiny Grail,TG">
+    <meta name="description" content="Anime Characters Trading System feat. bangumi.tv">
+    <title>Episode Editor - Tiny Grail</title>    <link href="/images/fav.ico" rel="shortcut icon" />
+    <link href="/images/icon.png" rel="apple-touch-icon" />
+    <style>        #editbox        {            font-size:12px;        }    </style>
+</head>
+<body><style>#editbox {width: 490px;}
+        #editbox div {            padding-bottom: 5px;        }
+        #editbox span {            margin-right: 5px;        }
+        #editbox a {font-size: 12px;color: #0187C5;float: right;margin: 0 5px 0 0;}
+    .short-input {width: 180px;margin-right: 5px;}
+    .long-input {width: 426px;}
+</style><div id="editbox"><div>请点击“授权访问”登陆TinyGrail添加节目源，您需要有“wiki人”权限才能进行此操作。</div>
+        <a href="#" onclick="login()">授权访问</a><a href="#" onclick="closeBox()">关闭</a></div>
+<script type="text/javascript" src="/scripts/episode.js"></script>
+    <script src="/bundles/jquery?v=FVs3ACwOLIVInrAl5sdzR2jrCDmVOWFbZMY6g6Q0ulE1"></script>
+</body></html>"""
+    return """<!DOCTYPE html><html><head><meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="keywords" content="小圣杯,Tiny Grail,TG">
+    <meta name="description" content="Anime Characters Trading System feat. bangumi.tv">
+    <title>Episode Editor - Tiny Grail</title><link href="/images/fav.ico" rel="shortcut icon" />
+    <link href="/images/icon.png" rel="apple-touch-icon" />
+    <style>#editbox{font-size:12px;}</style>
+</head>
+<body><style>#editbox {width: 490px;}
+        #editbox div {padding-bottom: 5px;}
+        #editbox span {margin-right: 5px;}
+        #editbox a {font-size: 12px;color: #0187C5;float: right;margin: 0 5px 0 0;}
+.short-input {width: 180px;margin-right: 5px;}
+    .long-input {width: 426px;}</style>
+    <div id="editbox">
+        <div>请点击“授权访问”登陆TinyGrail添加节目源，您需要有“wiki人”权限才能进行此操作。</div>
+        <a href="#" onclick="login()">授权访问</a>
+        <a href="#" onclick="closeBox()">关闭</a>
+    </div>
+<script type="text/javascript" src="/scripts/episode.js"></script>
+    <script src="/bundles/jquery?v=FVs3ACwOLIVInrAl5sdzR2jrCDmVOWFbZMY6g6Q0ulE1"></script>
+</body></html>"""
+
+
 def create_app(io_loop=asyncio.get_event_loop()):
     app = web.Application(
         # middlewares=[error_middleware, ]
@@ -364,6 +477,10 @@ def create_app(io_loop=asyncio.get_event_loop()):
         web.post('/api/v0.1/reportMissingBangumi', report_missing_bangumi),
         web.get('/api/v0.1/collected_episode_info', collected_episode_info),
         web.post('/api/v0.1/collect_episode_info', collect_episode_info),
+        web.get('/api/episode/subject/{subject_id}', tinygrail_episode_api),
+        web.get('/api/episode/{ep_id}', tinygrail_single_episode),
+        web.get('/api/episode/box/{ep_id}', tinygrail_box_episode),
+        web.get('/api/episode/{ep_id}/edit/{edit_id}', tinygrail_edit)
 
     ])
     cors = aiohttp_cors.setup(app, defaults={

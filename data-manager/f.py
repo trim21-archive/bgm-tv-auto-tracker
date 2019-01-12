@@ -12,6 +12,9 @@ for d in data:
     ep_id = d.get('ep_id')
     f = db.get_collection('episode_info').find_one({'_id': int(media_id), })
     if f:
+        if 'pubInfo' not in f:
+            print(f['mediaInfo']['media_id'])
+            continue
         if not f['pubInfo'].get('is_finish'):
             continue
 

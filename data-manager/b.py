@@ -15,11 +15,10 @@ bilibili_collection = db.get_collection('episode_info')
 subject_collection = db.get_collection('bgm_tv_episode_info')
 map_collection = db.get_collection('bilibili')
 episode_map_collection = db.get_collection('bilibili_episode_map')
-for item in bilibili_collection.find({'epList.ep_id':80091}):
+for item in bilibili_collection.find({}):
     i = map_collection.find_one({'_id': str(item['mediaInfo']['season_id'])})
     # print({'_id': str(item['_id'])})
     if not i:
-        print(i)
         continue
     subject_id = int(i['subject_id'])
     subject_json = subject_collection.find_one({'_id': subject_id})
