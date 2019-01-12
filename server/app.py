@@ -321,10 +321,16 @@ async def collected_episode_info(request: WebRequest):
     return web.json_response({'message': 'hello world', 'data': await request.app.db.episode_info.find().to_list(None)})
 
 
+def j(d):
+    d['_id'] = str(d['_id'])
+    d['time'] = str(d['time'])
+    return d
+
+
 async def missing_episode(request: WebRequest):
     return web.json_response({
         'message': 'hello world',
-        'data'   : await request.app.db.bilibili_missing_episode.find().to_list(None),
+        'data'   : [j(x) for x in await request.app.db.bilibili_missing_episode.find().to_list(None)],
     })
 
 
