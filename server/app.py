@@ -413,7 +413,7 @@ async def tinygrail_box_episode(request: WebRequest):
 async def tinygrail_edit(request: WebRequest):
     edit_id = request.match_info.get('edit_id')
     if int(edit_id) == -1:
-        return """<!DOCTYPE html><html><head>    <meta charset="utf-8" />
+        return web.Response(text="""<!DOCTYPE html><html><head>    <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="keywords" content="小圣杯,Tiny Grail,TG">
     <meta name="description" content="Anime Characters Trading System feat. bangumi.tv">
@@ -431,8 +431,8 @@ async def tinygrail_edit(request: WebRequest):
         <a href="#" onclick="login()">授权访问</a><a href="#" onclick="closeBox()">关闭</a></div>
 <script type="text/javascript" src="/scripts/episode.js"></script>
     <script src="/bundles/jquery?v=FVs3ACwOLIVInrAl5sdzR2jrCDmVOWFbZMY6g6Q0ulE1"></script>
-</body></html>"""
-    return """<!DOCTYPE html><html><head><meta charset="utf-8" />
+</body></html>""")
+    return web.Response(text="""<!DOCTYPE html><html><head><meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="keywords" content="小圣杯,Tiny Grail,TG">
     <meta name="description" content="Anime Characters Trading System feat. bangumi.tv">
@@ -453,7 +453,7 @@ async def tinygrail_edit(request: WebRequest):
     </div>
 <script type="text/javascript" src="/scripts/episode.js"></script>
     <script src="/bundles/jquery?v=FVs3ACwOLIVInrAl5sdzR2jrCDmVOWFbZMY6g6Q0ulE1"></script>
-</body></html>"""
+</body></html>""")
 
 
 def create_app(io_loop=asyncio.get_event_loop()):
