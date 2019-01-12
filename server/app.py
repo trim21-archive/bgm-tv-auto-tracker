@@ -318,7 +318,14 @@ async def ep_map(request: WebRequest):
 
 
 async def collected_episode_info(request: WebRequest):
-    return web.json_response({'message': 'hello world', 'data': await request.app.db.episode_info.find().to_list()})
+    return web.json_response({'message': 'hello world', 'data': await request.app.db.episode_info.find().to_list(None)})
+
+
+async def missing_episode(request: WebRequest):
+    return web.json_response({
+        'message': 'hello world',
+        'data'   : await request.app.db.bilibili_missing_episode.find().to_list(None),
+    })
 
 
 def create_app(io_loop=asyncio.get_event_loop()):
@@ -337,6 +344,7 @@ def create_app(io_loop=asyncio.get_event_loop()):
         web.get('/oauth_callback', get_token),
         web.get('/api/v0.2/querySubjectID', query_subject_id),
         web.get('/statistics_missing_bangumi', statistics_missing_bangumi),
+        web.get('/bilibili_missing_episode', missing_episode),
         web.post('/api/v0.1/refresh_token', refresh_auth_token),
         web.post('/api/v0.1/reportMissingBangumi', report_missing_bangumi),
         web.get('/api/v0.1/collected_episode_info', collected_episode_info),
