@@ -190,14 +190,6 @@ async def statistics_missing_bangumi(request: WebRequest):
     return web.json_response(f)
 
 
-async def dump_website(request: WebRequest):
-    website = request.query.get('website')
-    if not website or website not in ['bilibili', 'iqiyi']:
-        raise web.HTTPBadRequest(reason='need a query `website`')
-    l = await request.app.db.get_collection(website).find().to_list(5000)
-    return web.json_response(l)
-
-
 def redirect(location):
     async def r(*args):
         raise web.HTTPFound(location)
@@ -406,54 +398,12 @@ async def tinygrail_box_episode(request: WebRequest):
         <div style="float:right"><a href="#" onclick="document.loadEditBox(-1)" class="l">[修改]</a></div>
     </div>
 </div>
-        """)
+        """, content_type='text/html')
     return aiohttp_jinja2.render_template('box.html', request, {'f': f, })
 
 
 async def tinygrail_edit(request: WebRequest):
-    edit_id = request.match_info.get('edit_id')
-    if int(edit_id) == -1:
-        return web.Response(text="""<!DOCTYPE html><html><head>    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="keywords" content="小圣杯,Tiny Grail,TG">
-    <meta name="description" content="Anime Characters Trading System feat. bangumi.tv">
-    <title>Episode Editor - Tiny Grail</title>    <link href="/images/fav.ico" rel="shortcut icon" />
-    <link href="/images/icon.png" rel="apple-touch-icon" />
-    <style>        #editbox        {            font-size:12px;        }    </style>
-</head>
-<body><style>#editbox {width: 490px;}
-        #editbox div {            padding-bottom: 5px;        }
-        #editbox span {            margin-right: 5px;        }
-        #editbox a {font-size: 12px;color: #0187C5;float: right;margin: 0 5px 0 0;}
-    .short-input {width: 180px;margin-right: 5px;}
-    .long-input {width: 426px;}
-</style><div id="editbox"><div>请点击“授权访问”登陆TinyGrail添加节目源，您需要有“wiki人”权限才能进行此操作。</div>
-        <a href="#" onclick="login()">授权访问</a><a href="#" onclick="closeBox()">关闭</a></div>
-<script type="text/javascript" src="/scripts/episode.js"></script>
-    <script src="/bundles/jquery?v=FVs3ACwOLIVInrAl5sdzR2jrCDmVOWFbZMY6g6Q0ulE1"></script>
-</body></html>""")
-    return web.Response(text="""<!DOCTYPE html><html><head><meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="keywords" content="小圣杯,Tiny Grail,TG">
-    <meta name="description" content="Anime Characters Trading System feat. bangumi.tv">
-    <title>Episode Editor - Tiny Grail</title><link href="/images/fav.ico" rel="shortcut icon" />
-    <link href="/images/icon.png" rel="apple-touch-icon" />
-    <style>#editbox{font-size:12px;}</style>
-</head>
-<body><style>#editbox {width: 490px;}
-        #editbox div {padding-bottom: 5px;}
-        #editbox span {margin-right: 5px;}
-        #editbox a {font-size: 12px;color: #0187C5;float: right;margin: 0 5px 0 0;}
-.short-input {width: 180px;margin-right: 5px;}
-    .long-input {width: 426px;}</style>
-    <div id="editbox">
-        <div>请点击“授权访问”登陆TinyGrail添加节目源，您需要有“wiki人”权限才能进行此操作。</div>
-        <a href="#" onclick="login()">授权访问</a>
-        <a href="#" onclick="closeBox()">关闭</a>
-    </div>
-<script type="text/javascript" src="/scripts/episode.js"></script>
-    <script src="/bundles/jquery?v=FVs3ACwOLIVInrAl5sdzR2jrCDmVOWFbZMY6g6Q0ulE1"></script>
-</body></html>""")
+    return web.Response(text="""这功能还没做好""", content_type='text/html')
 
 
 def create_app(io_loop=asyncio.get_event_loop()):
@@ -467,7 +417,6 @@ def create_app(io_loop=asyncio.get_event_loop()):
     aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader(str(base_dir / 'templates')))
     app.add_routes([
         web.get('/', redirect(github_url)),
-        web.get('/dump', dump_website),
         web.get('/auth', redirect(oauth_url)),
         web.get('/oauth_callback', get_token),
         web.get('/api/v0.2/querySubjectID', query_subject_id),
@@ -477,6 +426,7 @@ def create_app(io_loop=asyncio.get_event_loop()):
         web.post('/api/v0.1/reportMissingBangumi', report_missing_bangumi),
         web.get('/api/v0.1/collected_episode_info', collected_episode_info),
         web.post('/api/v0.1/collect_episode_info', collect_episode_info),
+
         web.get('/api/episode/subject/{subject_id}', tinygrail_episode_api),
         web.get('/api/episode/{ep_id}', tinygrail_single_episode),
         web.get('/api/episode/box/{ep_id}', tinygrail_box_episode),
