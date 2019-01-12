@@ -14,4 +14,4 @@ bgm.tv auto tracker将会在如下的情况下收集如下的信息:
 
 2019.1.8新增:
 因为b站和bgm.tv的许多剧集不是完全对应的 (比如许多sp剧集), 所以为了提高标记的准确性, 需要知道b站番剧具体的分集信息.
-现在bgm会在你观看b站番剧的时候收集b站的番剧和分集信息, 具体为`__INITIAL_STATE__.mediaInfo`, `__INITIAL_STATE__.epInfo`和`__INITIAL_STATE__.epList`.
+现在bgm会在你观看b站番剧的时候收集b站的番剧和分集信息, 具体为`__INITIAL_STATE__.mediaInfo`, `__INITIAL_STATE__.epInfo`, `__INITIAL_STATE__.pubInfo`和`__INITIAL_STATE__.epList`.

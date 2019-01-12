@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Bgm.tv auto tracker
 // @namespace   https://trim21.me/
-// @version     0.10.0
+// @version     0.10.1
 // @author      Trim21 <trim21me@gmail.com>
 // @source      https://github.com/Trim21/bilibili-bangumi-tv-auto-tracker
 // @license     MIT
@@ -1143,6 +1143,7 @@ class website_bilibili {
       mediaInfo: gmUnsafeWindow.__INITIAL_STATE__.mediaInfo,
       epInfo: gmUnsafeWindow.__INITIAL_STATE__.epInfo,
       epList: gmUnsafeWindow.__INITIAL_STATE__.epList,
+      pubInfo: gmUnsafeWindow.__INITIAL_STATE__.pubInfo,
     }).then(
       res => {
         console.log(res)
@@ -1153,7 +1154,7 @@ class website_bilibili {
 
     return new Promise((resolve, reject) => {
       apiServer.get('/api/v0.2/querySubjectID', {
-        params: {bangumiID, website: 'bilibili'}
+        params: { bangumiID, website: 'bilibili' }
       }).then(
         response => resolve({
           subjectID: response.data.subject_id,
@@ -1179,7 +1180,7 @@ class website_bilibili {
     let bangumiID = status.mediaInfo.season_id
     let INNER_EPISODE = gmUnsafeWindow.__INITIAL_STATE__.epInfo.index
 
-    function onEpisodeChange ({season = false, episode = false}) {
+    function onEpisodeChange ({ season = false, episode = false }) {
       if (season) {
         cls.init().then(
           data => {
@@ -1252,7 +1253,7 @@ class website_iQiyi {
 
     return new Promise((resolve, reject) => {
       apiServer.get('/api/v0.2/querySubjectID', {
-        params: {bangumiID, website: 'iqiyi'}
+        params: { bangumiID, website: 'iqiyi' }
       }).then(
         response => {
           console.log(response)
@@ -1279,7 +1280,7 @@ class website_iQiyi {
       let title = gmUnsafeWindow.document.title
       let episode = parseEpisode(title)
       if (episode) {
-        cb({episode})
+        cb({ episode })
       } else {
         notfound()
       }

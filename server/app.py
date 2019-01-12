@@ -265,10 +265,19 @@ class MediaInfoValidator(Validator):
     total_ep = IntegerField()  #: 0
 
 
+class PubInfoValidator(Validator):
+    is_finish = IntegerField()  #: 0
+    is_started = IntegerField()  #: 1
+    pub_time = StringField()  #: "2019-01-07 00:15:00"
+    pub_time_show = StringField()  #: "01月07日00:15"
+    weekday = IntegerField()  #: 1
+
+
 class InitialStateValidator(Validator):
     epList = ListField(DictField(EpisodeItemValidator))
     epInfo = DictField(EpisodeInfoValidator)
     mediaInfo = DictField(MediaInfoValidator)
+    pubInfo = DictField(PubInfoValidator)
 
 
 import datetime
