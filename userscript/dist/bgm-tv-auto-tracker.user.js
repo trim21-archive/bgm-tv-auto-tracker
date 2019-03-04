@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Bgm.tv auto tracker
 // @namespace   https://trim21.me/
-// @version     0.10.1
+// @version     0.10.2
 // @author      Trim21 <trim21me@gmail.com>
 // @source      https://github.com/Trim21/bilibili-bangumi-tv-auto-tracker
 // @license     MIT
@@ -1131,10 +1131,11 @@ class website_bilibili {
   static init () {
     const status = gmUnsafeWindow.__INITIAL_STATE__
     const episode = gmUnsafeWindow.__INITIAL_STATE__.epList
-      .findIndex(val => {
+      .filter(val => !val.index.includes('.')
+      ).findIndex(val => {
         return val.index === gmUnsafeWindow.__INITIAL_STATE__.epInfo.index
       }) + 1
-    console.log(episode)
+
     const bangumiID = status.mediaInfo.season_id
     let title = status.mediaInfo.title
     let episodeStartWith = parseInt(status.epList[0].index)
