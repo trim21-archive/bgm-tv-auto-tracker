@@ -4,20 +4,24 @@ import pathlib
 from os import path
 from typing import Callable
 
+import aiohttp.client_exceptions
 import aiohttp
 import aiohttp.http
 import aiohttp_cors
 import aiohttp_jinja2
 import jinja2
 import motor.core
-import pytz
 from aiohttp import web
 from dateutil import parser
-from validator import Validator, StringField, EnumField, ListField, \
-    IntegerField, DictField
+from validator import Validator, StringField, EnumField
+import website
+import datetime
+import pytz
 
 from config import APP_ID, APP_SECRET, HOST, PROTOCOL
+from constants import mongo_collection_name
 from db import setup_mongo
+from validators import InitialStateValidator, EpInputValidator
 
 github_url = 'https://github.com/Trim21/bilibili-bangumi-tv-auto-tracker'
 callback_url = f'{PROTOCOL}://{HOST}/oauth_callback'
@@ -40,7 +44,6 @@ class TypeDatabase(object):
 
 class TypeMongoClient(object):
     bilibili_bangumi: TypeDatabase
-    pass
 
 
 class TypeApp(web.Application):
@@ -55,6 +58,7 @@ class WebRequest(web.Request):
 
 
 async def get_token(request: WebRequest, ):
+    app_access_token = 'app_access_token'
     code = request.query.get('code', None)
 
     if not code:
@@ -74,12 +78,25 @@ async def get_token(request: WebRequest, ):
     if 'error' in r:
         return web.json_response(r, status=400)
     r['auth_time'] = int(parser.parse(resp.headers['Date']).timestamp())
-    await request.app.db.token.find_one({'_id': r['user_id']})
+    # if not request.cookies.get('app_access_token'):
+    user = await request.app.db.token.find_one({'_id': r['user_id']})
+
+    if user:
+        if app_access_token not in r:
+            r[app_access_token] = r['access_token'] + r["refresh_token"]
+    else:
+        r[app_access_token] = r['access_token'] + r["refresh_token"]
+
+    # if not (user and app_access_token not in r):
+    #     r[app_access_token] = r['access_token'] + r["refresh_token"]
+
     await request.app.db.token.update_one({'_id': r['user_id']},
                                           {'$set': r},
                                           upsert=True)
-    return aiohttp_jinja2.render_template('post_to_extension.html', request,
+    resp = aiohttp_jinja2.render_template('post_to_extension.html', request,
                                           {'data': json.dumps(r), })
+    resp.set_cookie(app_access_token, r[app_access_token])
+    return resp
 
 
 async def refresh_auth_token(request: WebRequest, ):
@@ -93,8 +110,9 @@ async def refresh_auth_token(request: WebRequest, ):
             'client_secret': APP_SECRET,
             'refresh_token': refresh_token,
             'redirect_uri' : callback_url}
-    async with request.app.client_session \
-        .post('https://bgm.tv/oauth/access_token', json=data) as resp:
+    async with request.app.client_session.post(
+        'https://bgm.tv/oauth/access_token', json=data
+    ) as resp:
         try:
             r = await resp.json()
         except aiohttp.client_exceptions.ContentTypeError:
@@ -191,7 +209,7 @@ async def statistics_missing_bangumi(request: WebRequest):
 
 
 def redirect(location):
-    async def r(*args):
+    async def r(request: WebRequest):
         raise web.HTTPFound(location)
 
     return r
@@ -199,81 +217,6 @@ def redirect(location):
 
 async def clean_up(app):
     await app.client_session.close()
-
-
-class EpisodeItemValidator(Validator):
-    aid = IntegerField()
-    badge = StringField()
-    badge_type = IntegerField()
-    cid = IntegerField()
-    cover = StringField()  #: "http://i1.hdslb.com/bfs/archive/ee4a86efc84a667783de4ee77b4229c751569237.jpg"
-    duration = IntegerField()  #: 1434005
-    ep_id = IntegerField()  #: 114966
-    episode_status = IntegerField()  #: 13
-    index = StringField()  #: "1"
-    index_title = StringField()  #: "亚斯塔与尤诺"
-    mid = IntegerField()  #: 21453565
-    page = IntegerField()  #: 1
-    pub_real_time = StringField()  #: "2017-10-03 18:25:00"
-    section_id = IntegerField()  #: 23405
-    section_type = IntegerField()  #: 0
-    vid = StringField()  #: ""
-    # from = StringField()  #: "bangumi"
-
-
-setattr(EpisodeItemValidator, 'from', StringField())
-
-
-class EpisodeInfoValidator(EpisodeItemValidator):
-    pass
-
-
-class MediaInfoValidator(Validator):
-    actors = StringField()  #:
-    # "亚斯塔：梶原岳人↵尤诺：岛崎信长↵夜见介大：诹访部顺一↵诺艾儿·西尔法：优木加奈↵芬拉尔·尔拉凯斯：福山润↵玛格那·斯威格：室元气↵拉克·鲍尔提亚：村濑步↵葛修·亚德雷：日野聪↵"
-    alias = StringField()  #: "黑色五叶草,BLACK CLOVER,黑五,黑色三叶草,黑色四叶草"
-    areas = ListField()  #: Array(1)
-    cover = StringField()  #: "http://i0.hdslb.com/bfs/bangumi/c345335f3cc395f7cfbe7e7e0a4913f9b1671fe2.jpg"
-    evaluate = StringField()  #: \
-    # "曾经险些遭到魔神毁灭的世界，拯救它的是一位被后世称为“魔法帝”的魔导士……两位被遗弃在教堂的少年，一位是有卓越魔力跟魔法才能的四叶草魔导书的尤诺，另一位魔法值为零但却意外获得黑色五叶草的魔法书的亚斯塔……这是关于一位没魔法能力的少年却想要成为魔法帝的故事。"
-    is_paster_ads = IntegerField()  #: 0
-    jp_title = StringField()  #: "ブラッククローバー"
-    link = StringField()  #: "http://www.bilibili.com/bangumi/media/md6422/"
-    media_id = IntegerField()  #: 6422
-    mode = IntegerField()  #: 2
-    paster_text = StringField()  #: ""
-    season_id = IntegerField()  #: 6422
-    season_status = IntegerField()  #: 13
-    season_title = StringField()  #: "TV"
-    season_type = IntegerField()  #: 1
-    series_title = StringField()  #: "黑色四叶草"
-    square_cover = StringField()  #: "http://i0.hdslb.com/bfs/bangumi/1d703634cd3ee35b625bf882f27289db301cae63.jpg"
-    staff = StringField()  #: "原作：田畠裕基（集英社《周刊少年JUMP" \
-    #
-    #  "》连载）↵监督：吉原达矢↵系列构成：笔安一幸↵角色设计：竹田逸子↵次要角色设计：德永久美子↵道具设计：高桥恒星↵美术监督：前田有纪↵摄影监督：国井智行↵色彩设计：篠原爱子↵编辑：奥田浩史↵音乐：关美奈子↵音响监督：高桑一↵动画制作：studio pierrot↵制作：黑色五叶草制作委员会"
-    stat = DictField()  #: Object
-    style = ListField()  #: Array(4)
-    title = StringField()  #: "黑色四叶草"
-    total_ep = IntegerField()  #: 0
-
-
-class PubInfoValidator(Validator):
-    is_finish = IntegerField()  #: 0
-    is_started = IntegerField()  #: 1
-    pub_time = StringField()  #: "2019-01-07 00:15:00"
-    pub_time_show = StringField()  #: "01月07日00:15"
-    weekday = IntegerField()  #: 1
-
-
-class InitialStateValidator(Validator):
-    epList = ListField(DictField(EpisodeItemValidator), required=True)
-    epInfo = DictField(EpisodeInfoValidator)
-    mediaInfo = DictField(MediaInfoValidator, required=True)
-    pubInfo = DictField(PubInfoValidator)
-
-
-import datetime
-import pytz
 
 
 async def collect_episode_info(request: WebRequest):
@@ -304,23 +247,22 @@ async def try_get_ep_info(request: WebRequest):
     ep_id = j.get('ep_id')
     if not (media_id and ep_id):
         return web.HTTPBadRequest()
-    return web.json_response({'message': '',
-                              'data'   : {
-                                  'ep_id'  : 123,
-                                  'episode': 1,
-                                  'sort'   : 1
-                              }})
+    return web.json_response({
+        'message': '',
+        'data'   : {
+            'ep_id'  : 123,
+            'episode': 1,
+            'sort'   : 1
+        }})
 
 
-async def ep_map(request: WebRequest):
-    media_id = request.query.get('media_id', None)
-    m = await request.app.db.get_collection('bilibili_episode_map').find(
-        {'media_id': int(media_id)}).to_list(None)
-    d = {'eps': {}}
-    for i in m:
-        d['eps'][i['ep_id']] = {'id'  : i['bgm_tv_ep_id'],
-                                'rank': i.get('index', 1)}
-    return web.json_response(d)
+async def check_user_right(request: WebRequest):
+    token = request.cookies.get('app_access_token', None)
+    if token:
+        user = await request.app.db \
+            .get_collection(mongo_collection_name.USER_TOKEN) \
+            .find_one({'app_access_token': token})
+        return user
 
 
 async def collected_episode_info(request: WebRequest):
@@ -336,7 +278,91 @@ async def collected_episode_info(request: WebRequest):
     })
 
 
-def j(d):
+async def version(request: WebRequest):
+    resp = web.Response(text='1.1.1')
+    resp.set_cookie('episode-player-url', '233', )
+    return resp
+
+
+async def get_player_url(request: WebRequest):
+    try:
+        ep_id = int(request.query.get('ep_id'))
+    except (ValueError, TypeError):
+        return web.HTTPBadRequest()
+    data = []
+    bilibili = await request.app.db \
+        .get_collection(mongo_collection_name.BILIBILI_EP_MAP) \
+        .find_one({'bgm_tv_ep_id': ep_id})
+    if bilibili:
+        data.append({
+            'type': 'bilibili',
+            'link': 'https://www.bilibili.com/bangumi/play/ep{}'
+                .format(bilibili["ep_id"])
+        })
+    return web.json_response({
+        'status': 'success',
+        'data'  : data
+    })
+
+
+from urllib.parse import urlparse
+
+
+def get_type(link: str):
+    url_obj = urlparse(link)
+    print(url_obj)
+    return {
+        'www.bilibili.com': 'bilibili',
+        'www.iqiyi.com'   : 'iqiyi',
+        'www.youku.com'   : 'youku',
+    }.get(url_obj.netloc, 'other')
+
+
+# class PlayerUrl(web.View)
+
+async def submit_player_url(request: WebRequest):
+    user = await check_user_right(request)
+    if not user:
+        return web.HTTPUnauthorized()
+        # return web.json_response({'status': 'error', 'message': 'ma'})
+    try:
+        user_input = await request.json()
+    except json.decoder.JSONDecodeError:
+        return web.HTTPBadRequest()
+    v = EpInputValidator(user_input)
+    if not v.is_valid():
+        print(v.errors)
+        return web.HTTPBadRequest()
+
+    user_input['user_id'] = user['user_id']
+    user_input['type'] = get_type(user_input['link'])
+    input_type = get_type(user_input['link'])
+    if input_type == 'bilibili':
+        if '/ss' in user_input['link']:
+            return web.json_response({
+                'status' : 'error',
+                'message': 'B站的视频应该是'
+                           'https://www.bilibili.com/bangumi/play/ep(\d), '
+                           '/ss(\d)结尾的那个地址不能精确定位到每集'
+            })
+
+    await request.app.db.get_collection(mongo_collection_name.EP_INPUT_LOG) \
+        .update_one(
+        {'user': user['user_id'], 'ep_id': user_input['ep_id']},
+        {'$set': user_input}, upsert=True
+    )
+
+    # async def get_user_info(user):
+    #     r = await request.app.client_session.get(
+    #         f"https://api.bgm.tv/user/{user_input['user']}"
+    #     )
+    #     request.app.db.get_collection('user_token')
+    #
+    # loop.call_later(1, get_user_info)
+    return web.json_response({'status': 'success'})
+
+
+def jsonify(d):
     d['_id'] = str(d['_id'])
     d['time'] = str(d['time'])
     return d
@@ -345,10 +371,15 @@ def j(d):
 async def missing_episode(request: WebRequest):
     return web.json_response({
         'message': 'hello world',
-        'data'   : [j(x) for x in
-                    await request.app.db.bilibili_missing_episode.find().to_list(
-                        None)],
+        'data'   : [jsonify(x) for x in
+                    await request.app.db.bilibili_missing_episode.find()
+                        .to_list(None)],
     })
+
+
+async def redirect_to_auth_url(request: WebRequest):
+    resp = web.HTTPFound(location=oauth_url)
+    return resp
 
 
 def create_app(io_loop=asyncio.get_event_loop()):
@@ -359,11 +390,13 @@ def create_app(io_loop=asyncio.get_event_loop()):
     app.on_cleanup.append(clean_up)
     app.client_session = aiohttp.ClientSession(loop=io_loop)
     setup_mongo(app, io_loop)
-    aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader(
-        str(base_dir / 'templates')))
+    aiohttp_jinja2.setup(
+        app, loader=jinja2.FileSystemLoader(str(base_dir / 'templates'))
+    )
     app.add_routes([
         web.get('/', redirect(github_url)),
-        web.get('/auth', redirect(oauth_url)),
+        web.get('/auth', redirect_to_auth_url),
+        web.get('/version', version),
         web.get('/oauth_callback', get_token),
         web.get('/api/v0.2/querySubjectID', query_subject_id),
         web.get('/statistics_missing_bangumi', statistics_missing_bangumi),
@@ -372,6 +405,9 @@ def create_app(io_loop=asyncio.get_event_loop()):
         web.post('/api/v0.1/reportMissingBangumi', report_missing_bangumi),
         web.get('/api/v0.1/collected_episode_info', collected_episode_info),
         web.post('/api/v0.1/collect_episode_info', collect_episode_info),
+
+        web.get('/api/v0.1/player_url', get_player_url),
+        web.post('/api/v0.1/player_url', submit_player_url),
     ])
     cors = aiohttp_cors.setup(app, defaults={
         "*": aiohttp_cors.ResourceOptions(
