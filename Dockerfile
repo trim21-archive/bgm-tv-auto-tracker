@@ -1,10 +1,11 @@
-FROM python:3.7-stretch
+FROM python:3.7.2-alpine
 
-COPY server /server
-COPY entrypoint.sh /entrypoint.sh
+COPY server/requirements.txt /server/requirements.txt
 
 RUN pip install -r server/requirements.txt
 
+COPY server /server
+
 EXPOSE 6003
 
-CMD [ "/bin/bash", "entrypoint.sh" ]
+CMD [ "sh", "/server/entrypoint.sh" ]

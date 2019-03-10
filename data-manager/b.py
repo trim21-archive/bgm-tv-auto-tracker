@@ -16,7 +16,19 @@ subject_collection = db.get_collection('bgm_tv_episode_info')
 map_collection = db.get_collection('bilibili')
 episode_map_collection = db.get_collection('bilibili_episode_map')
 for item in bilibili_collection.find({}):
-    i = map_collection.find_one({'_id': str(item['mediaInfo']['season_id'])})
+    if 'season_id' in item['mediaInfo']:
+
+        i = map_collection.find_one({'_id': str(item['mediaInfo']['season_id'])})
+    else:
+        i = None
+        season_id = None
+        if 'seasons' in item['mediaInfo']:
+            for season in item['mediaInfo']['seasons']:
+                if season['media_id'] == item['mediaInfo']['media_id']:
+                    season_id = season['season_id']
+                    i = map_collection.find_one({'_id': str(season_id)})
+        else:
+            print(item)
     # print({'_id': str(item['_id'])})
     if not i:
         continue
@@ -29,9 +41,7 @@ for item in bilibili_collection.find({}):
     item['epList'] = list(filter(lambda x: x["section_type"] == 0, item['epList']))
     item['epList'] = list(filter(lambda x: str.isdecimal(x["index"]), item['epList']))
     if len(subject_json['eps']) == len(item['epList']):
-        print(i['title'], item['mediaInfo']['media_id'])
         for i in range(len(subject_json['eps'])):
-            print(item['epList'][i]['index'])
             episode_map_collection.update_one({'_id': subject_json['eps'][i]['id'], },
                                               {'$set': {
                                                   'media_id'    : item['mediaInfo']['media_id'],
@@ -40,7 +50,6 @@ for item in bilibili_collection.find({}):
                                                   'index'       : item['epList'][i]['index'],
                                               }}, upsert=True)
     else:
-        print(item)
         pass
         # print(i['title'], item['mediaInfo']['media_id'])
 

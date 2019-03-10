@@ -13,7 +13,8 @@ import motor.core
 import pytz
 from aiohttp import web
 from dateutil import parser
-from validator import Validator, StringField, EnumField, ListField, IntegerField, DictField
+from validator import Validator, StringField, EnumField, ListField, \
+    IntegerField, DictField
 
 from config import APP_ID, APP_SECRET, HOST, PROTOCOL
 from db import setup_mongo
@@ -182,11 +183,10 @@ async def statistics_missing_bangumi(request: WebRequest):
         .sort([('times', -1), ('subject_id', 1)]).to_list(500)
 
     for item in f:
-        item['bangumi_url'] = website_template \
-            .get(item['website'], '{}').format(item['bangumi_id'])
+        item['bangumi_url'] = website_template.get(item['website'], '{}') \
+            .format(item['bangumi_id'])
         if item.get('subject_id'):
-            item['subject_url'] = 'https://bgm.tv/subject/{}' \
-                .format(item['subject_id'])
+            item['subject_url'] = f"https://bgm.tv/subject/{item['subject_id']}"
     return web.json_response(f)
 
 
@@ -266,9 +266,9 @@ class PubInfoValidator(Validator):
 
 
 class InitialStateValidator(Validator):
-    epList = ListField(DictField(EpisodeItemValidator))
+    epList = ListField(DictField(EpisodeItemValidator), required=True)
     epInfo = DictField(EpisodeInfoValidator)
-    mediaInfo = DictField(MediaInfoValidator)
+    mediaInfo = DictField(MediaInfoValidator, required=True)
     pubInfo = DictField(PubInfoValidator)
 
 
@@ -280,8 +280,9 @@ async def collect_episode_info(request: WebRequest):
     d = await request.json()
     v = InitialStateValidator(d)
     if v.is_valid():
-        await request.app.db.episode_info.update_one({'_id': v.validated_data['mediaInfo']['media_id']},
-                                                     {'$set': v.validated_data}, upsert=True)
+        await request.app.db.episode_info.update_one(
+            {'_id': v.validated_data['mediaInfo']['media_id']},
+            {'$set': v.validated_data}, upsert=True)
         f = await request.app.db.bilibili_episode_map.find_one({
             'ep_id'   : v.validated_data['epInfo']['ep_id'],
             'media_id': v.validated_data['mediaInfo']['media_id'],
@@ -291,8 +292,10 @@ async def collect_episode_info(request: WebRequest):
                 '_id'     : v.validated_data['epInfo']['ep_id'],
                 'ep_id'   : v.validated_data['epInfo']['ep_id'],
                 'media_id': v.validated_data['mediaInfo']['media_id'],
-            }, {'$set': {'time': datetime.datetime.now(request.app.tz)}}, upsert=True)
-    return web.json_response({'message': 'hello world', 'correct': v.is_valid(), 'data': v.validated_data})
+            }, {'$set': {'time': datetime.datetime.now(request.app.tz)}},
+                upsert=True)
+    return web.json_response({'message': 'hello world', 'correct': v.is_valid(),
+                              'data'   : v.validated_data})
 
 
 async def try_get_ep_info(request: WebRequest):
@@ -311,15 +314,26 @@ async def try_get_ep_info(request: WebRequest):
 
 async def ep_map(request: WebRequest):
     media_id = request.query.get('media_id', None)
-    m = await request.app.db.get_collection('bilibili_episode_map').find({'media_id': int(media_id)}).to_list(None)
+    m = await request.app.db.get_collection('bilibili_episode_map').find(
+        {'media_id': int(media_id)}).to_list(None)
     d = {'eps': {}}
     for i in m:
-        d['eps'][i['ep_id']] = {'id': i['bgm_tv_ep_id'], 'rank': i.get('index', 1)}
+        d['eps'][i['ep_id']] = {'id'  : i['bgm_tv_ep_id'],
+                                'rank': i.get('index', 1)}
     return web.json_response(d)
 
 
 async def collected_episode_info(request: WebRequest):
-    return web.json_response({'message': 'hello world', 'data': await request.app.db.episode_info.find().to_list(None)})
+    episode = request.query.get('length', None)
+    if episode is not None:
+        try:
+            episode = int(episode)
+        except ValueError:
+            raise web.HTTPBadRequest(reason='episode not right')
+    return web.json_response({
+        'message': 'hello world',
+        'data'   : await request.app.db.episode_info.find().to_list(episode)
+    })
 
 
 def j(d):
@@ -331,79 +345,10 @@ def j(d):
 async def missing_episode(request: WebRequest):
     return web.json_response({
         'message': 'hello world',
-        'data'   : [j(x) for x in await request.app.db.bilibili_missing_episode.find().to_list(None)],
+        'data'   : [j(x) for x in
+                    await request.app.db.bilibili_missing_episode.find().to_list(
+                        None)],
     })
-
-
-async def tinygrail_episode_api(request: WebRequest):
-    subject_id = request.match_info.get('subject_id')
-    f = await request.app.db.get_collection('bilibili').find_one({'subject_id': subject_id})
-    if not f:
-        return web.HTTPNotFound()
-    e = await request.app.db.episode_info.find_one({'mediaInfo.season_id': int(f['_id'])})
-    if not e:
-        return web.HTTPNotFound()
-    d = []
-    for i in (await request.app.db.bilibili_episode_map.find({'media_id': e['mediaInfo']['media_id']}).to_list(None)):
-        d.append({
-            "EpisodeId"   : i['bgm_tv_ep_id'],
-            "Id"          : 13681,
-            "LastModified": "\/Date(1531239807000)\/",
-            "Link"        : "https://www.bilibili.com/bangumi/play/ep{}".format(i['ep_id']),
-            "Name"        : "肺炎链球菌",
-            "OnAir"       : "\/Date(1531009800000)\/",
-            "State"       : 1,
-            "SubjectId"   : int(subject_id),
-            "Type"        : 1,
-            "UserId"      : 702,
-            "Site"        : "bilibili"
-        })
-    return web.json_response({
-        "State": 0,
-        "Value": d
-    })
-
-
-async def tinygrail_single_episode(request: WebRequest):
-    ep_id = request.match_info.get('ep_id')
-    f = await request.app.db.bilibili_episode_map.find_one({'bgm_tv_ep_id': int(ep_id)})
-    if not f:
-        return web.json_response({"State": 0, "Value": []})
-    return web.json_response({
-        "State": 0,
-        "Value": [{
-            "EpisodeId"   : f['bgm_tv_ep_id'],
-            "Id"          : 13681,
-            "LastModified": "\/Date(1531239807000)\/",
-            "Link"        : "https://www.bilibili.com/bangumi/play/ep{}".format(f['ep_id']),
-            "Name"        : "肺炎链球菌",
-            "OnAir"       : "\/Date(1531009800000)\/",
-            "State"       : 1,
-            "SubjectId"   : 235612,
-            "Type"        : 1,
-            "UserId"      : 702,
-            "Site"        : "bilibili"
-        }, ]
-    })
-
-
-async def tinygrail_box_episode(request: WebRequest):
-    ep_id = request.match_info.get('ep_id')
-    f = await request.app.db.bilibili_episode_map.find_one({'bgm_tv_ep_id': int(ep_id)})
-    if not f:
-        return web.Response(text="""
-<div id="playbox" class="grp_box clearit">
-    <div class="clearit">
-            <span class="tip_j">暂无播放源</span>
-        <div style="float:right"><a href="#" onclick="document.loadEditBox(-1)" class="l">[修改]</a></div>
-    </div>
-</div>
-        """, content_type='text/html')
-    return aiohttp_jinja2.render_template('box.html', request, {'f': f, })
-
-
-async def tinygrail_edit(request: WebRequest):
-    return web.Response(text="""这功能还没做好""", content_type='text/html')
 
 
 def create_app(io_loop=asyncio.get_event_loop()):
@@ -414,7 +359,8 @@ def create_app(io_loop=asyncio.get_event_loop()):
     app.on_cleanup.append(clean_up)
     app.client_session = aiohttp.ClientSession(loop=io_loop)
     setup_mongo(app, io_loop)
-    aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader(str(base_dir / 'templates')))
+    aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader(
+        str(base_dir / 'templates')))
     app.add_routes([
         web.get('/', redirect(github_url)),
         web.get('/auth', redirect(oauth_url)),
@@ -426,12 +372,6 @@ def create_app(io_loop=asyncio.get_event_loop()):
         web.post('/api/v0.1/reportMissingBangumi', report_missing_bangumi),
         web.get('/api/v0.1/collected_episode_info', collected_episode_info),
         web.post('/api/v0.1/collect_episode_info', collect_episode_info),
-
-        web.get('/api/episode/subject/{subject_id}', tinygrail_episode_api),
-        web.get('/api/episode/{ep_id}', tinygrail_single_episode),
-        web.get('/api/episode/box/{ep_id}', tinygrail_box_episode),
-        web.get('/api/episode/{ep_id}/edit/{edit_id}', tinygrail_edit)
-
     ])
     cors = aiohttp_cors.setup(app, defaults={
         "*": aiohttp_cors.ResourceOptions(
