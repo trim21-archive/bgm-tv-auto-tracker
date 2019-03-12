@@ -62,12 +62,6 @@ async def test_no_root_absolute_path(cli):
     assert resp.status == 302
 
 
-aiohttpClient = typing.Callable[
-    [web.Application],
-    typing.Awaitable[aiohttp.ClientSession]
-]
-
-
 class MockRequest:
     def __aenter__(self):
         pass
