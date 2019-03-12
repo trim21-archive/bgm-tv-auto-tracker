@@ -14,8 +14,11 @@
     <div class="bgm_tv_tracker_info">
       <div class="not_found" v-if="!subjectID">
         <label>
-          <input type="text" class="subject" v-model="tmpSubjectID" placeholder='条目ID或者对应条目链接'/>
-          <button class="notfound" @click="userSubmitSubjectID">submit subject id</button>
+          <input type="text" class="subject" v-model="tmpSubjectID"
+                 placeholder='条目ID或者对应条目链接'/>
+          <button class="notfound" @click="userSubmitSubjectID">submit subject
+            id
+          </button>
         </label>
       </div>
       <br>
@@ -23,7 +26,8 @@
         <p>你正在看:
           <span id="bgm_tv_tracker_title">{{ bangumiName }}</span>
         </p>
-        <p>第 <span id="bgm_tv_tracker_episode">{{ episode + (episodeStartWith?episodeStartWith:1) -1 }}</span> 集</p>
+        <p>第 <span id="bgm_tv_tracker_episode">{{ episode + (episodeStartWith?episodeStartWith:1) -1 }}</span>
+          集</p>
       </div>
       <br>
       <div id="bgm_tv_tracker_link">
@@ -31,10 +35,12 @@
            v-if="episodeID" target="_blank" rel="noopener noreferrer">吐槽本集</a>
         <br>
         <br>
-        <a :href="`https://bgm.tv/subject/${subjectID}`" v-if="subjectID" target="_blank"
+        <a :href="`https://bgm.tv/subject/${subjectID}`" v-if="subjectID"
+           target="_blank"
            rel="noopener noreferrer">subject/{{ subjectID }}</a>
 
-        <a :href="`https://bgm.tv/subject_search/${ title }?cat=2`" v-else target="_blank"
+        <a :href="`https://bgm.tv/subject_search/${ title }?cat=2`" v-else
+           target="_blank"
            rel="noopener noreferrer">search in bgm.tv</a>
       </div>
       <br>
@@ -49,9 +55,12 @@
         </button>
       </div>
       <br>
-      <a :href="reportUrl" target='_blank' rel="noopener noreferrer" style="color: red"><p>报告问题</p></a>
-      <a href="https://github.com/Trim21/bgm-tv-auto-tracker/blob/master/docs/user_info_collection.md"
-         target='_blank' rel="noopener noreferrer" style="color: red"><p>关于信息收集</p></a>
+      <a :href="reportUrl" target='_blank' rel="noopener noreferrer"
+         style="color: red"><p>报告问题</p></a>
+      <a
+        href="https://github.com/Trim21/bgm-tv-auto-tracker/blob/master/docs/user_info_collection.md"
+        target='_blank' rel="noopener noreferrer" style="color: red"><p>
+        关于信息收集</p></a>
       <!--<br>-->
       <p v-if="!subjectID">"bangumi_id" : "{{ bangumiID }}",</p>
       <p v-if="!subjectID">"title" : "{{ title }}",</p>
@@ -77,7 +86,8 @@
         <div v-for="(message, index) in messages" :key="index">
           <hr>
           <div><p>
-            {{ message.time.getHours() }}:{{ message.time.getMinutes() }}:{{ message.time.getSeconds() }}
+            {{ message.time.getHours() }}:{{ message.time.getMinutes() }}:{{
+            message.time.getSeconds() }}
           </p>
             <p>{{ message.text }}</p>
           </div>
@@ -88,7 +98,14 @@
 </template>
 <script>
 import $ from 'jquery'
-import { gmGetValue, gmOpenInTab, gmSetValue, gmUnsafeWindow, URLS, WEBSITE } from './vars'
+import {
+  gmGetValue,
+  gmOpenInTab,
+  gmSetValue,
+  gmUnsafeWindow,
+  URLS,
+  WEBSITE
+} from './vars'
 import { apiServer, getConfig } from './utils'
 
 /**
@@ -107,8 +124,7 @@ export default {
     let website = ''
     if (gmUnsafeWindow.location.href.startsWith('https://www.bilibili.com/bangumi/play/')) {
       website = WEBSITE.bilibili
-    }
-    else if (gmUnsafeWindow.location.hostname === 'www.iqiyi.com') {
+    } else if (gmUnsafeWindow.location.hostname === 'www.iqiyi.com') {
       website = WEBSITE.iqiyi
     }
     let config = getConfig()
@@ -245,7 +261,10 @@ export default {
       if (!this.config.collectionSubjectWhenMarkStatus) return
       let vm = this
       if (!collection[subjectID]) {
-        this.$bgmApi.setSubjectCollectionStatus({ subjectID, status: 'do' }).then(
+        this.$bgmApi.setSubjectCollectionStatus({
+          subjectID,
+          status: 'do'
+        }).then(
           response => {
             if (response.data.code === 401) {
               vm.notify(JSON.stringify(response))

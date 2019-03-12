@@ -18,7 +18,8 @@ episode_map_collection = db.get_collection('bilibili_episode_map')
 for item in bilibili_collection.find({}):
     if 'season_id' in item['mediaInfo']:
 
-        i = map_collection.find_one({'_id': str(item['mediaInfo']['season_id'])})
+        i = map_collection.find_one(
+            {'_id': str(item['mediaInfo']['season_id'])})
     else:
         i = None
         season_id = None
@@ -37,18 +38,22 @@ for item in bilibili_collection.find({}):
     if not subject_json or not subject_json['eps']:
         continue
 
-    subject_json['eps'] = list(filter(lambda x: x['type'] == 0, subject_json['eps']))
-    item['epList'] = list(filter(lambda x: x["section_type"] == 0, item['epList']))
-    item['epList'] = list(filter(lambda x: str.isdecimal(x["index"]), item['epList']))
+    subject_json['eps'] = list(
+        filter(lambda x: x['type'] == 0, subject_json['eps']))
+    item['epList'] = list(
+        filter(lambda x: x["section_type"] == 0, item['epList']))
+    item['epList'] = list(
+        filter(lambda x: str.isdecimal(x["index"]), item['epList']))
     if len(subject_json['eps']) == len(item['epList']):
         for i in range(len(subject_json['eps'])):
-            episode_map_collection.update_one({'_id': subject_json['eps'][i]['id'], },
-                                              {'$set': {
-                                                  'media_id'    : item['mediaInfo']['media_id'],
-                                                  'ep_id'       : item['epList'][i]['ep_id'],
-                                                  'bgm_tv_ep_id': subject_json['eps'][i]['id'],
-                                                  'index'       : item['epList'][i]['index'],
-                                              }}, upsert=True)
+            episode_map_collection.update_one(
+                {'_id': subject_json['eps'][i]['id'], },
+                {'$set': {
+                    'media_id'    : item['mediaInfo']['media_id'],
+                    'ep_id'       : item['epList'][i]['ep_id'],
+                    'bgm_tv_ep_id': subject_json['eps'][i]['id'],
+                    'index'       : item['epList'][i]['index'],
+                }}, upsert=True)
     else:
         pass
         # print(i['title'], item['mediaInfo']['media_id'])

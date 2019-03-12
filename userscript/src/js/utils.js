@@ -11,11 +11,22 @@
  * @typedef {Object} AxiosError
  * @property {AxiosResponse} response
  */
-import { gmGetValue, gmInfo, gmSetValue, URLS } from './vars.js'
+import { gmGetValue, gmInfo, gmSetValue, gmUnsafeWindow, URLS } from './vars.js'
 import axios from 'axios'
 import adapter from 'axios-userscript-adapter'
+// import { gmUnsafeWindow } from './vars'
 
 axios.defaults.adapter = adapter
+
+/**
+ * @return {string}
+ */
+function getScriptUserAgent () {
+  return `${gmUnsafeWindow.navigator.userAgent}  Extension/${gmInfo.version} Bgm-tv-auto-tracker/${gmInfo.script.version}`
+}
+
+// function getBrowserName () {
+// }
 
 function sortEps (eps) {
   eps = JSON.parse(JSON.stringify(eps))
@@ -40,8 +51,10 @@ class BgmApi {
      */
     this.http = axios.create({
       baseURL: serverRoot,
-      headers: { Authorization: 'Bearer ' + this.access_token },
-      adapter
+      headers: {
+        Authorization: 'Bearer ' + this.access_token,
+        'User-Agent': getScriptUserAgent(),
+      },
     })
   }
 
@@ -175,7 +188,9 @@ class BgmApi {
 
 let apiServer = axios.create({
   baseURL: URLS.apiServerURL,
-  headers: { 'bgm-tv-auto-tracker': gmInfo.script.version },
+  headers: {
+    'User-Agent': getScriptUserAgent(),
+  },
 })
 
 function parseEpisode (title) {

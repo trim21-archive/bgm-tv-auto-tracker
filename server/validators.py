@@ -1,5 +1,7 @@
 from validator import Validator, IntegerField, StringField, ListField, \
-    DictField, URLField
+    DictField, URLField, EnumField
+
+URLField.SCHEMAS = ('http', 'https')
 
 
 class EpisodeItemValidator(Validator):
@@ -77,7 +79,12 @@ class InitialStateValidator(Validator):
 class EpInputValidator(Validator):
     user = StringField(required=True)
     link = URLField(required=True)
-    ep_id = StringField(required=True)
+    ep_id = IntegerField(required=True, strict=False)
 
 
-URLField.SCHEMAS = ('http', 'https')
+class ReportMissingBangumiValidator(Validator):
+    bangumiID = StringField(strict=False, required=True)
+    subjectID = StringField(required=True)
+    title = StringField(required=True)
+    href = StringField(required=True)
+    website = EnumField(choices=['bilibili', 'iqiyi'], required=True)

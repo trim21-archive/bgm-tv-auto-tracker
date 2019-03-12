@@ -6,7 +6,7 @@ from threading import Lock
 import pymongo
 import requests
 
-from server.app import InitialStateValidator
+from validators import InitialStateValidator
 
 client = pymongo.MongoClient()
 db = client.get_database('bilibili_bangumi')

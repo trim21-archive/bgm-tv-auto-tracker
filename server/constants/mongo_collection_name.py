@@ -10,3 +10,5 @@ BGM_TV_EPISODE = 'bgm_tv_episode_info'
 EP_INPUT_LOG = 'bgm_episode_input_log'
 
 BILIBILI_EP_MAP = 'bilibili_episode_map'
+
+FINAL_BGM_EP_MAP = 'bgm_tv_episode'
