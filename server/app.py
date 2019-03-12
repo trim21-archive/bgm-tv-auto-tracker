@@ -3,7 +3,6 @@ import pathlib
 from os import path
 
 import aiohttp.client_exceptions
-import aiohttp
 import aiohttp.http
 import aiohttp_cors
 import aiohttp_jinja2
@@ -47,11 +46,7 @@ def create_app(io_loop=asyncio.get_event_loop()):
     )
     app.tz = pytz.timezone('Asia/Shanghai')
     app.on_cleanup.append(clean_up)
-    app.client_session = aiohttp.ClientSession(
-        loop=io_loop,
-        connector=aiohttp.TCPConnector(loop=io_loop,
-                                       resolver=aiohttp.AsyncResolver)
-    )
+    app.client_session = aiohttp.ClientSession(loop=io_loop)
     # await setupClientSession(app, io_loop)
     setup_mongo(app, io_loop)
     aiohttp_jinja2.setup(
