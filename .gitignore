@@ -11,3 +11,4 @@ htmlcov
 .coverage
 bangumi-data
 .env
+tmp.py

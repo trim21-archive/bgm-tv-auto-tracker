@@ -16,6 +16,7 @@ class TypeDatabase:
     episode_info: motor.core.AgnosticCollection
     bilibili_episode_map: motor.core.AgnosticCollection
     bilibili_missing_episode: motor.core.AgnosticCollection
+    bgm_tv_episode: motor.core.AgnosticCollection
 
 
 class TypeMongoClient(object):
@@ -31,5 +32,3 @@ class TypeApp(web.Application):
 
 class WebRequest(web.Request):
     app: TypeApp
-
-

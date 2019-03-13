@@ -10,6 +10,7 @@
  * @property {string} location.protocol
  * @property {string} location.host
  * @property {string} location.pathname
+ * @property {string} navigator.userAgent
  */
 
 /**
@@ -63,16 +64,17 @@ const URLS = {
   callBackUrl: 'https://bangumi-auto-tracker.trim21.cn/oauth_callback',
   apiBgmUrl: 'https://api.bgm.tv',
   authURL: 'https://bgm.tv/oauth/authorize?client_id=bgm2775b2797b4d958b&response_type=code&redirect_uri' +
-  '=https://bangumi-auto-tracker.trim21.cn/oauth_callback',
+    '=https://bangumi-auto-tracker.trim21.cn/oauth_callback',
 }
 
 if (window.TM_ENV === 'dev') {
+// if (true) {
   Object.assign(URLS, {
     apiServerURL: 'http://localhost:6001',
     callBackUrl: 'http://localhost:6001/oauth_callback',
     apiBgmUrl: 'https://api.bgm.tv',
     authURL: 'https://bgm.tv/oauth/authorize?client_id=bgm2955b3b3050e7bf2&response_type=code&redirect_uri' +
-    '=http://localhost:6001/oauth_callback',
+      '=http://localhost:6001/oauth_callback',
   })
 }
 const WEBSITE = {
@@ -80,4 +82,12 @@ const WEBSITE = {
   iqiyi: 'iqiyi',
 }
 
-export { WEBSITE, gmSetValue, gmGetValue, gmOpenInTab, gmUnsafeWindow, URLS, gmInfo }
+export {
+  WEBSITE,
+  gmSetValue,
+  gmGetValue,
+  gmOpenInTab,
+  gmUnsafeWindow,
+  URLS,
+  gmInfo
+}

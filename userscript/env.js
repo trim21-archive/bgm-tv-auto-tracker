@@ -1,1 +1,2 @@
-window.TM_ENV = 'de';
+window.TM_ENV = 'dev';
+

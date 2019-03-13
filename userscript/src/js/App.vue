@@ -9,7 +9,7 @@
          id="bgm_tv_tracker_btn_on_page"
          :class="{}"
          @click="trigger">
-      bgm.tv{{ score }} {{episodeMarked?'✓':''}}
+      bgm.tv{{ score }} {{ episodeMarked?'✓':'' }}
     </div>
     <div class="bgm_tv_tracker_info">
       <div class="not_found" v-if="!subjectID">
@@ -147,7 +147,8 @@ export default {
       },
       watchPercent: 0,
       episodeMarked: false,
-      website
+      website,
+      // $website: null,
     }
   },
   computed: {
@@ -327,6 +328,11 @@ export default {
     }
   },
   created () {
+    this.$website.getBgmEpisodeID().then(
+      res => {
+        console.log('res', res)
+      },)
+
     // episode-item
     this.$website.init().then(data => {
       let { subjectID, episode, title, bangumiID, episodeStartWith } = data

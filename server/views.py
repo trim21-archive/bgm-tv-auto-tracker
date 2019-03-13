@@ -3,15 +3,18 @@ import json
 from urllib.parse import urlparse
 
 import aiohttp.client_exceptions
+import aiohttp_cors
 import aiohttp_jinja2
+import pymongo
 
 from aiohttp import web
+from aiohttp_cors import CorsViewMixin, ResourceOptions
 from dateutil import parser
 
 from .config import oauth_url, APP_ID, APP_SECRET, callback_url
 from .utils import jsonify
 from .constants import mongo_collection_name
-from .types import WebRequest
+from .app_types import WebRequest
 from .validators import InitialStateValidator, ReportMissingBangumiValidator, \
     EpInputValidator
 
@@ -133,20 +136,6 @@ async def version(request: WebRequest):
     return resp
 
 
-async def get_player_url(request: WebRequest):
-    try:
-        ep_id = int(request.query.get('ep_id'))
-    except (ValueError, TypeError):
-        return web.HTTPBadRequest()
-    data = await request.app.db \
-        .get_collection(mongo_collection_name.FINAL_BGM_EP_MAP) \
-        .find({'ep_id': ep_id}, {'_id': 0}).to_list(None)
-    return web.json_response({
-        'status': 'success',
-        'data'  : data
-    })
-
-
 def get_type(link: str):
     url_obj = urlparse(link)
     print(url_obj)
@@ -156,63 +145,6 @@ def get_type(link: str):
         'www.youku.com'   : 'youku',
         'v.qq.com'        : 'tencent',
     }.get(url_obj.netloc, 'other')
-
-
-async def submit_player_url(request: WebRequest):
-    user = await check_user_right(request)
-    if not user:
-        return web.HTTPUnauthorized()
-        # return web.json_response({'status': 'error', 'message': 'ma'})
-    try:
-        user_input = await request.json()
-    except json.decoder.JSONDecodeError:
-        return web.HTTPBadRequest()
-    v = EpInputValidator(user_input)
-    if not v.is_valid():
-        print(v.errors)
-        return web.HTTPBadRequest()
-    user_input = v.validated_data
-    user_input['user_id'] = user['user_id']
-    user_input['type'] = get_type(user_input['link'])
-    input_type = get_type(user_input['link'])
-    if input_type == 'bilibili':
-        if '/ss' in user_input['link']:
-            return web.json_response({
-                'status' : 'error',
-                'message': 'B站的视频应该是'
-                           'https://www.bilibili.com/bangumi/play/ep(\\d), '
-                           '/ss(\\d)结尾的那个地址不能精确定位到每集'
-            })
-
-    await request.app.db.get_collection(mongo_collection_name.EP_INPUT_LOG) \
-        .update_one(
-        {'user': user['user_id'], 'ep_id': user_input['ep_id']},
-        {'$set': user_input}, upsert=True
-    )
-
-    current_episode = await request.app.db \
-        .get_collection(mongo_collection_name.FINAL_BGM_EP_MAP) \
-        .find_one({'type': input_type, 'ep_id': user_input['ep_id']})
-    if not current_episode:
-        await request.app.db \
-            .get_collection(mongo_collection_name.FINAL_BGM_EP_MAP) \
-            .update_one(
-            {'type': input_type, 'ep_id': user_input['ep_id']},
-            {'$set': {
-                'type' : input_type,
-                'ep_id': user_input['ep_id'],
-                'link' : user_input['link'],
-            }}
-            , upsert=True)
-
-    # async def get_user_info(user):
-    #     r = await request.app.client_session.get(
-    #         f"https://api.bgm.tv/user/{user_input['user']}"
-    #     )
-    #     request.app.db.get_collection('user_token')
-    #
-    # loop.call_later(1, get_user_info)
-    return web.json_response({'status': 'success'})
 
 
 async def missing_episode(request: WebRequest):
@@ -293,24 +225,147 @@ async def refresh_auth_token(request: WebRequest, ):
     return web.json_response(r)
 
 
+import pymongo.results
+
+
 async def query_subject_id(request: WebRequest):
     website = request.query.get('website', None)
-    bangumi_id = request.query.get('bangumiID', None)
-    if not (website and bangumi_id and website in ['iqiyi', 'bilibili']):
-        raise web.HTTPBadRequest(
+    if website not in ['iqiyi', 'bilibili']:
+        return web.HTTPBadRequest(
             reason='missing input `website` or `bangumiID`'
         )
-    collection = request.app.db.get_collection(website)
-    e = await collection.find_one({'_id': bangumi_id})
-    if e:
-        await request.app.db.statistics_missing_bangumi.delete_one(
-            {'website': website, 'bangumi_id': bangumi_id},
+
+    bangumi_id = request.query.get('bangumiID', None)
+    episode_id = request.query.get('episodeID', None)
+
+    if episode_id:
+        collection = request.app.db.bgm_tv_episode
+        e = await collection.find_one({
+            'ep_id': episode_id,
+            'type' : website,
+        }, {'_id': 0})
+        if e:
+            await request.app.db.statistics_missing_bangumi.delete_one(
+                {'type'      : website,
+                 'ep_id'     : episode_id,
+                 'bangumi_id': bangumi_id},
+            )
+            return web.json_response(e)
+        else:
+            r = await request.app.db.statistics_missing_bangumi.update_one(
+                {'type'      : website,
+                 'ep_id'     : episode_id,
+                 'bangumi_id': bangumi_id},
+                {'$inc': {'times': 1}},
+                upsert=True
+            )
+            print(r.raw_result)
+        return web.HTTPNotFound()
+    elif bangumi_id:
+        collection = request.app.db.get_collection(website)
+        e = await collection.find_one({'_id': bangumi_id})
+        if e:
+            await request.app.db.statistics_missing_bangumi.delete_one(
+                {'website': website, 'bangumi_id': bangumi_id},
+            )
+            return web.json_response(e)
+        else:
+            await request.app.db.statistics_missing_bangumi.update_one(
+                {'website': website, 'bangumi_id': bangumi_id},
+                {'$inc': {'times': 1}},
+                upsert=True
+            )
+            return web.HTTPNotFound()
+
+    return web.HTTPBadRequest(
+        reason='need query `episodeID` or `bangumiID`'
+    )
+
+
+import server.website
+
+
+class PlayerUrl(web.View, CorsViewMixin):
+    request: WebRequest
+
+    cors_config = {
+        "*": ResourceOptions(
+            allow_credentials=True,
+            allow_headers="*",
         )
-        return web.json_response(e)
-    else:
-        await request.app.db.statistics_missing_bangumi.update_one(
-            {'website': website, 'bangumi_id': bangumi_id},
-            {'$inc': {'times': 1}},
-            upsert=True
+    }
+
+    async def get(self):
+        request = self.request
+        try:
+            ep_id = int(request.query.get('bgm_ep_id'))
+        except (ValueError, TypeError):
+            return web.HTTPBadRequest()
+        data = await request.app.db \
+            .get_collection(mongo_collection_name.FINAL_BGM_EP_MAP) \
+            .find({'bgm_ep_id': ep_id}, {'_id': 0}).to_list(None)
+        return web.json_response({
+            'status': 'success',
+            'data'  : data
+        })
+
+    async def post(self):
+        request = self.request
+        user = await check_user_right(request)
+        if not user:
+            return web.HTTPUnauthorized()
+            # return web.json_response({'status': 'error', 'message': 'ma'})
+        try:
+            user_input = await request.json()
+        except json.decoder.JSONDecodeError:
+            return web.HTTPBadRequest()
+        v = EpInputValidator(user_input)
+        if not v.is_valid():
+            print(v.errors)
+            return web.HTTPBadRequest()
+        user_input = v.validated_data
+        user_input['user_id'] = user['user_id']
+        user_input['type'] = get_type(user_input['link'])
+        input_type = get_type(user_input['link'])
+        if input_type == 'bilibili':
+            if '/ss' in user_input['link']:
+                return web.json_response({
+                    'status' : 'error',
+                    'message': 'B站的视频应该是'
+                               'https://www.bilibili.com/bangumi/play/ep(\\d), '
+                               '/ss(\\d)结尾的那个地址不能精确定位到每集'
+                })
+        parser = server.website.get_website_parser(input_type)
+        data = {
+            'type'     : input_type,
+            'user'     : user['user_id'],
+            'bgm_ep_id': user_input['ep_id'],
+            'link'     : user_input['link'],
+            'ep_id'    : parser.link_to_ep_id(user_input['link']),
+        }
+
+        await request.app.db.get_collection(mongo_collection_name.EP_INPUT_LOG) \
+            .update_one(
+            {'user': user['user_id'], 'bgm_ep_id': user_input['ep_id']},
+            {'$set': data}, upsert=True
         )
-        raise web.HTTPNotFound()
+
+        current_episode = await request.app.db \
+            .get_collection(mongo_collection_name.FINAL_BGM_EP_MAP) \
+            .find_one({'type': input_type, 'ep_id': user_input['ep_id']})
+        if not current_episode:
+            await request.app.db \
+                .get_collection(mongo_collection_name.FINAL_BGM_EP_MAP) \
+                .update_one(
+                {'type': input_type, 'bgm_ep_id': user_input['ep_id']},
+                {'$set': data},
+                upsert=True)
+
+        # async def get_user_info(user):
+        #     r = await request.app.client_session.get(
+        #         f"https://api.bgm.tv/user/{user_input['user']}"
+        #     )
+        #     request.app.db.get_collection('user_token')
+        #
+        # loop.call_later(1, get_user_info)
+        return web.json_response({'status': 'success'})

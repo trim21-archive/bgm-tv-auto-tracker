@@ -22,11 +22,9 @@ axios.defaults.adapter = adapter
  * @return {string}
  */
 function getScriptUserAgent () {
-  return `${gmUnsafeWindow.navigator.userAgent}  Extension/${gmInfo.version} Bgm-tv-auto-tracker/${gmInfo.script.version}`
+  return gmUnsafeWindow.navigator.userAgent +
+    ` Extension/${gmInfo.version} Bgm-tv-auto-tracker/${gmInfo.script.version}`
 }
-
-// function getBrowserName () {
-// }
 
 function sortEps (eps) {
   eps = JSON.parse(JSON.stringify(eps))
@@ -171,7 +169,8 @@ class BgmApi {
 
   setSubjectCollectionStatus ({ subjectID, status }) {
     return new Promise((resolve, reject) => {
-      this.http.post(`/collection/${subjectID}/update`, `status=${status}`,
+      this.http.post(`/collection/${subjectID}/update`,
+        `status=${status}`,
         { headers: { 'content-type': 'application/x-www-form-urlencoded' } }).then(
         response => {
           if (response.data.code >= 300) {

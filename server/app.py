@@ -12,11 +12,11 @@ import pytz
 
 from .config import oauth_url, github_url
 from .db import setup_mongo
-from .types import WebRequest
+from .app_types import WebRequest
 from .views import collect_episode_info, report_missing_bangumi, \
     statistics_missing_bangumi, collected_episode_info, \
-    version, get_player_url, submit_player_url, missing_episode, get_token, \
-    refresh_auth_token, query_subject_id
+    version, missing_episode, get_token, \
+    refresh_auth_token, query_subject_id, PlayerUrl
 import aiohttp
 
 base_dir = pathlib.Path(path.dirname(__file__))
@@ -64,8 +64,9 @@ def create_app(io_loop=asyncio.get_event_loop()):
         web.post('/api/v0.1/reportMissingBangumi', report_missing_bangumi),
         web.get('/api/v0.1/collected_episode_info', collected_episode_info),
         web.post('/api/v0.1/collect_episode_info', collect_episode_info),
-        web.get('/api/v0.1/player_url', get_player_url),
-        web.post('/api/v0.1/player_url', submit_player_url),
+        # web.get('/api/v0.1/player_url', get_player_url),
+        # web.post('/api/v0.1/player_url', submit_player_url),
+        web.view('/api/v0.1/player_url', PlayerUrl),
     ])
     cors = aiohttp_cors.setup(app, defaults={
         "*": aiohttp_cors.ResourceOptions(
@@ -76,7 +77,6 @@ def create_app(io_loop=asyncio.get_event_loop()):
     })
     for route in list(app.router.routes()):
         cors.add(route)
-
     return app
 
 

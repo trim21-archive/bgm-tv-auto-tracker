@@ -113,7 +113,7 @@
     type: 'GET',
     withCredentials: true,
     xhrFields: { withCredentials: true },
-    data: { ep_id: getEpId() },
+    data: { bgm_ep_id: getEpId() },
     crossDomain: true,
   }).then(
     res => {
@@ -134,7 +134,7 @@
           console.log(userInput)
           post('/api/v0.1/player_url',
             {
-              'ep_id': getEpId(),
+              'bgm_ep_id': getEpId(),
               'link': userInput,
             }
           ).then(

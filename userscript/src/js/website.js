@@ -7,6 +7,14 @@ class bilibili {
     return WEBSITE.bilibili
   }
 
+  static get bangumiID () {
+    return gmUnsafeWindow.__INITIAL_STATE__.mediaInfo.season_id
+  }
+
+  static get episodeID () {
+    return gmUnsafeWindow.__INITIAL_STATE__.epInfo.ep_id
+  }
+
   /**
    * Init Website Data.
    *
@@ -21,7 +29,7 @@ class bilibili {
         return val.index === gmUnsafeWindow.__INITIAL_STATE__.epInfo.index
       }) + 1
 
-    const bangumiID = status.mediaInfo.season_id
+    const bangumiID = this.bangumiID
     let title = status.mediaInfo.title
     let episodeStartWith = parseInt(status.epList[0].index)
 
@@ -60,6 +68,20 @@ class bilibili {
     })
   }
 
+  static async getBgmEpisodeID () {
+    try {
+      return await apiServer.get('/api/v0.2/querySubjectID', {
+        params: {
+          bangumiID: this.bangumiID,
+          episodeID: this.episodeID,
+          website: 'bilibili',
+        }
+      })
+    } catch (e) {
+      throw e
+    }
+  }
+
   static detectEpisodeChange (cb, notfound) {
     let cls = this
     const status = gmUnsafeWindow.__INITIAL_STATE__
@@ -67,6 +89,7 @@ class bilibili {
     let INNER_EPISODE = gmUnsafeWindow.__INITIAL_STATE__.epInfo.index
 
     function onEpisodeChange ({ season = false, episode = false }) {
+      cls.getBgmEpisodeID()
       if (season) {
         cls.init().then(
           data => {
@@ -126,6 +149,32 @@ class iQiyi {
     return WEBSITE.iqiyi
   }
 
+  static get bangumiID () {
+    let collectionLinkEl = $('#block-C > div.qy-player-detail > div > div > div > div > div.qy-player-title > h1 > a')
+    let collectionLink = collectionLinkEl.attr('href')
+    let filename = collectionLink.split('/')
+    filename = filename[filename.length - 1]
+    return filename.split('.').slice(0, -1).join('.')
+  }
+
+  static get episodeID () {
+    return gmUnsafeWindow.location.pathname.split('_')[1].split('.')[0]
+  }
+
+  static async getBgmEpisodeID () {
+    try {
+      return await apiServer.get('/api/v0.2/querySubjectID', {
+        params: {
+          bangumiID: this.bangumiID,
+          episodeID: this.episodeID,
+          website: 'iqiyi',
+        }
+      })
+    } catch (e) {
+      throw e
+    }
+  }
+
   static init () {
     // console.log(bangumiName)
     let collectionLinkEl = $('#block-C > div.qy-player-detail > div > div > div > div > div.qy-player-title > h1 > a')
@@ -161,7 +210,10 @@ class iQiyi {
   }
 
   static detectEpisodeChange (cb, notfound) {
+    let cls = this
+
     function onEpisodeChange () {
+      cls.getBgmEpisodeID()
       console.log('href change')
       let title = gmUnsafeWindow.document.title
       let episode = parseEpisode(title)
