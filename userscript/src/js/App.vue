@@ -227,9 +227,6 @@ export default {
 
       this.$website.getBgmEpisodeID().then(
         res => {
-          console.log(res)
-          console.log(this.episodeID)
-          console.log(this.episode)
           this.episodeID = res.data.bgm_ep_id
           this.episodeNotMatch = false
 
@@ -318,7 +315,7 @@ export default {
         this.episodeID = this.tmpEpisodeID
         apiServer.post('/api/v0.1/report_missing_episode',
           {
-            bangumiID: this.bangumiID,
+            bangumiID: this.bangumiID.toString(),
             episodeID: this.$website.episodeID.toString(),
             bgmEpisodeID: this.episodeID,
             website: this.website
