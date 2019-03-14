@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Bgm.tv auto tracker
 // @namespace   https://trim21.me/
-// @version     1.0.0
+// @version     1.0.1
 // @author      Trim21 <trim21me@gmail.com>
 // @source      https://github.com/Trim21/bilibili-bangumi-tv-auto-tracker
 // @license     MIT
@@ -1426,7 +1426,7 @@ class website_iQiyi extends website_AbstractWebsite {
 
 
 
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/js/App.vue?vue&type=template&id=4f25675e&
+// CONCATENATED MODULE: ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/js/App.vue?vue&type=template&id=02b17178&
 var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"disable",class:{
         iqiyi: this.website === 'iqiyi',
         bilibili: this.website === 'bilibili',
@@ -1434,7 +1434,7 @@ var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._sel
 var staticRenderFns = [function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('a',{staticStyle:{"color":"red"},attrs:{"href":"https://github.com/Trim21/\n      bgm-tv-auto-tracker/blob/master/docs/user_info_collection.md","target":"_blank","rel":"noopener noreferrer"}},[_c('p',[_vm._v("\n      关于信息收集")])])}]
 
 
-// CONCATENATED MODULE: ./src/js/App.vue?vue&type=template&id=4f25675e&
+// CONCATENATED MODULE: ./src/js/App.vue?vue&type=template&id=02b17178&
 
 // CONCATENATED MODULE: ./node_modules/vue-loader/lib??vue-loader-options!./src/js/App.vue?vue&type=script&lang=js&
 //
@@ -1659,9 +1659,6 @@ if (!collection) {
 
       this.$website.getBgmEpisodeID().then(
         res => {
-          console.log(res)
-          console.log(this.episodeID)
-          console.log(this.episode)
           this.episodeID = res.data.bgm_ep_id
           this.episodeNotMatch = false
 
@@ -1750,7 +1747,7 @@ if (!collection) {
         this.episodeID = this.tmpEpisodeID
         apiServer.post('/api/v0.1/report_missing_episode',
           {
-            bangumiID: this.bangumiID,
+            bangumiID: this.bangumiID.toString(),
             episodeID: this.$website.episodeID.toString(),
             bgmEpisodeID: this.episodeID,
             website: this.website

@@ -121,9 +121,9 @@ async def report_missing_episode(request: WebRequest):
         await request.db.get_collection(mongo_collection_name.FINAL_BGM_EP_MAP) \
             .update_one(
             {'bangumi_id': data['bangumiID'],
-             'user_id'   : request.session.user_id,
+             'bgm_ep_id' : data['bgmEpisodeID'],
              'type'      : data['website']},
-            {'$set': {'link': link}},
+            {'$set': {'link': link, 'user_id': request.session.user_id, }},
             upsert=True)
 
     return web.json_response({'status': 'success'})
