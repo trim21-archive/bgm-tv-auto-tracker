@@ -122,6 +122,7 @@ async def report_missing_episode(request: WebRequest):
             .update_one(
             {'bangumi_id': data['bangumiID'],
              'bgm_ep_id' : data['bgmEpisodeID'],
+             'ep_id'     : data['episodeID'],
              'type'      : data['website']},
             {'$set': {'link': link, 'user_id': request.session.user_id, }},
             upsert=True)
