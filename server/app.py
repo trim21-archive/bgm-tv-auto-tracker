@@ -1,27 +1,28 @@
 import asyncio
+import os
 import pathlib
 from os import path
-import os
 
+import aiohttp
 import aiohttp.client_exceptions
 import aiohttp.http
 import aiohttp_cors
 import aiohttp_jinja2
-import jinja2
-from aiohttp import web
-import pytz
 import aiohttp_session
+import jinja2
+import pytz
+from aiohttp import web
 
 from server.middlewares import session_middleware
-from .session import MongoStorage
-from .config import oauth_url, github_url
-from .db import setup_mongo
-from .app_types import WebRequest, TypeApp
-from .views import collect_episode_info, report_missing_bangumi, \
-    statistics_missing_bangumi, collected_episode_info, \
-    version, missing_episode, query_subject_id, PlayerUrl, report_missing_episode
 from server.views.oauth import get_token, refresh_auth_token
-import aiohttp
+from server.app_types import WebRequest, TypeApp
+from server.config import oauth_url, github_url
+from server.db import setup_mongo
+from server.session import MongoStorage
+from server.views import collect_episode_info, report_missing_bangumi, \
+    statistics_missing_bangumi, collected_episode_info, \
+    version, missing_episode, query_subject_id, PlayerUrl, \
+    report_missing_episode
 
 base_dir = pathlib.Path(path.dirname(__file__))
 
