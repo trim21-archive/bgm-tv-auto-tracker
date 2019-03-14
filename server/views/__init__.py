@@ -69,6 +69,11 @@ async def report_missing_bangumi(request: WebRequest):
 
         }, upsert=True
     )
+    await request.db.get_collection(data['website']).update_one(
+        {'_id': data['bangumiID']},
+        {'$set': {'subject_id': data['subjectID'], 'title': data['title']}},
+        upsert=True
+    )
     return web.json_response({'status': 'success'})
 
 
@@ -103,6 +108,16 @@ async def report_missing_episode(request: WebRequest):
             'bangumi)id': data['bangumiID'],
             'bgm_ep_id' : data['bgmEpisodeID'],
         }}}, upsert=True
+    )
+    link = server.website.get_website_parser(data['website']) \
+        .ep_id_to_link(data['episodeID'])
+    await request.app.db.get_collection(mongo_collection_name.FINAL_BGM_EP_MAP) \
+        .update_one(
+        {'type'     : data['website'],
+         'ep_id'    : data['episodeID'],
+         'bgm_ep_id': data['bgmEpisodeID']},
+        {'$set': {'link': link}},
+        upsert=True
     )
     return web.json_response({'status': 'success'})
 
