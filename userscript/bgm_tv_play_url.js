@@ -5,7 +5,9 @@
 // @author      Trim21 <trim21me@gmail.com>
 // @source      https://github.com/Trim21/bilibili-bangumi-tv-auto-tracker
 // @license     MIT
-// @match       https://bgm.tv/ep/*
+// @match       http*://bgm.tv/ep/*
+// @match       http*://chii.in/ep/*
+// @match       http*://bangumi.tv/ep/*
 // @run-at      document-end
 // ==/UserScript==
 
@@ -13,7 +15,7 @@
 /* env jquery */
 
 (() => {
-  const SERVER_ROOT = 'http://localhost:6001'
+  const SERVER_ROOT = 'https://bangumi-auto-tracker.trim21.cn'
   const CONTAINER_EL_ID = 'trim21-episode-player-url'
   $('body').append(`<style>
     #${CONTAINER_EL_ID} a.${CONTAINER_EL_ID}-episodes:hover{

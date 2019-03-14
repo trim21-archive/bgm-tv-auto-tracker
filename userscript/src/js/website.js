@@ -2,7 +2,49 @@ import $ from 'jquery'
 import { gmUnsafeWindow, WEBSITE } from './vars'
 import { apiServer, parseEpisode } from './utils'
 
-class bilibili {
+class AbstractWebsite {
+  constructor () {
+    if (new.target === AbstractWebsite) {
+      throw new TypeError('Cannot construct Abstract instances directly')
+    }
+  }
+
+  static get name () {}
+
+  static get bangumiID () {}
+
+  static get episodeID () {}
+
+  static get title () {}
+
+  /**
+   * Init Website Data.
+   *
+   * @method
+   * @returns {Promise}
+   */
+  static init () {}
+
+  static async getBgmEpisodeID () {
+    try {
+      return await apiServer.get('/api/v0.2/querySubjectID', {
+        params: {
+          bangumiID: this.bangumiID,
+          episodeID: this.episodeID,
+          website: this.name,
+        }
+      })
+    } catch (e) {
+      throw e
+    }
+  }
+
+  static detectEpisodeChange (cb, notfound) {}
+
+  static getPlayerInfo () {}
+}
+
+class bilibili extends AbstractWebsite {
   static get name () {
     return WEBSITE.bilibili
   }
@@ -13,6 +55,10 @@ class bilibili {
 
   static get episodeID () {
     return gmUnsafeWindow.__INITIAL_STATE__.epInfo.ep_id
+  }
+
+  static get title () {
+    return gmUnsafeWindow.__INITIAL_STATE__.mediaInfo.title
   }
 
   /**
@@ -30,7 +76,7 @@ class bilibili {
       }) + 1
 
     const bangumiID = this.bangumiID
-    let title = status.mediaInfo.title
+    let title = this.title
     let episodeStartWith = parseInt(status.epList[0].index)
 
     apiServer.post('/api/v0.1/collect_episode_info', {
@@ -38,58 +84,33 @@ class bilibili {
       epInfo: gmUnsafeWindow.__INITIAL_STATE__.epInfo,
       epList: gmUnsafeWindow.__INITIAL_STATE__.epList,
       pubInfo: gmUnsafeWindow.__INITIAL_STATE__.pubInfo,
-    }).then(
-      res => {
-        console.log(res)
-      },
-      err => {
-        console.log(err)
-      })
-
-    return new Promise((resolve, reject) => {
-      apiServer.get('/api/v0.2/querySubjectID', {
-        params: { bangumiID, website: 'bilibili' }
-      }).then(
-        response => resolve({
-          subjectID: response.data.subject_id,
-          episode,
-          title,
-          episodeStartWith,
-          bangumiID
-        }),
-        error => reject({
-          episode,
-          title,
-          episodeStartWith,
-          bangumiID,
-          error
-        })
-      )
     })
-  }
-
-  static async getBgmEpisodeID () {
-    try {
-      return await apiServer.get('/api/v0.2/querySubjectID', {
-        params: {
-          bangumiID: this.bangumiID,
-          episodeID: this.episodeID,
-          website: 'bilibili',
-        }
+    return apiServer.get('/api/v0.2/querySubjectID', {
+      params: { bangumiID, website: 'bilibili' }
+    }).then(
+      response => ({
+        subjectID: response.data.subject_id,
+        episode,
+        title,
+        episodeStartWith,
+        bangumiID
+      }),
+      error => ({
+        episode,
+        title,
+        episodeStartWith,
+        bangumiID,
+        error
       })
-    } catch (e) {
-      throw e
-    }
+    )
   }
 
   static detectEpisodeChange (cb, notfound) {
     let cls = this
-    const status = gmUnsafeWindow.__INITIAL_STATE__
-    let bangumiID = status.mediaInfo.season_id
+    let bangumiID = this.bangumiID
     let INNER_EPISODE = gmUnsafeWindow.__INITIAL_STATE__.epInfo.index
 
     function onEpisodeChange ({ season = false, episode = false }) {
-      cls.getBgmEpisodeID()
       if (season) {
         cls.init().then(
           data => {
@@ -100,7 +121,8 @@ class bilibili {
       }
       if (episode) {
         let ep = gmUnsafeWindow.__INITIAL_STATE__.epList
-          .findIndex(val => val.index === gmUnsafeWindow.__INITIAL_STATE__.epInfo.index) + 1
+          .filter(val => !val.index.includes('.')
+          ).findIndex(val => val.index === gmUnsafeWindow.__INITIAL_STATE__.epInfo.index) + 1
         if (ep) {
           cb({
             episode: ep
@@ -144,7 +166,7 @@ class bilibili {
   }
 }
 
-class iQiyi {
+class iQiyi extends AbstractWebsite {
   static get name () {
     return WEBSITE.iqiyi
   }
@@ -161,59 +183,38 @@ class iQiyi {
     return gmUnsafeWindow.location.pathname.split('_')[1].split('.')[0]
   }
 
-  static async getBgmEpisodeID () {
-    try {
-      return await apiServer.get('/api/v0.2/querySubjectID', {
-        params: {
-          bangumiID: this.bangumiID,
-          episodeID: this.episodeID,
-          website: 'iqiyi',
-        }
-      })
-    } catch (e) {
-      throw e
-    }
+  static get title () {
+    return gmUnsafeWindow.document.title
   }
 
   static init () {
-    // console.log(bangumiName)
-    let collectionLinkEl = $('#block-C > div.qy-player-detail > div > div > div > div > div.qy-player-title > h1 > a')
-    let title = gmUnsafeWindow.document.title
-    // let title = gmUnsafeWindow.document.title
-    let collectionLink = collectionLinkEl.attr('href')
-    let filename = collectionLink.split('/')
-    filename = filename[filename.length - 1]
-    let bangumiID = filename.split('.').slice(0, -1).join('.')
+    let title = this.title
+    let bangumiID = this.bangumiID
     let episode = parseEpisode(title)
 
-    return new Promise((resolve, reject) => {
-      apiServer.get('/api/v0.2/querySubjectID', {
-        params: { bangumiID, website: 'iqiyi' }
-      }).then(
-        response => {
-          console.log(response)
-          let subjectID = response.data.subject_id
-          resolve({
-            subjectID, episode, title, bangumiID, episodeStartWith: 1,
-          })
-        },
-        error => reject({
-          error,
-          episode,
-          title,
-          episodeStartWith: 1,
-          bangumiID,
-          // bangumiName
-        })
-      )
-    })
+    return apiServer.get('/api/v0.2/querySubjectID', {
+      params: { bangumiID, website: 'iqiyi' }
+    }).then(
+      response => ({
+        subjectID: response.data.subject_id,
+        episode,
+        title,
+        bangumiID,
+        episodeStartWith: 1
+      }),
+      error => ({
+        error,
+        episode,
+        title,
+        episodeStartWith: 1,
+        bangumiID,
+        // bangumiName
+      })
+    )
   }
 
   static detectEpisodeChange (cb, notfound) {
-    let cls = this
-
     function onEpisodeChange () {
-      cls.getBgmEpisodeID()
       console.log('href change')
       let title = gmUnsafeWindow.document.title
       let episode = parseEpisode(title)

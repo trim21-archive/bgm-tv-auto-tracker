@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import Callable, List, Optional, Union
+from typing import Callable, List, Optional, Union, Dict
 from typing import Mapping
 
 import aiohttp.client_exceptions
@@ -27,6 +27,15 @@ class S:
     token_type: Optional[str]
     access_token: Optional[str]
     refresh_token: Optional[str]
+
+    # user info
+    id: Optional[int]
+    url: Optional[str]
+    username: str
+    nickname: str
+    avatar: Optional[Dict[str, str]]
+    sign: Optional[str]
+    usergroup: Optional[int]
 
     # csrf
     csrf_token: Optional[str]

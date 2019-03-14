@@ -27,8 +27,17 @@ async def get_token(request: WebRequest, ):
     if 'error' in r:
         return web.json_response(r, status=400)
     r['auth_time'] = int(date_parser.parse(resp.headers['Date']).timestamp())
+    async with request.app.client_session.get(
+        'https://api.bgm.tv/user/{}'.format(r['user_id'])
+    ) as resp:
+        try:
+            user_info = await resp.json()
+        except aiohttp.client_exceptions.ContentTypeError:
+            raise web.HTTPFound(oauth_url)
+
     session = await request.session.new_session()
     session.update(r)
+    session.update(user_info)
     session.login = True
     return aiohttp_jinja2.render_template('post_to_extension.html',
                                           request,
@@ -56,9 +65,19 @@ async def refresh_auth_token(request: WebRequest, ):
     if 'error' in r:
         return web.json_response(r)
     r['auth_time'] = int(date_parser.parse(resp.headers['Date']).timestamp())
+
+    async with request.app.client_session.get(
+        'https://api.bgm.tv/user/{}'.format(r['user_id'])
+    ) as resp:
+        try:
+            user_info = await resp.json()
+        except aiohttp.client_exceptions.ContentTypeError:
+            raise web.HTTPFound(oauth_url)
+
     if request.session.login:
         request.session.update(r)
     else:
         s = await request.session.new_session()
         s.update(r)
+    request.session.update(user_info)
     return web.json_response(r)

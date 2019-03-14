@@ -26,13 +26,16 @@
         <p>你正在看:
           <span id="bgm_tv_tracker_title">{{ bangumiName }}</span>
         </p>
-        <p>第 <span id="bgm_tv_tracker_episode">{{ episode + (episodeStartWith?episodeStartWith:1) -1 }}</span>
+        <p>第 <span id="bgm_tv_tracker_episode">
+          {{ episodeSort }}
+        </span>
           集</p>
       </div>
       <br>
       <div id="bgm_tv_tracker_link">
         <a :href="`https://bgm.tv/ep/${episodeID}`"
-           v-if="episodeID" target="_blank" rel="noopener noreferrer">吐槽本集</a>
+           v-if="episodeID" target="_blank"
+           rel="noopener noreferrer">吐槽本集</a>
         <br>
         <br>
         <a :href="`https://bgm.tv/subject/${subjectID}`" v-if="subjectID"
@@ -55,10 +58,23 @@
         </button>
       </div>
       <br>
+
+      <div class="not_found" v-if="episodeNotMatch">
+
+        <label>填写本集对应的bgm单集网址来帮助我们精确定位这是哪一集
+          <input type="text" class="subject"
+                 placeholder="https://bgm.tv/ep/12345" v-model="tmpEpisodeID"/>
+          <button class="notfound" @click="userSubmitEpisodeID">submit</button>
+        </label>
+
+      </div>
+
+      <br>
       <a :href="reportUrl" target='_blank' rel="noopener noreferrer"
          style="color: red"><p>报告问题</p></a>
       <a
-        href="https://github.com/Trim21/bgm-tv-auto-tracker/blob/master/docs/user_info_collection.md"
+        href="https://github.com/Trim21/
+        bgm-tv-auto-tracker/blob/master/docs/user_info_collection.md"
         target='_blank' rel="noopener noreferrer" style="color: red"><p>
         关于信息收集</p></a>
       <!--<br>-->
@@ -86,8 +102,8 @@
         <div v-for="(message, index) in messages" :key="index">
           <hr>
           <div><p>
-            {{ message.time.getHours() }}:{{ message.time.getMinutes() }}:{{
-            message.time.getSeconds() }}
+            {{ message.time.getHours() }}:{{ message.time.getMinutes() }}:
+            {{ message.time.getSeconds() }}
           </p>
             <p>{{ message.text }}</p>
           </div>
@@ -122,7 +138,8 @@ if (!collection) {
 export default {
   data () {
     let website = ''
-    if (gmUnsafeWindow.location.href.startsWith('https://www.bilibili.com/bangumi/play/')) {
+    if (gmUnsafeWindow.location.href
+      .startsWith('https://www.bilibili.com/bangumi/play/')) {
       website = WEBSITE.bilibili
     } else if (gmUnsafeWindow.location.hostname === 'www.iqiyi.com') {
       website = WEBSITE.iqiyi
@@ -130,14 +147,20 @@ export default {
     let config = getConfig()
 
     return {
+      episodeNotMatch: false,
+      tmpEpisodeID: null,
+
       tmpSubjectID: null,
       messages: [],
       bangumiID: null,
       bangumiName: null,
-      // is episode starts with 1, like https://www.bilibili.com/bangumi/play/ep200167
+      // is episode starts with 1,
+      // like https://www.bilibili.com/bangumi/play/ep200167
       episodeStartWith: null,
+      // episode id in bgm.tv
       episodeID: null,
       episode: null,
+      episodeSort: null,
       title: null,
       subjectID: null,
       score: '',
@@ -153,7 +176,8 @@ export default {
   },
   computed: {
     reportUrl () {
-      let baseURL = 'https://github.com/Trim21/bilibili-bangumi-tv-auto-tracker/issues/new'
+      let baseURL = 'https://github.com/' +
+        'Trim21/bgm-tv-auto-tracker/issues/new'
       let hrefWithoutHash = gmUnsafeWindow.location.protocol + '//'
         + gmUnsafeWindow.location.host + gmUnsafeWindow.location.pathname
       let body =
@@ -195,30 +219,68 @@ export default {
     bangumiID () {
       this.episodeMarked = false
     },
-    episode () {
+    episode: function () {
+
       this.episodeMarked = false
       if (!this.subjectID) return
       let vm = this
-      vm.$bgmApi.getEps(this.subjectID).then(
-        data => {
-          let episode = vm.episode
-          let eps = data.eps.filter(val => Number.isInteger(Number(val.sort)) && (parseInt(val.type, 10) === 0))
 
-          eps = eps.sort(function (a, b) {
-            let key = 'sort'
-            let x = a[key]
-            let y = b[key]
-            return ((x < y) ? -1 : ((x > y) ? 1 : 0))
-          })
-          try {
-            this.episodeID = eps[episode - 1].id
-          } catch (e) {
-            vm.notify('没找到这集...')
-          }
+      this.$website.getBgmEpisodeID().then(
+        res => {
+          console.log(res)
+          console.log(this.episodeID)
+          console.log(this.episode)
+          this.episodeID = res.data.bgm_ep_id
+          this.episodeNotMatch = false
+
+          vm.$bgmApi.getEps(this.subjectID).then(
+            data => {
+              let episode = vm.episode
+              let eps = data.eps.filter(val => val.id === parseInt(vm.episodeID, 10))
+              try {
+                this.episodeSort = eps[0].sort
+              } catch (e) {
+                vm.notify('没找到这集...')
+              }
+            },
+            error => {
+              vm.notify('233')
+              vm.notify(JSON.stringify(error))
+            }
+          )
+
         },
-        error => {
-          vm.notify('233')
-          vm.notify(JSON.stringify(error))
+        err => {
+          this.episodeNotMatch = true
+
+          vm.$bgmApi.getEps(this.subjectID).then(
+            data => {
+              let episode = vm.episode
+              let eps = data.eps.filter(val => Number.isInteger(Number(val.sort)) &&
+                (parseInt(val.type, 10) === 0))
+
+              eps = eps.sort(function (a, b) {
+                let key = 'sort'
+                let x = a[key]
+                let y = b[key]
+                return ((x < y) ? -1 : ((x > y) ? 1 : 0))
+              })
+              try {
+                this.episodeID = eps[episode - 1].id
+                if (this.episodeStartWith) {
+                  this.episodeSort = this.episode + this.episodeStartWith - 1
+                } else {
+                  this.episodeSort = this.episode + 1 - 1
+                }
+              } catch (e) {
+                vm.notify('没找到这集...')
+              }
+            },
+            error => {
+              vm.notify('233')
+              vm.notify(JSON.stringify(error))
+            }
+          )
         }
       )
 
@@ -240,6 +302,25 @@ export default {
             subjectID: this.subjectID,
             title: this.title,
             href: gmUnsafeWindow.location.href,
+            website: this.website
+          })
+      }
+    },
+
+    userSubmitEpisodeID () {
+      if (this.tmpEpisodeID) {
+        if (this.tmpEpisodeID.startsWith('http')) {
+          const myURL = new URL(this.tmpEpisodeID)
+          const p = myURL.pathname
+          const pList = p.split('/')
+          this.tmpEpisodeID = pList[pList.length - 1]
+        }
+        this.episodeID = this.tmpEpisodeID
+        apiServer.post('/api/v0.1/report_missing_episode',
+          {
+            bangumiID: this.bangumiID,
+            episodeID: this.$website.episodeID.toString(),
+            bgmEpisodeID: this.episodeID,
             website: this.website
           })
       }
@@ -291,7 +372,8 @@ export default {
         let data = await vm.$bgmApi.getEps(this.subjectID)
         let episode = vm.episode
         let eps = data.eps
-          .filter(val => Number.isInteger(Number(val.sort)) && (parseInt(val.type, 10) === 0))
+          .filter(val => Number.isInteger(Number(val.sort)) &&
+            (parseInt(val.type, 10) === 0))
           .sort(function (a, b) {
             let key = 'sort'
             let x = a[key]
@@ -320,7 +402,8 @@ export default {
         this.episodeMarked = true
       } catch (error) {
         if (error.response.data.code === 400) {
-          this.notify('error: ' + error.response.data.error + ',' + '应该是因为你在bgm上的状态已经是看到本集')
+          this.notify('error: ' + error.response.data.error +
+            ',' + '应该是因为你在bgm上的状态已经是看到本集')
         } else {
           this.notify('error: ' + JSON.stringify(error.response))
         }
@@ -329,29 +412,33 @@ export default {
   },
   created () {
     this.$website.getBgmEpisodeID().then(
-      res => {
-        console.log('res', res)
-      },)
+      res => {},
+      err => {
+        this.notify('不能精确定位这是哪一集, 只能根据集数来猜了, 可能猜的不太对.')
+        this.episodeNotMatch = true
+      }
+    )
 
     // episode-item
-    this.$website.init().then(data => {
-      let { subjectID, episode, title, bangumiID, episodeStartWith } = data
-      this.subjectID = subjectID
-      this.episode = episode
-      this.title = title
-      this.bangumiID = bangumiID
-      this.episodeStartWith = episodeStartWith
-    }, error => {
-      console.log(error)
-      if (error.error.response.status === 404) {
-        this.notify('番剧没找到 手动输入吧')
-      }
-      let { episode, title, bangumiID, episodeStartWith } = error
-      this.episodeStartWith = episodeStartWith
-      this.episode = episode
-      this.title = title
-      this.bangumiID = bangumiID
-    })
+    this.$website.init().then(
+      data => {
+        let { subjectID, episode, title, bangumiID, episodeStartWith } = data
+        this.subjectID = subjectID
+        this.episode = episode
+        this.title = title
+        this.bangumiID = bangumiID
+        this.episodeStartWith = episodeStartWith
+      },
+      error => {
+        if (error.error.response.status === 404) {
+          this.notify('番剧没找到 手动输入吧')
+        }
+        let { episode, title, bangumiID, episodeStartWith } = error
+        this.episodeStartWith = episodeStartWith
+        this.episode = episode
+        this.title = title
+        this.bangumiID = bangumiID
+      })
 
     let vm = this
     this.$website.detectEpisodeChange(data => {
@@ -363,7 +450,6 @@ export default {
           vm.bangumiID = data.bangumiID
       },
       error => {
-        console.log(error)
         vm.episode = error.episode
         if (error.bangumiID !== vm.bangumiID) {
           vm.subjectID = undefined
@@ -374,40 +460,14 @@ export default {
         }
       })
 
-    this.$bgmApi.http.interceptors.request.use(function (config) {
-      //在发送请求之前做某事
-      if (gmUnsafeWindow.bgm_tv_debug) {
-        vm.notify('config: ' + JSON.stringify(config, null, 2))
-      }
-      return config
-    }, function (error) {
-      //请求错误时做些事
-      if (gmUnsafeWindow.bgm_tv_debug) {
-        vm.notify('response: ' + JSON.stringify(response, null, 2))
-      }
-      return Promise.reject(error)
-    })
-
-    this.$bgmApi.http.interceptors.response.use(function (response) {
-      //对响应数据做些事
-      if (gmUnsafeWindow.bgm_tv_debug) {
-        vm.notify('response: ' + JSON.stringify(response, null, 2))
-      }
-      return response
-    }, function (error) {
-      //请求错误时做些事
-      if (gmUnsafeWindow.bgm_tv_debug) {
-        vm.notify('error: ' + JSON.stringify(error, null, 2))
-      }
-      return Promise.reject(error)
-    })
     setInterval(() => {
       this.$website.getPlayerInfo().then(info => {
           let { percent, duration } = info
           console.log('get player percent')
           this.watchPercent = percent
           if (percent > 0.8 && (duration > 120)) {
-            if (this.config.autoMarkWatched && this.subjectID && !this.episodeMarked) {
+            if (this.config.autoMarkWatched && this.subjectID &&
+              !this.episodeMarked) {
               this.episodeMarked = true
               this.watchEps()
             }
@@ -417,7 +477,6 @@ export default {
           console.log('can\'t get play time')
         })
     }, 30 * 1000)
-    console.log('finish bgm_tv_auto_tracker vue components init')
   }
 }
 

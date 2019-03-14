@@ -66,11 +66,14 @@ def create_app(io_loop=asyncio.get_event_loop()):
         web.get('/api/v0.2/querySubjectID', query_subject_id),
         web.get('/statistics_missing_bangumi', statistics_missing_bangumi),
         web.get('/bilibili_missing_episode', missing_episode),
+        web.get('/api/v0.1/collected_episode_info', collected_episode_info),
+
         web.post('/api/v0.1/refresh_token', refresh_auth_token),
+        web.post('/api/v0.1/collect_episode_info', collect_episode_info),
+
         web.post('/api/v0.1/reportMissingBangumi', report_missing_bangumi),
         web.post('/api/v0.1/report_missing_episode', report_missing_episode),
-        web.get('/api/v0.1/collected_episode_info', collected_episode_info),
-        web.post('/api/v0.1/collect_episode_info', collect_episode_info),
+
         web.view('/api/v0.1/player_url', PlayerUrl),
     ])
     if os.getenv('DEV'):

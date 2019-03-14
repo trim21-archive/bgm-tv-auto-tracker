@@ -11,7 +11,14 @@
  * @typedef {Object} AxiosError
  * @property {AxiosResponse} response
  */
-import { gmGetValue, gmInfo, gmSetValue, gmUnsafeWindow, URLS } from './vars.js'
+import {
+  gmGetValue,
+  gmInfo,
+  gmOpenInTab,
+  gmSetValue,
+  gmUnsafeWindow,
+  URLS
+} from './vars.js'
 import axios from 'axios'
 import adapter from 'axios-userscript-adapter'
 // import { gmUnsafeWindow } from './vars'
@@ -192,6 +199,17 @@ let apiServer = axios.create({
   },
 })
 
+apiServer.interceptors.response.use(
+  response => {
+    return response
+  },
+  error => {
+    if (error.response.status === 401) {
+      gmOpenInTab(URLS.authURL, { active: true })
+    }
+    return Promise.reject(error)
+  })
+
 function parseEpisode (title) {
   let re = /第(\d+)集/g
   let result = re.exec(title)
@@ -291,3 +309,33 @@ function getConfig () {
 }
 
 export { BgmApi, axios, apiServer, parseEpisode, saveAuth, getAuth, getConfig }
+
+/*
+this.$bgmApi.http.interceptors.request.use(function (config) {
+      //在发送请求之前做某事
+      if (gmUnsafeWindow.bgm_tv_debug) {
+        vm.notify('config: ' + JSON.stringify(config, null, 2))
+      }
+      return config
+    }, function (error) {
+      //请求错误时做些事
+      if (gmUnsafeWindow.bgm_tv_debug) {
+        vm.notify('response: ' + JSON.stringify(response, null, 2))
+      }
+      return Promise.reject(error)
+    })
+
+    this.$bgmApi.http.interceptors.response.use(function (response) {
+      //对响应数据做些事
+      if (gmUnsafeWindow.bgm_tv_debug) {
+        vm.notify('response: ' + JSON.stringify(response, null, 2))
+      }
+      return response
+    }, function (error) {
+      //请求错误时做些事
+      if (gmUnsafeWindow.bgm_tv_debug) {
+        vm.notify('error: ' + JSON.stringify(error, null, 2))
+      }
+      return Promise.reject(error)
+    })
+*/

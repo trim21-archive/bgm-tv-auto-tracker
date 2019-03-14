@@ -1,5 +1,4 @@
 import Vue from 'vue'
-import axios from 'axios'
 import $ from 'jquery'
 
 import { gmOpenInTab, gmUnsafeWindow, URLS, WEBSITE } from './vars'
@@ -62,25 +61,18 @@ function init () {
     getAuth().then(
       auth => {
         if (auth && auth.hasOwnProperty('access_token')) {
-          console.log(auth)
           /* eslint-disable unused-def */
+          /* eslint-enable unused-def */
           /**
            * @type {BgmApi}
            */
           Vue.prototype.$bgmApi = new BgmApi({ accessToken: auth.access_token })
-          // Vue.prototype.$bgmApi = new BgmApi({ accessToken: undefined })
-          Vue.prototype.$http = axios
-          /* eslint-enable unused-def */
-          console.log(website)
-
           if (website) {
             Vue.prototype.$website = getWebsiteClass(website)
-            console.log('bgm_tv_auto_tracker before vue')
             gmUnsafeWindow.bgm_tv_tracker = new Vue({
               el: '#bgm_tv_tracker',
               render: h => h(App),
             })
-            console.log('bgm_tv_auto_tracker after vue')
           }
         } else {
           gmOpenInTab(URLS.authURL, { active: true })

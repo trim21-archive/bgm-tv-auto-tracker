@@ -6,7 +6,7 @@ from aiohttp import web
 from aiohttp_cors import CorsViewMixin, ResourceOptions
 import server.website
 
-from server.utils import jsonify
+from server.utils import jsonify, is_authorized_user
 from server.constants import mongo_collection_name
 from server.app_types import WebRequest
 from server.validators import InitialStateValidator, \
@@ -37,6 +37,9 @@ async def collect_episode_info(request: WebRequest):
                               'data'   : v.validated_data})
 
 
+import pymongo.results
+
+
 async def report_missing_bangumi(request: WebRequest):
     if not request.session.user_id:
         return web.HTTPUnauthorized()
@@ -51,7 +54,7 @@ async def report_missing_bangumi(request: WebRequest):
             status=400
         )
     data = v.validated_data
-    await request.app.db.submitted_missing_bangumi.update_one(
+    u = await request.app.db.submitted_missing_bangumi.update_one(
         {
             'bangumi_id': data['bangumiID'],
             'user_id'   : request.session.user_id,
@@ -69,11 +72,12 @@ async def report_missing_bangumi(request: WebRequest):
 
         }, upsert=True
     )
-    await request.db.get_collection(data['website']).update_one(
-        {'_id': data['bangumiID']},
-        {'$set': {'subject_id': data['subjectID'], 'title': data['title']}},
-        upsert=True
-    )
+    if await is_authorized_user(request):
+        await request.db.get_collection(data['website']).update_one(
+            {'_id': data['bangumiID'], },
+            {'$set': {'title': data['title'], 'subject_id': data['subjectID']}},
+            upsert=True)
+
     return web.json_response({'status': 'success'})
 
 
@@ -109,16 +113,17 @@ async def report_missing_episode(request: WebRequest):
             'bgm_ep_id' : data['bgmEpisodeID'],
         }}}, upsert=True
     )
-    link = server.website.get_website_parser(data['website']) \
-        .ep_id_to_link(data['episodeID'])
-    await request.app.db.get_collection(mongo_collection_name.FINAL_BGM_EP_MAP) \
-        .update_one(
-        {'type'     : data['website'],
-         'ep_id'    : data['episodeID'],
-         'bgm_ep_id': data['bgmEpisodeID']},
-        {'$set': {'link': link}},
-        upsert=True
-    )
+    if await is_authorized_user(request):
+        link = server.website.get_website_parser(data['website']) \
+            .ep_id_to_link(data['episodeID'])
+        await request.db.get_collection(mongo_collection_name.FINAL_BGM_EP_MAP) \
+            .update_one(
+            {'bangumi_id': data['bangumiID'],
+             'user_id'   : request.session.user_id,
+             'type'      : data['website']},
+            {'$set': {'link': link}},
+            upsert=True)
+
     return web.json_response({'status': 'success'})
 
 
@@ -317,10 +322,10 @@ class PlayerUrl(web.View, CorsViewMixin):
             }}}, upsert=True
         )
         print('after put object')
-        current_episode = await request.app.db \
-            .get_collection(mongo_collection_name.FINAL_BGM_EP_MAP) \
-            .find_one({'type': input_type, 'ep_id': user_input['ep_id']})
-        if not current_episode:
+        # current_episode = await request.app.db \
+        #     .get_collection(mongo_collection_name.FINAL_BGM_EP_MAP) \
+        #     .find_one({'type': input_type, 'ep_id': user_input['ep_id']})
+        if await is_authorized_user(request):
             await request.app.db \
                 .get_collection(mongo_collection_name.FINAL_BGM_EP_MAP) \
                 .update_one(
