@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Bgm.tv auto tracker
 // @namespace   https://trim21.me/
-// @version     0.10.2
+// @version     1.0.0
 // @author      Trim21 <trim21me@gmail.com>
 // @source      https://github.com/Trim21/bilibili-bangumi-tv-auto-tracker
 // @license     MIT
@@ -734,10 +734,6 @@ __webpack_require__.r(__webpack_exports__);
 var external_Vue_ = __webpack_require__("i7/w");
 var external_Vue_default = /*#__PURE__*/__webpack_require__.n(external_Vue_);
 
-// EXTERNAL MODULE: external "axios"
-var external_axios_ = __webpack_require__("zr5I");
-var external_axios_default = /*#__PURE__*/__webpack_require__.n(external_axios_);
-
 // EXTERNAL MODULE: external "$"
 var external_$_ = __webpack_require__("xeH2");
 var external_$_default = /*#__PURE__*/__webpack_require__.n(external_$_);
@@ -755,6 +751,7 @@ var external_$_default = /*#__PURE__*/__webpack_require__.n(external_$_);
  * @property {string} location.protocol
  * @property {string} location.host
  * @property {string} location.pathname
+ * @property {string} navigator.userAgent
  */
 
 /**
@@ -808,16 +805,17 @@ const URLS = {
   callBackUrl: 'https://bangumi-auto-tracker.trim21.cn/oauth_callback',
   apiBgmUrl: 'https://api.bgm.tv',
   authURL: 'https://bgm.tv/oauth/authorize?client_id=bgm2775b2797b4d958b&response_type=code&redirect_uri' +
-  '=https://bangumi-auto-tracker.trim21.cn/oauth_callback',
+    '=https://bangumi-auto-tracker.trim21.cn/oauth_callback',
 }
 
 if (window.TM_ENV === 'dev') {
+// if (true) {
   Object.assign(URLS, {
     apiServerURL: 'http://localhost:6001',
     callBackUrl: 'http://localhost:6001/oauth_callback',
     apiBgmUrl: 'https://api.bgm.tv',
     authURL: 'https://bgm.tv/oauth/authorize?client_id=bgm2955b3b3050e7bf2&response_type=code&redirect_uri' +
-    '=http://localhost:6001/oauth_callback',
+      '=http://localhost:6001/oauth_callback',
   })
 }
 const WEBSITE = {
@@ -826,6 +824,10 @@ const WEBSITE = {
 }
 
 
+
+// EXTERNAL MODULE: external "axios"
+var external_axios_ = __webpack_require__("zr5I");
+var external_axios_default = /*#__PURE__*/__webpack_require__.n(external_axios_);
 
 // EXTERNAL MODULE: external "axiosGmxhrAdapter"
 var external_axiosGmxhrAdapter_ = __webpack_require__("CFBl");
@@ -848,8 +850,17 @@ var external_axiosGmxhrAdapter_default = /*#__PURE__*/__webpack_require__.n(exte
 
 
 
+// import { gmUnsafeWindow } from './vars'
 
 external_axios_default.a.defaults.adapter = external_axiosGmxhrAdapter_default.a
+
+/**
+ * @return {string}
+ */
+function getScriptUserAgent () {
+  return gmUnsafeWindow.navigator.userAgent +
+    ` Extension/${gmInfo.version} Bgm-tv-auto-tracker/${gmInfo.script.version}`
+}
 
 function sortEps (eps) {
   eps = JSON.parse(JSON.stringify(eps))
@@ -874,8 +885,10 @@ class utils_BgmApi {
      */
     this.http = external_axios_default.a.create({
       baseURL: serverRoot,
-      headers: { Authorization: 'Bearer ' + this.access_token },
-      adapter: external_axiosGmxhrAdapter_default.a
+      headers: {
+        Authorization: 'Bearer ' + this.access_token,
+        'User-Agent': getScriptUserAgent(),
+      },
     })
   }
 
@@ -992,7 +1005,8 @@ class utils_BgmApi {
 
   setSubjectCollectionStatus ({ subjectID, status }) {
     return new Promise((resolve, reject) => {
-      this.http.post(`/collection/${subjectID}/update`, `status=${status}`,
+      this.http.post(`/collection/${subjectID}/update`,
+        `status=${status}`,
         { headers: { 'content-type': 'application/x-www-form-urlencoded' } }).then(
         response => {
           if (response.data.code >= 300) {
@@ -1009,8 +1023,21 @@ class utils_BgmApi {
 
 let apiServer = external_axios_default.a.create({
   baseURL: URLS.apiServerURL,
-  headers: { 'bgm-tv-auto-tracker': gmInfo.script.version },
+  headers: {
+    'User-Agent': getScriptUserAgent(),
+  },
 })
+
+apiServer.interceptors.response.use(
+  response => {
+    return response
+  },
+  error => {
+    if (error.response.status === 401) {
+      gmOpenInTab(URLS.authURL, { active: true })
+    }
+    return Promise.reject(error)
+  })
 
 function parseEpisode (title) {
   let re = /第(\d+)集/g
@@ -1112,14 +1139,98 @@ function getConfig () {
 
 
 
+/*
+this.$bgmApi.http.interceptors.request.use(function (config) {
+      //在发送请求之前做某事
+      if (gmUnsafeWindow.bgm_tv_debug) {
+        vm.notify('config: ' + JSON.stringify(config, null, 2))
+      }
+      return config
+    }, function (error) {
+      //请求错误时做些事
+      if (gmUnsafeWindow.bgm_tv_debug) {
+        vm.notify('response: ' + JSON.stringify(response, null, 2))
+      }
+      return Promise.reject(error)
+    })
+
+    this.$bgmApi.http.interceptors.response.use(function (response) {
+      //对响应数据做些事
+      if (gmUnsafeWindow.bgm_tv_debug) {
+        vm.notify('response: ' + JSON.stringify(response, null, 2))
+      }
+      return response
+    }, function (error) {
+      //请求错误时做些事
+      if (gmUnsafeWindow.bgm_tv_debug) {
+        vm.notify('error: ' + JSON.stringify(error, null, 2))
+      }
+      return Promise.reject(error)
+    })
+*/
+
 // CONCATENATED MODULE: ./src/js/website.js
 
 
 
 
-class website_bilibili {
+class website_AbstractWebsite {
+  constructor () {
+    if (new.target === website_AbstractWebsite) {
+      throw new TypeError('Cannot construct Abstract instances directly')
+    }
+  }
+
+  static get name () {}
+
+  static get bangumiID () {}
+
+  static get episodeID () {}
+
+  static get title () {}
+
+  /**
+   * Init Website Data.
+   *
+   * @method
+   * @returns {Promise}
+   */
+  static init () {}
+
+  static async getBgmEpisodeID () {
+    try {
+      return await apiServer.get('/api/v0.2/querySubjectID', {
+        params: {
+          bangumiID: this.bangumiID,
+          episodeID: this.episodeID,
+          website: this.name,
+        }
+      })
+    } catch (e) {
+      throw e
+    }
+  }
+
+  static detectEpisodeChange (cb, notfound) {}
+
+  static getPlayerInfo () {}
+}
+
+class website_bilibili extends website_AbstractWebsite {
   static get name () {
     return WEBSITE.bilibili
+  }
+
+  static get bangumiID () {
+    return gmUnsafeWindow.__INITIAL_STATE__.mediaInfo.season_id
+  }
+
+  static get episodeID () {
+    return gmUnsafeWindow.__INITIAL_STATE__.epInfo.ep_id
+  }
+
+  static get title () {
+    return gmUnsafeWindow.__INITIAL_STATE__.mediaInfo.title
   }
 
   /**
@@ -1136,8 +1247,8 @@ class website_bilibili {
         return val.index === gmUnsafeWindow.__INITIAL_STATE__.epInfo.index
       }) + 1
 
-    const bangumiID = status.mediaInfo.season_id
-    let title = status.mediaInfo.title
+    const bangumiID = this.bangumiID
+    let title = this.title
     let episodeStartWith = parseInt(status.epList[0].index)
 
     apiServer.post('/api/v0.1/collect_episode_info', {
@@ -1145,40 +1256,30 @@ class website_bilibili {
       epInfo: gmUnsafeWindow.__INITIAL_STATE__.epInfo,
       epList: gmUnsafeWindow.__INITIAL_STATE__.epList,
       pubInfo: gmUnsafeWindow.__INITIAL_STATE__.pubInfo,
-    }).then(
-      res => {
-        console.log(res)
-      },
-      err => {
-        console.log(err)
-      })
-
-    return new Promise((resolve, reject) => {
-      apiServer.get('/api/v0.2/querySubjectID', {
-        params: { bangumiID, website: 'bilibili' }
-      }).then(
-        response => resolve({
-          subjectID: response.data.subject_id,
-          episode,
-          title,
-          episodeStartWith,
-          bangumiID
-        }),
-        error => reject({
-          episode,
-          title,
-          episodeStartWith,
-          bangumiID,
-          error
-        })
-      )
     })
+    return apiServer.get('/api/v0.2/querySubjectID', {
+      params: { bangumiID, website: 'bilibili' }
+    }).then(
+      response => ({
+        subjectID: response.data.subject_id,
+        episode,
+        title,
+        episodeStartWith,
+        bangumiID
+      }),
+      error => ({
+        episode,
+        title,
+        episodeStartWith,
+        bangumiID,
+        error
+      })
+    )
   }
 
   static detectEpisodeChange (cb, notfound) {
     let cls = this
-    const status = gmUnsafeWindow.__INITIAL_STATE__
-    let bangumiID = status.mediaInfo.season_id
+    let bangumiID = this.bangumiID
     let INNER_EPISODE = gmUnsafeWindow.__INITIAL_STATE__.epInfo.index
 
     function onEpisodeChange ({ season = false, episode = false }) {
@@ -1192,7 +1293,8 @@ class website_bilibili {
       }
       if (episode) {
         let ep = gmUnsafeWindow.__INITIAL_STATE__.epList
-          .findIndex(val => val.index === gmUnsafeWindow.__INITIAL_STATE__.epInfo.index) + 1
+          .filter(val => !val.index.includes('.')
+          ).findIndex(val => val.index === gmUnsafeWindow.__INITIAL_STATE__.epInfo.index) + 1
         if (ep) {
           cb({
             episode: ep
@@ -1236,43 +1338,51 @@ class website_bilibili {
   }
 }
 
-class website_iQiyi {
+class website_iQiyi extends website_AbstractWebsite {
   static get name () {
     return WEBSITE.iqiyi
   }
 
-  static init () {
-    // console.log(bangumiName)
+  static get bangumiID () {
     let collectionLinkEl = external_$_default()('#block-C > div.qy-player-detail > div > div > div > div > div.qy-player-title > h1 > a')
-    let title = gmUnsafeWindow.document.title
-    // let title = gmUnsafeWindow.document.title
     let collectionLink = collectionLinkEl.attr('href')
     let filename = collectionLink.split('/')
     filename = filename[filename.length - 1]
-    let bangumiID = filename.split('.').slice(0, -1).join('.')
+    return filename.split('.').slice(0, -1).join('.')
+  }
+
+  static get episodeID () {
+    return gmUnsafeWindow.location.pathname.split('_')[1].split('.')[0]
+  }
+
+  static get title () {
+    return gmUnsafeWindow.document.title
+  }
+
+  static init () {
+    let title = this.title
+    let bangumiID = this.bangumiID
     let episode = parseEpisode(title)
 
-    return new Promise((resolve, reject) => {
-      apiServer.get('/api/v0.2/querySubjectID', {
-        params: { bangumiID, website: 'iqiyi' }
-      }).then(
-        response => {
-          console.log(response)
-          let subjectID = response.data.subject_id
-          resolve({
-            subjectID, episode, title, bangumiID, episodeStartWith: 1,
-          })
-        },
-        error => reject({
-          error,
-          episode,
-          title,
-          episodeStartWith: 1,
-          bangumiID,
-          // bangumiName
-        })
-      )
-    })
+    return apiServer.get('/api/v0.2/querySubjectID', {
+      params: { bangumiID, website: 'iqiyi' }
+    }).then(
+      response => ({
+        subjectID: response.data.subject_id,
+        episode,
+        title,
+        bangumiID,
+        episodeStartWith: 1
+      }),
+      error => ({
+        error,
+        episode,
+        title,
+        episodeStartWith: 1,
+        bangumiID,
+        // bangumiName
+      })
+    )
   }
 
   static detectEpisodeChange (cb, notfound) {
@@ -1316,17 +1426,43 @@ class website_iQiyi {
 
 
 
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/js/App.vue?vue&type=template&id=3e92e0f8&
+// CONCATENATED MODULE: ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/js/App.vue?vue&type=template&id=4f25675e&
 var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"disable",class:{
         iqiyi: this.website === 'iqiyi',
         bilibili: this.website === 'bilibili',
-     },attrs:{"id":"bgm_tv_tracker"}},[_c('div',{staticClass:"bgm_tv_tracker_btn bgm_tv_tracker bgm_tv_tracker_radius",class:{},attrs:{"id":"bgm_tv_tracker_btn_on_page"},on:{"click":_vm.trigger}},[_vm._v("\n    bgm.tv"+_vm._s(_vm.score)+" "+_vm._s(_vm.episodeMarked?'✓':'')+"\n  ")]),_vm._v(" "),_c('div',{staticClass:"bgm_tv_tracker_info"},[(!_vm.subjectID)?_c('div',{staticClass:"not_found"},[_c('label',[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.tmpSubjectID),expression:"tmpSubjectID"}],staticClass:"subject",attrs:{"type":"text","placeholder":"条目ID或者对应条目链接"},domProps:{"value":(_vm.tmpSubjectID)},on:{"input":function($event){if($event.target.composing){ return; }_vm.tmpSubjectID=$event.target.value}}}),_vm._v(" "),_c('button',{staticClass:"notfound",on:{"click":_vm.userSubmitSubjectID}},[_vm._v("submit subject id")])])]):_vm._e(),_vm._v(" "),_c('br'),_vm._v(" "),_c('div',[_c('p',[_vm._v("你正在看:\n        "),_c('span',{attrs:{"id":"bgm_tv_tracker_title"}},[_vm._v(_vm._s(_vm.bangumiName))])]),_vm._v(" "),_c('p',[_vm._v("第 "),_c('span',{attrs:{"id":"bgm_tv_tracker_episode"}},[_vm._v(_vm._s(_vm.episode + (_vm.episodeStartWith?_vm.episodeStartWith:1) -1))]),_vm._v(" 集")])]),_vm._v(" "),_c('br'),_vm._v(" "),_c('div',{attrs:{"id":"bgm_tv_tracker_link"}},[(_vm.episodeID)?_c('a',{attrs:{"href":("https://bgm.tv/ep/" + _vm.episodeID),"target":"_blank","rel":"noopener noreferrer"}},[_vm._v("吐槽本集")]):_vm._e(),_vm._v(" "),_c('br'),_vm._v(" "),_c('br'),_vm._v(" "),(_vm.subjectID)?_c('a',{attrs:{"href":("https://bgm.tv/subject/" + _vm.subjectID),"target":"_blank","rel":"noopener noreferrer"}},[_vm._v("subject/"+_vm._s(_vm.subjectID))]):_c('a',{attrs:{"href":("https://bgm.tv/subject_search/" + _vm.title + "?cat=2"),"target":"_blank","rel":"noopener noreferrer"}},[_vm._v("search in bgm.tv")])]),_vm._v(" "),_c('br'),_vm._v(" "),(_vm.subjectID)?_c('div',[_c('button',{staticClass:"bgm_tv_tracker_radius",attrs:{"id":"bgm_tv_tracker_mark_watch"},on:{"click":_vm.watchEps}},[_vm._v("标记本集为看过\n      ")]),_vm._v(" "),_c('button',{staticClass:"bgm_tv_tracker_radius",attrs:{"id":"bgm_tv_tracker_mark_watched"},on:{"click":_vm.setWatchProgress}},[_vm._v("看到本集\n      ")])]):_vm._e(),_vm._v(" "),_c('br'),_vm._v(" "),_c('a',{staticStyle:{"color":"red"},attrs:{"href":_vm.reportUrl,"target":"_blank","rel":"noopener noreferrer"}},[_c('p',[_vm._v("报告问题")])]),_vm._v(" "),_vm._m(0),_vm._v(" "),(!_vm.subjectID)?_c('p',[_vm._v("\"bangumi_id\" : \""+_vm._s(_vm.bangumiID)+"\",")]):_vm._e(),_vm._v(" "),(!_vm.subjectID)?_c('p',[_vm._v("\"title\" : \""+_vm._s(_vm.title)+"\",")]):_vm._e(),_vm._v(" "),(!_vm.subjectID)?_c('p',[_vm._v("\"website\" : \""+_vm._s(_vm.website)+"\",")]):_vm._e(),_vm._v(" "),(!_vm.subjectID)?_c('p',[_vm._v("\"subject\" : \"\",")]):_vm._e(),_vm._v(" "),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.config.autoMarkWatched),expression:"config.autoMarkWatched"}],attrs:{"type":"checkbox","id":"bgm_tv_tracker_auto_mark_watched"},domProps:{"checked":Array.isArray(_vm.config.autoMarkWatched)?_vm._i(_vm.config.autoMarkWatched,null)>-1:(_vm.config.autoMarkWatched)},on:{"change":function($event){var $$a=_vm.config.autoMarkWatched,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(_vm.config, "autoMarkWatched", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(_vm.config, "autoMarkWatched", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(_vm.config, "autoMarkWatched", $$c)}}}}),_vm._v(" "),_c('label',{attrs:{"for":"bgm_tv_tracker_auto_mark_watched"}},[_vm._v("\n      播放进度大于80%时自动标记为看过\n    ")]),_vm._v(" "),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.config.collectionSubjectWhenMarkStatus),expression:"config.collectionSubjectWhenMarkStatus"}],attrs:{"type":"checkbox","id":"bgm_tv_tracker_collection_status_when_watch_status"},domProps:{"checked":Array.isArray(_vm.config.collectionSubjectWhenMarkStatus)?_vm._i(_vm.config.collectionSubjectWhenMarkStatus,null)>-1:(_vm.config.collectionSubjectWhenMarkStatus)},on:{"change":function($event){var $$a=_vm.config.collectionSubjectWhenMarkStatus,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(_vm.config, "collectionSubjectWhenMarkStatus", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(_vm.config, "collectionSubjectWhenMarkStatus", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(_vm.config, "collectionSubjectWhenMarkStatus", $$c)}}}}),_vm._v(" "),_c('label',{attrs:{"for":"bgm_tv_tracker_collection_status_when_watch_status"}},[_vm._v("\n      标记播放进度时把条目标记为在看\n    ")]),_vm._v(" "),_c('br'),_vm._v(" "),_c('div',{attrs:{"id":"bgm_tv_tracker_notification"}},_vm._l((_vm.messages),function(message,index){return _c('div',{key:index},[_c('hr'),_vm._v(" "),_c('div',[_c('p',[_vm._v("\n          "+_vm._s(message.time.getHours())+":"+_vm._s(message.time.getMinutes())+":"+_vm._s(message.time.getSeconds())+"\n        ")]),_vm._v(" "),_c('p',[_vm._v(_vm._s(message.text))])])])}))])])}
-var staticRenderFns = [function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('a',{staticStyle:{"color":"red"},attrs:{"href":"https://github.com/Trim21/bgm-tv-auto-tracker/blob/master/docs/user_info_collection.md","target":"_blank","rel":"noopener noreferrer"}},[_c('p',[_vm._v("关于信息收集")])])}]
+     },attrs:{"id":"bgm_tv_tracker"}},[_c('div',{staticClass:"bgm_tv_tracker_btn bgm_tv_tracker bgm_tv_tracker_radius",class:{},attrs:{"id":"bgm_tv_tracker_btn_on_page"},on:{"click":_vm.trigger}},[_vm._v("\n    bgm.tv"+_vm._s(_vm.score)+" "+_vm._s(_vm.episodeMarked?'✓':'')+"\n  ")]),_vm._v(" "),_c('div',{staticClass:"bgm_tv_tracker_info"},[(!_vm.subjectID)?_c('div',{staticClass:"not_found"},[_c('label',[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.tmpSubjectID),expression:"tmpSubjectID"}],staticClass:"subject",attrs:{"type":"text","placeholder":"条目ID或者对应条目链接"},domProps:{"value":(_vm.tmpSubjectID)},on:{"input":function($event){if($event.target.composing){ return; }_vm.tmpSubjectID=$event.target.value}}}),_vm._v(" "),_c('button',{staticClass:"notfound",on:{"click":_vm.userSubmitSubjectID}},[_vm._v("submit subject\n          id\n        ")])])]):_vm._e(),_vm._v(" "),_c('br'),_vm._v(" "),_c('div',[_c('p',[_vm._v("你正在看:\n        "),_c('span',{attrs:{"id":"bgm_tv_tracker_title"}},[_vm._v(_vm._s(_vm.bangumiName))])]),_vm._v(" "),_c('p',[_vm._v("第 "),_c('span',{attrs:{"id":"bgm_tv_tracker_episode"}},[_vm._v("\n        "+_vm._s(_vm.episodeSort)+"\n      ")]),_vm._v("\n        集")])]),_vm._v(" "),_c('br'),_vm._v(" "),_c('div',{attrs:{"id":"bgm_tv_tracker_link"}},[(_vm.episodeID)?_c('a',{attrs:{"href":("https://bgm.tv/ep/" + _vm.episodeID),"target":"_blank","rel":"noopener noreferrer"}},[_vm._v("吐槽本集")]):_vm._e(),_vm._v(" "),_c('br'),_vm._v(" "),_c('br'),_vm._v(" "),(_vm.subjectID)?_c('a',{attrs:{"href":("https://bgm.tv/subject/" + _vm.subjectID),"target":"_blank","rel":"noopener noreferrer"}},[_vm._v("subject/"+_vm._s(_vm.subjectID))]):_c('a',{attrs:{"href":("https://bgm.tv/subject_search/" + _vm.title + "?cat=2"),"target":"_blank","rel":"noopener noreferrer"}},[_vm._v("search in bgm.tv")])]),_vm._v(" "),_c('br'),_vm._v(" "),(_vm.subjectID)?_c('div',[_c('button',{staticClass:"bgm_tv_tracker_radius",attrs:{"id":"bgm_tv_tracker_mark_watch"},on:{"click":_vm.watchEps}},[_vm._v("标记本集为看过\n      ")]),_vm._v(" "),_c('button',{staticClass:"bgm_tv_tracker_radius",attrs:{"id":"bgm_tv_tracker_mark_watched"},on:{"click":_vm.setWatchProgress}},[_vm._v("看到本集\n      ")])]):_vm._e(),_vm._v(" "),_c('br'),_vm._v(" "),(_vm.episodeNotMatch)?_c('div',{staticClass:"not_found"},[_c('label',[_vm._v("填写本集对应的bgm单集网址来帮助我们精确定位这是哪一集\n        "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.tmpEpisodeID),expression:"tmpEpisodeID"}],staticClass:"subject",attrs:{"type":"text","placeholder":"https://bgm.tv/ep/12345"},domProps:{"value":(_vm.tmpEpisodeID)},on:{"input":function($event){if($event.target.composing){ return; }_vm.tmpEpisodeID=$event.target.value}}}),_vm._v(" "),_c('button',{staticClass:"notfound",on:{"click":_vm.userSubmitEpisodeID}},[_vm._v("submit")])])]):_vm._e(),_vm._v(" "),_c('br'),_vm._v(" "),_c('a',{staticStyle:{"color":"red"},attrs:{"href":_vm.reportUrl,"target":"_blank","rel":"noopener noreferrer"}},[_c('p',[_vm._v("报告问题")])]),_vm._v(" "),_vm._m(0),_vm._v(" "),(!_vm.subjectID)?_c('p',[_vm._v("\"bangumi_id\" : \""+_vm._s(_vm.bangumiID)+"\",")]):_vm._e(),_vm._v(" "),(!_vm.subjectID)?_c('p',[_vm._v("\"title\" : \""+_vm._s(_vm.title)+"\",")]):_vm._e(),_vm._v(" "),(!_vm.subjectID)?_c('p',[_vm._v("\"website\" : \""+_vm._s(_vm.website)+"\",")]):_vm._e(),_vm._v(" "),(!_vm.subjectID)?_c('p',[_vm._v("\"subject\" : \"\",")]):_vm._e(),_vm._v(" "),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.config.autoMarkWatched),expression:"config.autoMarkWatched"}],attrs:{"type":"checkbox","id":"bgm_tv_tracker_auto_mark_watched"},domProps:{"checked":Array.isArray(_vm.config.autoMarkWatched)?_vm._i(_vm.config.autoMarkWatched,null)>-1:(_vm.config.autoMarkWatched)},on:{"change":function($event){var $$a=_vm.config.autoMarkWatched,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(_vm.config, "autoMarkWatched", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(_vm.config, "autoMarkWatched", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(_vm.config, "autoMarkWatched", $$c)}}}}),_vm._v(" "),_c('label',{attrs:{"for":"bgm_tv_tracker_auto_mark_watched"}},[_vm._v("\n      播放进度大于80%时自动标记为看过\n    ")]),_vm._v(" "),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.config.collectionSubjectWhenMarkStatus),expression:"config.collectionSubjectWhenMarkStatus"}],attrs:{"type":"checkbox","id":"bgm_tv_tracker_collection_status_when_watch_status"},domProps:{"checked":Array.isArray(_vm.config.collectionSubjectWhenMarkStatus)?_vm._i(_vm.config.collectionSubjectWhenMarkStatus,null)>-1:(_vm.config.collectionSubjectWhenMarkStatus)},on:{"change":function($event){var $$a=_vm.config.collectionSubjectWhenMarkStatus,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(_vm.config, "collectionSubjectWhenMarkStatus", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(_vm.config, "collectionSubjectWhenMarkStatus", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(_vm.config, "collectionSubjectWhenMarkStatus", $$c)}}}}),_vm._v(" "),_c('label',{attrs:{"for":"bgm_tv_tracker_collection_status_when_watch_status"}},[_vm._v("\n      标记播放进度时把条目标记为在看\n    ")]),_vm._v(" "),_c('br'),_vm._v(" "),_c('div',{attrs:{"id":"bgm_tv_tracker_notification"}},_vm._l((_vm.messages),function(message,index){return _c('div',{key:index},[_c('hr'),_vm._v(" "),_c('div',[_c('p',[_vm._v("\n          "+_vm._s(message.time.getHours())+":"+_vm._s(message.time.getMinutes())+":\n          "+_vm._s(message.time.getSeconds())+"\n        ")]),_vm._v(" "),_c('p',[_vm._v(_vm._s(message.text))])])])}))])])}
+var staticRenderFns = [function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('a',{staticStyle:{"color":"red"},attrs:{"href":"https://github.com/Trim21/\n      bgm-tv-auto-tracker/blob/master/docs/user_info_collection.md","target":"_blank","rel":"noopener noreferrer"}},[_c('p',[_vm._v("\n      关于信息收集")])])}]
 
 
-// CONCATENATED MODULE: ./src/js/App.vue?vue&type=template&id=3e92e0f8&
+// CONCATENATED MODULE: ./src/js/App.vue?vue&type=template&id=4f25675e&
 
 // CONCATENATED MODULE: ./node_modules/vue-loader/lib??vue-loader-options!./src/js/App.vue?vue&type=script&lang=js&
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -1434,23 +1570,29 @@ if (!collection) {
 /* harmony default export */ var Appvue_type_script_lang_js_ = ({
   data () {
     let website = ''
-    if (gmUnsafeWindow.location.href.startsWith('https://www.bilibili.com/bangumi/play/')) {
+    if (gmUnsafeWindow.location.href
+      .startsWith('https://www.bilibili.com/bangumi/play/')) {
       website = WEBSITE.bilibili
-    }
-    else if (gmUnsafeWindow.location.hostname === 'www.iqiyi.com') {
+    } else if (gmUnsafeWindow.location.hostname === 'www.iqiyi.com') {
       website = WEBSITE.iqiyi
     }
     let config = getConfig()
 
     return {
+      episodeNotMatch: false,
+      tmpEpisodeID: null,
+
       tmpSubjectID: null,
       messages: [],
       bangumiID: null,
       bangumiName: null,
-      // is episode starts with 1, like https://www.bilibili.com/bangumi/play/ep200167
+      // is episode starts with 1,
+      // like https://www.bilibili.com/bangumi/play/ep200167
       episodeStartWith: null,
+      // episode id in bgm.tv
       episodeID: null,
       episode: null,
+      episodeSort: null,
       title: null,
       subjectID: null,
       score: '',
@@ -1460,12 +1602,14 @@ if (!collection) {
       },
       watchPercent: 0,
       episodeMarked: false,
-      website
+      website,
+      // $website: null,
     }
   },
   computed: {
     reportUrl () {
-      let baseURL = 'https://github.com/Trim21/bilibili-bangumi-tv-auto-tracker/issues/new'
+      let baseURL = 'https://github.com/' +
+        'Trim21/bgm-tv-auto-tracker/issues/new'
       let hrefWithoutHash = gmUnsafeWindow.location.protocol + '//'
         + gmUnsafeWindow.location.host + gmUnsafeWindow.location.pathname
       let body =
@@ -1507,30 +1651,68 @@ if (!collection) {
     bangumiID () {
       this.episodeMarked = false
     },
-    episode () {
+    episode: function () {
+
       this.episodeMarked = false
       if (!this.subjectID) return
       let vm = this
-      vm.$bgmApi.getEps(this.subjectID).then(
-        data => {
-          let episode = vm.episode
-          let eps = data.eps.filter(val => Number.isInteger(Number(val.sort)) && (parseInt(val.type, 10) === 0))
 
-          eps = eps.sort(function (a, b) {
-            let key = 'sort'
-            let x = a[key]
-            let y = b[key]
-            return ((x < y) ? -1 : ((x > y) ? 1 : 0))
-          })
-          try {
-            this.episodeID = eps[episode - 1].id
-          } catch (e) {
-            vm.notify('没找到这集...')
-          }
+      this.$website.getBgmEpisodeID().then(
+        res => {
+          console.log(res)
+          console.log(this.episodeID)
+          console.log(this.episode)
+          this.episodeID = res.data.bgm_ep_id
+          this.episodeNotMatch = false
+
+          vm.$bgmApi.getEps(this.subjectID).then(
+            data => {
+              let episode = vm.episode
+              let eps = data.eps.filter(val => val.id === parseInt(vm.episodeID, 10))
+              try {
+                this.episodeSort = eps[0].sort
+              } catch (e) {
+                vm.notify('没找到这集...')
+              }
+            },
+            error => {
+              vm.notify('233')
+              vm.notify(JSON.stringify(error))
+            }
+          )
+
         },
-        error => {
-          vm.notify('233')
-          vm.notify(JSON.stringify(error))
+        err => {
+          this.episodeNotMatch = true
+
+          vm.$bgmApi.getEps(this.subjectID).then(
+            data => {
+              let episode = vm.episode
+              let eps = data.eps.filter(val => Number.isInteger(Number(val.sort)) &&
+                (parseInt(val.type, 10) === 0))
+
+              eps = eps.sort(function (a, b) {
+                let key = 'sort'
+                let x = a[key]
+                let y = b[key]
+                return ((x < y) ? -1 : ((x > y) ? 1 : 0))
+              })
+              try {
+                this.episodeID = eps[episode - 1].id
+                if (this.episodeStartWith) {
+                  this.episodeSort = this.episode + this.episodeStartWith - 1
+                } else {
+                  this.episodeSort = this.episode + 1 - 1
+                }
+              } catch (e) {
+                vm.notify('没找到这集...')
+              }
+            },
+            error => {
+              vm.notify('233')
+              vm.notify(JSON.stringify(error))
+            }
+          )
         }
       )
 
@@ -1557,6 +1739,25 @@ if (!collection) {
       }
     },
 
+    userSubmitEpisodeID () {
+      if (this.tmpEpisodeID) {
+        if (this.tmpEpisodeID.startsWith('http')) {
+          const myURL = new URL(this.tmpEpisodeID)
+          const p = myURL.pathname
+          const pList = p.split('/')
+          this.tmpEpisodeID = pList[pList.length - 1]
+        }
+        this.episodeID = this.tmpEpisodeID
+        apiServer.post('/api/v0.1/report_missing_episode',
+          {
+            bangumiID: this.bangumiID,
+            episodeID: this.$website.episodeID.toString(),
+            bgmEpisodeID: this.episodeID,
+            website: this.website
+          })
+      }
+    },
+
     /**
      * Append a message to banner
      * @param {string} message.
@@ -1574,7 +1775,10 @@ if (!collection) {
       if (!this.config.collectionSubjectWhenMarkStatus) return
       let vm = this
       if (!collection[subjectID]) {
-        this.$bgmApi.setSubjectCollectionStatus({ subjectID, status: 'do' }).then(
+        this.$bgmApi.setSubjectCollectionStatus({
+          subjectID,
+          status: 'do'
+        }).then(
           response => {
             if (response.data.code === 401) {
               vm.notify(JSON.stringify(response))
@@ -1600,7 +1804,8 @@ if (!collection) {
         let data = await vm.$bgmApi.getEps(this.subjectID)
         let episode = vm.episode
         let eps = data.eps
-          .filter(val => Number.isInteger(Number(val.sort)) && (parseInt(val.type, 10) === 0))
+          .filter(val => Number.isInteger(Number(val.sort)) &&
+            (parseInt(val.type, 10) === 0))
           .sort(function (a, b) {
             let key = 'sort'
             let x = a[key]
@@ -1629,7 +1834,8 @@ if (!collection) {
         this.episodeMarked = true
       } catch (error) {
         if (error.response.data.code === 400) {
-          this.notify('error: ' + error.response.data.error + ',' + '应该是因为你在bgm上的状态已经是看到本集')
+          this.notify('error: ' + error.response.data.error +
+            ',' + '应该是因为你在bgm上的状态已经是看到本集')
         } else {
           this.notify('error: ' + JSON.stringify(error.response))
         }
@@ -1637,25 +1843,34 @@ if (!collection) {
     }
   },
   created () {
-    // episode-item
-    this.$website.init().then(data => {
-      let { subjectID, episode, title, bangumiID, episodeStartWith } = data
-      this.subjectID = subjectID
-      this.episode = episode
-      this.title = title
-      this.bangumiID = bangumiID
-      this.episodeStartWith = episodeStartWith
-    }, error => {
-      console.log(error)
-      if (error.error.response.status === 404) {
-        this.notify('番剧没找到 手动输入吧')
+    this.$website.getBgmEpisodeID().then(
+      res => {},
+      err => {
+        this.notify('不能精确定位这是哪一集, 只能根据集数来猜了, 可能猜的不太对.')
+        this.episodeNotMatch = true
       }
-      let { episode, title, bangumiID, episodeStartWith } = error
-      this.episodeStartWith = episodeStartWith
-      this.episode = episode
-      this.title = title
-      this.bangumiID = bangumiID
-    })
+    )
+
+    // episode-item
+    this.$website.init().then(
+      data => {
+        let { subjectID, episode, title, bangumiID, episodeStartWith } = data
+        this.subjectID = subjectID
+        this.episode = episode
+        this.title = title
+        this.bangumiID = bangumiID
+        this.episodeStartWith = episodeStartWith
+      },
+      error => {
+        if (error.error.response.status === 404) {
+          this.notify('番剧没找到 手动输入吧')
+        }
+        let { episode, title, bangumiID, episodeStartWith } = error
+        this.episodeStartWith = episodeStartWith
+        this.episode = episode
+        this.title = title
+        this.bangumiID = bangumiID
+      })
 
     let vm = this
     this.$website.detectEpisodeChange(data => {
@@ -1667,7 +1882,6 @@ if (!collection) {
           vm.bangumiID = data.bangumiID
       },
       error => {
-        console.log(error)
         vm.episode = error.episode
         if (error.bangumiID !== vm.bangumiID) {
           vm.subjectID = undefined
@@ -1678,40 +1892,14 @@ if (!collection) {
         }
       })
 
-    this.$bgmApi.http.interceptors.request.use(function (config) {
-      //在发送请求之前做某事
-      if (gmUnsafeWindow.bgm_tv_debug) {
-        vm.notify('config: ' + JSON.stringify(config, null, 2))
-      }
-      return config
-    }, function (error) {
-      //请求错误时做些事
-      if (gmUnsafeWindow.bgm_tv_debug) {
-        vm.notify('response: ' + JSON.stringify(response, null, 2))
-      }
-      return Promise.reject(error)
-    })
-
-    this.$bgmApi.http.interceptors.response.use(function (response) {
-      //对响应数据做些事
-      if (gmUnsafeWindow.bgm_tv_debug) {
-        vm.notify('response: ' + JSON.stringify(response, null, 2))
-      }
-      return response
-    }, function (error) {
-      //请求错误时做些事
-      if (gmUnsafeWindow.bgm_tv_debug) {
-        vm.notify('error: ' + JSON.stringify(error, null, 2))
-      }
-      return Promise.reject(error)
-    })
     setInterval(() => {
       this.$website.getPlayerInfo().then(info => {
           let { percent, duration } = info
           console.log('get player percent')
           this.watchPercent = percent
           if (percent > 0.8 && (duration > 120)) {
-            if (this.config.autoMarkWatched && this.subjectID && !this.episodeMarked) {
+            if (this.config.autoMarkWatched && this.subjectID &&
+              !this.episodeMarked) {
               this.episodeMarked = true
               this.watchEps()
             }
@@ -1721,7 +1909,6 @@ if (!collection) {
           console.log('can\'t get play time')
         })
     }, 30 * 1000)
-    console.log('finish bgm_tv_auto_tracker vue components init')
   }
 });
 
@@ -1857,7 +2044,6 @@ component.options.__file = "App.vue"
 
 
 
-
 if (gmUnsafeWindow.location.href.startsWith(URLS.callBackUrl)) {
   if (gmUnsafeWindow.data) {
     saveAuth(gmUnsafeWindow.data)
@@ -1913,25 +2099,18 @@ function init () {
     getAuth().then(
       auth => {
         if (auth && auth.hasOwnProperty('access_token')) {
-          console.log(auth)
           /* eslint-disable unused-def */
+          /* eslint-enable unused-def */
           /**
            * @type {BgmApi}
            */
           external_Vue_default.a.prototype.$bgmApi = new utils_BgmApi({ accessToken: auth.access_token })
-          // Vue.prototype.$bgmApi = new BgmApi({ accessToken: undefined })
-          external_Vue_default.a.prototype.$http = external_axios_default.a
-          /* eslint-enable unused-def */
-          console.log(js_website)
-
           if (js_website) {
             external_Vue_default.a.prototype.$website = getWebsiteClass(js_website)
-            console.log('bgm_tv_auto_tracker before vue')
             gmUnsafeWindow.bgm_tv_tracker = new external_Vue_default.a({
               el: '#bgm_tv_tracker',
               render: h => h(App),
             })
-            console.log('bgm_tv_auto_tracker after vue')
           }
         } else {
           gmOpenInTab(URLS.authURL, { active: true })
