@@ -88,3 +88,10 @@ class ReportMissingBangumiValidator(Validator):
     title = StringField(required=True)
     href = StringField(required=True)
     website = EnumField(choices=['bilibili', 'iqiyi'], required=True)
+
+
+class ReportMissingEpisodeValidator(Validator):
+    bangumiID = StringField(strict=False, required=True)
+    episodeID = StringField(required=True)
+    bgmEpisodeID = StringField(required=True)
+    website = EnumField(choices=['bilibili', 'iqiyi'], required=True)

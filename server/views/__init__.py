@@ -2,21 +2,16 @@ import datetime
 import json
 from urllib.parse import urlparse
 
-import aiohttp.client_exceptions
-import aiohttp_cors
-import aiohttp_jinja2
-import pymongo
-
 from aiohttp import web
 from aiohttp_cors import CorsViewMixin, ResourceOptions
-from dateutil import parser
+import server.website
 
-from .config import oauth_url, APP_ID, APP_SECRET, callback_url
-from .utils import jsonify
-from .constants import mongo_collection_name
-from .app_types import WebRequest
-from .validators import InitialStateValidator, ReportMissingBangumiValidator, \
-    EpInputValidator
+from server.utils import jsonify
+from server.constants import mongo_collection_name
+from server.app_types import WebRequest
+from server.validators import InitialStateValidator, \
+    ReportMissingBangumiValidator, \
+    EpInputValidator, ReportMissingEpisodeValidator
 
 
 async def collect_episode_info(request: WebRequest):
@@ -42,22 +37,9 @@ async def collect_episode_info(request: WebRequest):
                               'data'   : v.validated_data})
 
 
-async def try_get_ep_info(request: WebRequest):
-    j = await request.json()
-    media_id = j.get('media_id')
-    ep_id = j.get('ep_id')
-    if not (media_id and ep_id):
-        return web.HTTPBadRequest()
-    return web.json_response({
-        'message': '',
-        'data'   : {
-            'ep_id'  : 123,
-            'episode': 1,
-            'sort'   : 1
-        }})
-
-
 async def report_missing_bangumi(request: WebRequest):
+    if not request.session.user_id:
+        return web.HTTPUnauthorized()
     data = await request.json()
     v = ReportMissingBangumiValidator(data)
 
@@ -69,18 +51,60 @@ async def report_missing_bangumi(request: WebRequest):
             status=400
         )
     data = v.validated_data
-    try:
-        await request.app.db.statistics_missing_bangumi.update_one(
-            {'bangumi_id': data['bangumiID'], 'website': data['website']},
-            {'$set': {'subject_id': data['subjectID'],
-                      'title'     : data['title'],
-                      'href'      : data['href']}},
+    await request.app.db.submitted_missing_bangumi.update_one(
+        {
+            'bangumi_id': data['bangumiID'],
+            'user_id'   : request.session.user_id,
+            'website'   : data['website']
+        },
+        {
+            '$push': {
+                'history': {
+                    'subject_id': data['subjectID'],
+                    'title'     : data['title'],
+                    'href'      : data['href'],
+                    'time'      : datetime.datetime.now(request.app.tz),
+                }
+            }
+
+        }, upsert=True
+    )
+    return web.json_response({'status': 'success'})
+
+
+async def report_missing_episode(request: WebRequest):
+    """
+    {
+            bangumiID: this.bangumiID,
+            episodeID: this.$website.episodeID.toString(),
+            bgmEpisodeID: this.episodeID,
+            website: this.website
+    }
+    :param request:
+    :return:
+    """
+    if not request.session.user_id:
+        return web.HTTPUnauthorized()
+    data = await request.json()
+    v = ReportMissingEpisodeValidator(data)
+
+    if not v.is_valid():
+        return web.json_response(
+            {'message': v.str_errors,
+             'code'   : 400,
+             'status' : 'error'},
+            status=400
         )
-        return web.json_response({'status': 'success'})
-    except Exception as e:
-        return web.json_response({'status' : 'error',
-                                  'message': str(e)},
-                                 status=502)
+    data = v.validated_data
+    await request.app.db.get_collection(mongo_collection_name.EP_INPUT_LOG) \
+        .update_one(
+        {'website': data['website'], 'ep_id': data['bangumiID']},
+        {'$push': {str(request.session.user_id): {
+            'bangumi)id': data['bangumiID'],
+            'bgm_ep_id' : data['bgmEpisodeID'],
+        }}}, upsert=True
+    )
+    return web.json_response({'status': 'success'})
 
 
 website_template = {
@@ -109,12 +133,8 @@ async def statistics_missing_bangumi(request: WebRequest):
 
 
 async def check_user_right(request: WebRequest):
-    token = request.cookies.get('app_access_token', None)
-    if token:
-        user = await request.app.db \
-            .get_collection(mongo_collection_name.USER_TOKEN) \
-            .find_one({'app_access_token': token})
-        return user
+    if request.session.user_id:
+        return True
 
 
 async def collected_episode_info(request: WebRequest):
@@ -126,7 +146,10 @@ async def collected_episode_info(request: WebRequest):
             raise web.HTTPBadRequest(reason='episode not right')
     return web.json_response({
         'message': 'hello world',
-        'data'   : await request.app.db.episode_info.find().to_list(episode)
+        'data'   : await request.app.db.episode_info
+            .find({}, {'mediaInfo': 0,
+                       'epInfo'   : 0,
+                       'pubInfo'  : 0, }).to_list(episode)
     })
 
 
@@ -150,82 +173,11 @@ def get_type(link: str):
 async def missing_episode(request: WebRequest):
     return web.json_response({
         'message': 'hello world',
-        'data'   : [jsonify(x) for x in
-                    await request.app.db.bilibili_missing_episode.find()
-                        .to_list(None)],
+        'data'   : [
+            jsonify(x) for x in
+            await request.app.db.bilibili_missing_episode.find().to_list(None)
+        ],
     })
-
-
-async def get_token(request: WebRequest, ):
-    app_access_token = 'app_access_token'
-    code = request.query.get('code', None)
-
-    if not code:
-        raise web.HTTPFound(location=oauth_url)
-
-    async with request.app.client_session.post(
-        'https://bgm.tv/oauth/access_token',
-        data={'grant_type'   : 'authorization_code',
-              'client_id'    : APP_ID,
-              'client_secret': APP_SECRET,
-              'code'         : code,
-              'redirect_uri' : callback_url}) as resp:
-        try:
-            r = await resp.json()
-        except aiohttp.client_exceptions.ContentTypeError:
-            raise web.HTTPFound(oauth_url)
-    if 'error' in r:
-        return web.json_response(r, status=400)
-    r['auth_time'] = int(parser.parse(resp.headers['Date']).timestamp())
-    # if not request.cookies.get('app_access_token'):
-    user = await request.app.db.token.find_one({'_id': r['user_id']})
-
-    if user:
-        if app_access_token not in r:
-            r[app_access_token] = r['access_token'] + r["refresh_token"]
-    else:
-        r[app_access_token] = r['access_token'] + r["refresh_token"]
-
-    # if not (user and app_access_token not in r):
-    #     r[app_access_token] = r['access_token'] + r["refresh_token"]
-
-    await request.app.db.token.update_one({'_id': r['user_id']},
-                                          {'$set': r},
-                                          upsert=True)
-    resp = aiohttp_jinja2.render_template('post_to_extension.html', request,
-                                          {'data': json.dumps(r), })
-    resp.set_cookie(app_access_token, r[app_access_token])
-    return resp
-
-
-async def refresh_auth_token(request: WebRequest, ):
-    data = await request.json()
-    refresh_token = data.get('refresh_token', None)
-    user_id = data.get('user_id', None)
-    if not (refresh_token and user_id):
-        return web.HTTPBadRequest()
-    data = {'grant_type'   : 'refresh_token',
-            'client_id'    : APP_ID,
-            'client_secret': APP_SECRET,
-            'refresh_token': refresh_token,
-            'redirect_uri' : callback_url}
-    async with request.app.client_session.post(
-        'https://bgm.tv/oauth/access_token', json=data
-    ) as resp:
-        try:
-            r = await resp.json()
-        except aiohttp.client_exceptions.ContentTypeError:
-            return web.json_response({}, status=504)
-    if 'error' in r:
-        return web.json_response(r)
-    r['_id'] = r['user_id']
-    r['auth_time'] = int(parser.parse(resp.headers['Date']).timestamp())
-    await request.app.db.token.update_one({'_id': r['_id']}, {'$set': r},
-                                          upsert=True)
-    return web.json_response(r)
-
-
-import pymongo.results
 
 
 async def query_subject_id(request: WebRequest):
@@ -282,9 +234,6 @@ async def query_subject_id(request: WebRequest):
     )
 
 
-import server.website
-
-
 class PlayerUrl(web.View, CorsViewMixin):
     request: WebRequest
 
@@ -314,7 +263,6 @@ class PlayerUrl(web.View, CorsViewMixin):
         user = await check_user_right(request)
         if not user:
             return web.HTTPUnauthorized()
-            # return web.json_response({'status': 'error', 'message': 'ma'})
         try:
             user_input = await request.json()
         except json.decoder.JSONDecodeError:
@@ -324,7 +272,7 @@ class PlayerUrl(web.View, CorsViewMixin):
             print(v.errors)
             return web.HTTPBadRequest()
         user_input = v.validated_data
-        user_input['user_id'] = user['user_id']
+        user_input['user_id'] = request.session.user_id
         user_input['type'] = get_type(user_input['link'])
         input_type = get_type(user_input['link'])
         if input_type == 'bilibili':
@@ -338,18 +286,22 @@ class PlayerUrl(web.View, CorsViewMixin):
         parser = server.website.get_website_parser(input_type)
         data = {
             'type'     : input_type,
-            'user'     : user['user_id'],
+            'user'     : request.session.user_id,
             'bgm_ep_id': user_input['ep_id'],
             'link'     : user_input['link'],
             'ep_id'    : parser.link_to_ep_id(user_input['link']),
         }
 
-        await request.app.db.get_collection(mongo_collection_name.EP_INPUT_LOG) \
+        await request.app.db \
+            .get_collection(mongo_collection_name.EP_INPUT_LOG) \
             .update_one(
-            {'user': user['user_id'], 'bgm_ep_id': user_input['ep_id']},
-            {'$set': data}, upsert=True
+            {'_id': user_input['ep_id']},
+            {'$push': {str(request.session.user_id): {
+                'link' : user_input['link'],
+                'ep_id': parser.link_to_ep_id(user_input['link']),
+            }}}, upsert=True
         )
-
+        print('after put object')
         current_episode = await request.app.db \
             .get_collection(mongo_collection_name.FINAL_BGM_EP_MAP) \
             .find_one({'type': input_type, 'ep_id': user_input['ep_id']})
@@ -359,13 +311,6 @@ class PlayerUrl(web.View, CorsViewMixin):
                 .update_one(
                 {'type': input_type, 'bgm_ep_id': user_input['ep_id']},
                 {'$set': data},
-                upsert=True)
-
-        # async def get_user_info(user):
-        #     r = await request.app.client_session.get(
-        #         f"https://api.bgm.tv/user/{user_input['user']}"
-        #     )
-        #     request.app.db.get_collection('user_token')
-        #
-        # loop.call_later(1, get_user_info)
+                upsert=True
+            )
         return web.json_response({'status': 'success'})
