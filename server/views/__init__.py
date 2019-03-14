@@ -1,5 +1,6 @@
 import datetime
 import json
+import time
 from urllib.parse import urlparse
 
 from aiohttp import web
@@ -107,9 +108,10 @@ async def report_missing_episode(request: WebRequest):
     data = v.validated_data
     await request.app.db.get_collection(mongo_collection_name.EP_INPUT_LOG) \
         .update_one(
-        {'website': data['website'], 'ep_id': data['bangumiID']},
+        {'website': data['website'], 'ep_id': data['episodeID']},
         {'$push': {str(request.session.user_id): {
-            'bangumi)id': data['bangumiID'],
+            'time'      : int(time.time()),
+            'bangumi_id': data['bangumiID'],
             'bgm_ep_id' : data['bgmEpisodeID'],
         }}}, upsert=True
     )
