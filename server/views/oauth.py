@@ -77,7 +77,8 @@ async def refresh_auth_token(request: WebRequest, ):
     if request.session.login:
         request.session.update(r)
     else:
-        s = await request.session.new_session()
-        s.update(r)
+        await request.session.new_session()
+        request.session.login = True
+        request.session.update(r)
     request.session.update(user_info)
     return web.json_response(r)

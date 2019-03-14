@@ -55,7 +55,7 @@ async def report_missing_bangumi(request: WebRequest):
             status=400
         )
     data = v.validated_data
-    u = await request.app.db.submitted_missing_bangumi.update_one(
+    await request.app.db.submitted_missing_bangumi.update_one(
         {
             'bangumi_id': data['bangumiID'],
             'user_id'   : request.session.user_id,
