@@ -55,6 +55,10 @@ async def cli(loop, aiohttp_client):
     return await aiohttp_client(app)
 
 
+async def test_get_auth(cli):
+    pass
+
+
 async def test_no_root_absolute_path(cli):
     # app = create_app()
     # app.router.add_get('/', )

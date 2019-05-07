@@ -13,7 +13,7 @@ PROTOCOL = os.environ.get('PROTOCOL', 'http')
 
 
 class MongoConfig(object):
-    host = os.environ.get('MONGO_HOST', '127.0.0.1')
+    host = os.environ.get('MONGO_HOST', 'nas.acg.tools')
     port = os.environ.get('MONGO_PORT', '27017')
     username = os.environ.get('MONGO_USERNAME', '')
     password = os.environ.get('MONGO_PASSWORD', '')
@@ -25,6 +25,8 @@ class MongoConfig(object):
     else:
         mongo_url = f"mongodb://{host}:{port}/{db_name}"
 
+
+DSN = os.getenv('DSN')
 
 callback_url = f'{PROTOCOL}://{HOST}/oauth_callback'
 oauth_url = f'https://bgm.tv/oauth/authorize?client_id={APP_ID}' \

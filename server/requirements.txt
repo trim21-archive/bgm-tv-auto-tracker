@@ -7,3 +7,4 @@ aiohttp-jinja2==1.0.0
 python-dateutil==2.7.3
 python-validator>=0.0.6,<0.1.0
 aiohttp-session>=2.7.0,<3.0.0
+aiohttp_sentry

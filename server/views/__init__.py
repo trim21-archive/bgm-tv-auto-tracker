@@ -21,21 +21,29 @@ async def collect_episode_info(request: WebRequest):
     if v.is_valid():
         await request.app.db.episode_info.update_one(
             {'_id': v.validated_data['mediaInfo']['media_id']},
-            {'$set': v.validated_data}, upsert=True)
+            {'$set': v.validated_data},
+            upsert=True,
+        )
         f = await request.app.db.bilibili_episode_map.find_one({
-            'ep_id'   : v.validated_data['epInfo']['ep_id'],
+            'ep_id': v.validated_data['epInfo']['ep_id'],
             'media_id': v.validated_data['mediaInfo']['media_id'],
         })
         if not f:
-            await request.app.db.bilibili_missing_episode.update_one({
-                '_id'     : v.validated_data['epInfo']['ep_id'],
-                'ep_id'   : v.validated_data['epInfo']['ep_id'],
-                'media_id': v.validated_data['mediaInfo']['media_id'],
-            }, {'$set': {'time': datetime.datetime.now(request.app.tz)}},
-                upsert=True)
+            await request.app.db.bilibili_missing_episode.update_one(
+                {
+                    '_id': v.validated_data['epInfo']['ep_id'],
+                    'ep_id': v.validated_data['epInfo']['ep_id'],
+                    'media_id': v.validated_data['mediaInfo']['media_id'],
+                },
+                {'$set': {'time': datetime.datetime.now(request.app.tz)}},
+                upsert=True,
+            )
 
-    return web.json_response({'message': 'hello world', 'correct': v.is_valid(),
-                              'data'   : v.validated_data})
+    return web.json_response({
+        'message': 'hello world',
+        'correct': v.is_valid(),
+        'data': v.validated_data,
+    })
 
 
 import pymongo.results
@@ -49,35 +57,29 @@ async def report_missing_bangumi(request: WebRequest):
 
     if not v.is_valid():
         return web.json_response(
-            {'message': v.str_errors,
-             'code'   : 400,
-             'status' : 'error'},
-            status=400
+            {'message': v.str_errors, 'code': 400, 'status': 'error'},
+            status=400,
         )
     data = v.validated_data
-    await request.app.db.submitted_missing_bangumi.update_one(
-        {
-            'bangumi_id': data['bangumiID'],
-            'user_id'   : request.session.user_id,
-            'website'   : data['website']
-        },
-        {
-            '$push': {
-                'history': {
-                    'subject_id': data['subjectID'],
-                    'title'     : data['title'],
-                    'href'      : data['href'],
-                    'time'      : datetime.datetime.now(request.app.tz),
-                }
+    await request.app.db.submitted_missing_bangumi.update_one({
+        'bangumi_id': data['bangumiID'], 'user_id': request.session.user_id,
+        'website': data['website']
+    }, {
+        '$push': {
+            'history': {
+                'subject_id': data['subjectID'],
+                'title': data['title'],
+                'href': data['href'],
+                'time': datetime.datetime.now(request.app.tz),
             }
-
-        }, upsert=True
-    )
+        }
+    },
+                                                              upsert=True)
     if await is_authorized_user(request):
-        await request.db.get_collection(data['website']).update_one(
-            {'_id': data['bangumiID'], },
-            {'$set': {'title': data['title'], 'subject_id': data['subjectID']}},
-            upsert=True)
+        await request.db.get_collection(data['website']).update_one({
+            '_id': data['bangumiID'],
+        }, {'$set': {'title': data['title'], 'subject_id': data['subjectID']}},
+                                                                    upsert=True)
 
     return web.json_response({'status': 'success'})
 
@@ -99,40 +101,48 @@ async def report_missing_episode(request: WebRequest):
     v = ReportMissingEpisodeValidator(data)
 
     if not v.is_valid():
-        return web.json_response(
-            {'message': v.str_errors,
-             'code'   : 400,
-             'status' : 'error'},
-            status=400
-        )
+        return web.json_response({
+            'message': v.str_errors, 'code': 400, 'status': 'error'
+        },
+                                 status=400)
     data = v.validated_data
-    await request.app.db.get_collection(mongo_collection_name.EP_INPUT_LOG) \
-        .update_one(
-        {'website': data['website'], 'ep_id': data['episodeID']},
-        {'$push': {str(request.session.user_id): {
-            'time'      : int(time.time()),
-            'bangumi_id': data['bangumiID'],
-            'bgm_ep_id' : data['bgmEpisodeID'],
-        }}}, upsert=True
-    )
+    await request.app.db.get_collection(
+        mongo_collection_name.EP_INPUT_LOG
+    ).update_one({'website': data['website'], 'ep_id': data['episodeID']}, {
+        '$push': {
+            str(request.session.user_id): {
+                'time': int(time.time()),
+                'bangumi_id': data['bangumiID'],
+                'bgm_ep_id': data['bgmEpisodeID'],
+            }
+        }
+    },
+                 upsert=True)
     if await is_authorized_user(request):
-        link = server.website.get_website_parser(data['website']) \
-            .ep_id_to_link(data['episodeID'])
-        await request.db.get_collection(mongo_collection_name.FINAL_BGM_EP_MAP) \
-            .update_one(
-            {'bangumi_id': data['bangumiID'],
-             'bgm_ep_id' : data['bgmEpisodeID'],
-             'ep_id'     : data['episodeID'],
-             'type'      : data['website']},
-            {'$set': {'link': link, 'user_id': request.session.user_id, }},
-            upsert=True)
+        link = server.website.get_website_parser(data['website']).ep_id_to_link(
+            data['episodeID']
+        )
+        await request.db.get_collection(
+            mongo_collection_name.FINAL_BGM_EP_MAP
+        ).update_one(
+            {
+                'bangumi_id': data['bangumiID'],
+                'bgm_ep_id': data['bgmEpisodeID'], 'ep_id': data['episodeID'],
+                'type': data['website']
+            },
+            {'$set': {
+                'link': link,
+                'user_id': request.session.user_id,
+            }},
+            upsert=True,
+        )
 
     return web.json_response({'status': 'success'})
 
 
 website_template = {
     'bilibili': 'https://bangumi.bilibili.com/anime/{}',
-    'iqiyi'   : 'https://www.iqiyi.com/{}.html'
+    'iqiyi': 'https://www.iqiyi.com/{}.html'
 }
 
 
@@ -143,13 +153,15 @@ async def statistics_missing_bangumi(request: WebRequest):
         condition['subject_id'] = {'$exists': True}
     elif subject == 'false':
         condition['subject_id'] = {'$exists': False}
-    f = await request.app.db.statistics_missing_bangumi \
-        .find(condition, {'_id': 0}) \
-        .sort([('times', -1), ('subject_id', 1)]).to_list(500)
+    f = await request.app.db.statistics_missing_bangumi.find(
+        condition, {'_id': 0}
+    ).sort([('times', -1), ('subject_id', 1)]).to_list(500)
 
     for item in f:
-        item['bangumi_url'] = website_template.get(item['website'], '{}') \
-            .format(item['bangumi_id'])
+        item['bangumi_url'] = website_template.get(
+            item['website'],
+            '{}',
+        ).format(item['bangumi_id'])
         if item.get('subject_id'):
             item['subject_url'] = f"https://bgm.tv/subject/{item['subject_id']}"
     return web.json_response(f)
@@ -168,17 +180,17 @@ async def collected_episode_info(request: WebRequest):
         except ValueError:
             raise web.HTTPBadRequest(reason='episode not right')
     return web.json_response({
-        'message': 'hello world',
-        'data'   : await request.app.db.episode_info
-            .find({}, {'mediaInfo': 0,
-                       'epInfo'   : 0,
-                       'pubInfo'  : 0, }).to_list(episode)
+        'message': 'hello world', 'data': await
+        request.app.db.episode_info.find({}, {
+            'mediaInfo': 0,
+            'epInfo': 0,
+            'pubInfo': 0,
+        }).to_list(episode)
     })
 
 
 async def version(request: WebRequest):
     resp = web.Response(text='1.1.1')
-    resp.set_cookie('episode-player-url', '233', )
     return resp
 
 
@@ -187,18 +199,18 @@ def get_type(link: str):
     print(url_obj)
     return {
         'www.bilibili.com': 'bilibili',
-        'www.iqiyi.com'   : 'iqiyi',
-        'www.youku.com'   : 'youku',
-        'v.qq.com'        : 'tencent',
+        'www.iqiyi.com': 'iqiyi',
+        'www.youku.com': 'youku',
+        'v.qq.com': 'tencent',
     }.get(url_obj.netloc, 'other')
 
 
 async def missing_episode(request: WebRequest):
     return web.json_response({
         'message': 'hello world',
-        'data'   : [
-            jsonify(x) for x in
-            await request.app.db.bilibili_missing_episode.find().to_list(None)
+        'data': [
+            jsonify(x) for x in await
+            request.app.db.bilibili_missing_episode.find().to_list(None)
         ],
     })
 
@@ -217,32 +229,30 @@ async def query_subject_id(request: WebRequest):
         collection = request.app.db.bgm_tv_episode
         e = await collection.find_one({
             'ep_id': episode_id,
-            'type' : website,
+            'type': website,
         }, {'_id': 0})
         if e:
-            await request.app.db.statistics_missing_bangumi.delete_one(
-                {'type'      : website,
-                 'ep_id'     : episode_id,
-                 'bangumi_id': bangumi_id},
-            )
+            await request.app.db.statistics_missing_bangumi.delete_one({
+                'type': website, 'ep_id': episode_id, 'bangumi_id': bangumi_id
+            }, )
             return web.json_response(e)
         else:
             r = await request.app.db.statistics_missing_bangumi.update_one(
-                {'type'      : website,
-                 'ep_id'     : episode_id,
-                 'bangumi_id': bangumi_id},
-                {'$inc': {'times': 1}},
+                {
+                    'type': website, 'ep_id': episode_id,
+                    'bangumi_id': bangumi_id
+                }, {'$inc': {'times': 1}},
                 upsert=True
             )
-            print(r.raw_result)
         return web.HTTPNotFound()
     elif bangumi_id:
         collection = request.app.db.get_collection(website)
         e = await collection.find_one({'_id': bangumi_id})
         if e:
-            await request.app.db.statistics_missing_bangumi.delete_one(
-                {'website': website, 'bangumi_id': bangumi_id},
-            )
+            await request.app.db.statistics_missing_bangumi.delete_one({
+                'website': website,
+                'bangumi_id': bangumi_id,
+            }, )
             return web.json_response(e)
         else:
             await request.app.db.statistics_missing_bangumi.update_one(
@@ -252,9 +262,7 @@ async def query_subject_id(request: WebRequest):
             )
             return web.HTTPNotFound()
 
-    return web.HTTPBadRequest(
-        reason='need query `episodeID` or `bangumiID`'
-    )
+    return web.HTTPBadRequest(reason='need query `episodeID` or `bangumiID`')
 
 
 class PlayerUrl(web.View, CorsViewMixin):
@@ -273,13 +281,10 @@ class PlayerUrl(web.View, CorsViewMixin):
             ep_id = int(request.query.get('bgm_ep_id'))
         except (ValueError, TypeError):
             return web.HTTPBadRequest()
-        data = await request.app.db \
-            .get_collection(mongo_collection_name.FINAL_BGM_EP_MAP) \
-            .find({'bgm_ep_id': ep_id}, {'_id': 0}).to_list(None)
-        return web.json_response({
-            'status': 'success',
-            'data'  : data
-        })
+        data = await request.app.db.get_collection(
+            mongo_collection_name.FINAL_BGM_EP_MAP
+        ).find({'bgm_ep_id': ep_id}, {'_id': 0}).to_list(None)
+        return web.json_response({'status': 'success', 'data': data})
 
     async def post(self):
         request = self.request
@@ -292,7 +297,6 @@ class PlayerUrl(web.View, CorsViewMixin):
             return web.HTTPBadRequest()
         v = EpInputValidator(user_input)
         if not v.is_valid():
-            print(v.errors)
             return web.HTTPBadRequest()
         user_input = v.validated_data
         user_input['user_id'] = request.session.user_id
@@ -301,39 +305,43 @@ class PlayerUrl(web.View, CorsViewMixin):
         if input_type == 'bilibili':
             if '/ss' in user_input['link']:
                 return web.json_response({
-                    'status' : 'error',
-                    'message': 'B站的视频应该是'
-                               'https://www.bilibili.com/bangumi/play/ep(\\d), '
-                               '/ss(\\d)结尾的那个地址不能精确定位到每集'
+                    'status': 'error', 'message': 'B站的视频应该是'
+                    'https://www.bilibili.com/bangumi/play/ep(\\d), '
+                    '/ss(\\d)结尾的那个地址不能精确定位到每集'
                 })
         parser = server.website.get_website_parser(input_type)
         data = {
-            'type'     : input_type,
-            'user'     : request.session.user_id,
+            'type': input_type,
+            'user': request.session.user_id,
             'bgm_ep_id': user_input['ep_id'],
-            'link'     : user_input['link'],
-            'ep_id'    : parser.link_to_ep_id(user_input['link']),
+            'link': user_input['link'],
+            'ep_id': parser.link_to_ep_id(user_input['link']),
         }
 
-        await request.app.db \
-            .get_collection(mongo_collection_name.EP_INPUT_LOG) \
-            .update_one(
+        await request.app.db.get_collection(
+            mongo_collection_name.EP_INPUT_LOG
+        ).update_one(
             {'_id': user_input['ep_id']},
-            {'$push': {str(request.session.user_id): {
-                'link' : user_input['link'],
-                'ep_id': parser.link_to_ep_id(user_input['link']),
-            }}}, upsert=True
+            {
+                '$push': {
+                    str(request.session.user_id): {
+                        'link': user_input['link'],
+                        'ep_id': parser.link_to_ep_id(user_input['link']),
+                    }
+                }
+            },
+            upsert=True,
         )
         print('after put object')
-        # current_episode = await request.app.db \
-        #     .get_collection(mongo_collection_name.FINAL_BGM_EP_MAP) \
+        # current_episode = await request.app.db
+        #     .get_collection(mongo_collection_name.FINAL_BGM_EP_MAP)
         #     .find_one({'type': input_type, 'ep_id': user_input['ep_id']})
         if await is_authorized_user(request):
-            await request.app.db \
-                .get_collection(mongo_collection_name.FINAL_BGM_EP_MAP) \
-                .update_one(
+            await request.app.db.get_collection(
+                mongo_collection_name.FINAL_BGM_EP_MAP
+            ).update_one(
                 {'type': input_type, 'bgm_ep_id': user_input['ep_id']},
                 {'$set': data},
-                upsert=True
+                upsert=True,
             )
         return web.json_response({'status': 'success'})
