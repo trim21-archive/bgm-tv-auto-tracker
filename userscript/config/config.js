@@ -1,4 +1,4 @@
-const WatchLiveReloadPlugin = require('webpack-watch-livereload-plugin')
+const LiveReloadPlugin = require('webpack-livereload-plugin')
 const UserScriptMetaDataPlugin = require('userscript-metadata-webpack-plugin')
 const metadata = require('./metadata')
 const webpack = require('webpack')
@@ -13,15 +13,7 @@ module.exports = {
       new webpack.DefinePlugin({
         // window: { TM_ENV: JSON.stringify('dev') }
       }),
-      new WatchLiveReloadPlugin({
-        delay: 500,
-        files: [
-          // Replace these globs with yours
-          './src/**/*.html',
-          './src/**/*.css',
-          './src/**/*.js',
-        ]
-      })
+      new LiveReloadPlugin({ delay: 500 })
     ],
   },
   production: {
