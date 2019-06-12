@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Bgm.tv auto tracker
 // @namespace   https://trim21.me/
-// @version     1.0.2
+// @version     1.0.3
 // @author      Trim21 <trim21me@gmail.com>
 // @source      https://github.com/Trim21/bilibili-bangumi-tv-auto-tracker
 // @license     MIT
@@ -24,6 +24,7 @@
 // @connect     localhost
 // @connect     api.bgm.tv
 // @connect     bangumi-auto-tracker.trim21.cn
+// @connect     www.trim21.cn
 // @run-at      document-idle
 // ==/UserScript==
 
