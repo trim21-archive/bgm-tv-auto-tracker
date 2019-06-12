@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Bgm.tv auto tracker
 // @namespace   https://trim21.me/
-// @version     1.0.3
+// @version     1.0.4
 // @author      Trim21 <trim21me@gmail.com>
 // @source      https://github.com/Trim21/bilibili-bangumi-tv-auto-tracker
 // @license     MIT
@@ -10,7 +10,7 @@
 // @match       https://bangumi-auto-tracker.trim21.cn/oauth_callback*
 // @match       https://bangumi-auto-tracker.trim21.cn/userscript/options*
 // @require     https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js
-// @require     https://cdn.jsdelivr.net/npm/axios@0.18.0/dist/axios.min.js
+// @require     https://cdn.jsdelivr.net/npm/axios@0.19.0/dist/axios.min.js
 // @require     https://cdn.jsdelivr.net/npm/axios-userscript-adapter@0.0.3/dist/axiosGmxhrAdapter.min.js
 // @require     https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.min.js
 // @grant       GM_addStyle
@@ -795,7 +795,7 @@ const URLS = {
     apiServerURL: 'https://bangumi-auto-tracker.trim21.cn',
     callBackUrl: 'https://bangumi-auto-tracker.trim21.cn/oauth_callback',
     apiBgmUrl: 'https://api.bgm.tv',
-    authURL: 'https://bangumi-auto-tracker.trim21.cn/oauth',
+    authURL: 'https://bangumi-auto-tracker.trim21.cn/auth',
     refreshTokenPath: '/api/v0.1/refresh_token',
     newApiServer: 'https://www.trim21.cn'
 };
@@ -1837,7 +1837,7 @@ class ServerApi {
     }
     getBgmEpisodeID(instance) {
         return __awaiter(this, void 0, void 0, function* () {
-            let res = yield this.http.get(`/ep_id/${instance.name}/${instance.getEpisodeID()}`);
+            let res = yield this.newHttpServer.get(`/ep_id/${instance.name}/${instance.getEpisodeID()}`);
             return { bgm_ep_id: res.data.bgm_ep_id };
         });
     }
