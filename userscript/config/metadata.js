@@ -32,7 +32,8 @@ module.exports = {
     '127.0.0.1',
     'localhost',
     'api.bgm.tv',
-    'bangumi-auto-tracker.trim21.cn'
+    'bangumi-auto-tracker.trim21.cn',
+    'www.trim21.cn',
   ],
   'run-at': 'document-idle'
 }
