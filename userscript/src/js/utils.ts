@@ -342,7 +342,7 @@ class ServerApi {
       source_ep_id: string
       bgm_ep_id: number
       episode: number
-    }> = await this.http.get(`/ep_id/${ instance.name }/${ instance.getEpisodeID() }`)
+    }> = await this.newHttpServer.get(`/ep_id/${ instance.name }/${ instance.getEpisodeID() }`)
     return { bgm_ep_id: res.data.bgm_ep_id }
   }
 
