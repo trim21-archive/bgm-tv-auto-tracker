@@ -29,6 +29,7 @@ module.exports = {
     'unsafeWindow'
   ],
   'connect': [
+    '127.0.0.1',
     'localhost',
     'api.bgm.tv',
     'bangumi-auto-tracker.trim21.cn'

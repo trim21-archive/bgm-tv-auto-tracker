@@ -3,13 +3,12 @@ import $ from 'jquery'
 
 import { gmOpenInTab, gmUnsafeWindow, URLS, WEBSITE } from './vars'
 import { BgmApi, getAuth, saveAuth } from './utils'
-import { bilibili, iQiyi } from './website'
-import App from './App'
+import { Bilibili, Iqiyi } from './website'
+import App from './App.vue'
 
 if (gmUnsafeWindow.location.href.startsWith(URLS.callBackUrl)) {
   if (gmUnsafeWindow.data) {
     saveAuth(gmUnsafeWindow.data)
-    // gmSetValue('auth', JSON.stringify(gmUnsafeWindow.data))
     let child = gmUnsafeWindow.document.createElement('h1')
     child.innerText = '成功授权 请关闭网页 授权后不要忘记刷新已经打开的视频网页'
     gmUnsafeWindow.document.body.appendChild(child)
@@ -17,16 +16,16 @@ if (gmUnsafeWindow.location.href.startsWith(URLS.callBackUrl)) {
 }
 let website
 
-// inject bilibili
+// inject Bilibili
 
 /**
  *
  * @param {string} websiteName
- * @returns {iQiyi|bilibili}
+ * @returns {AbstractWebsite}
  */
 function getWebsiteClass (websiteName) {
-  if (websiteName === WEBSITE.iqiyi) return iQiyi
-  if (websiteName === WEBSITE.bilibili) return bilibili
+  if (websiteName === WEBSITE.iqiyi) return new Iqiyi()
+  if (websiteName === WEBSITE.bilibili) return new Bilibili()
 }
 
 if (gmUnsafeWindow.location.href.startsWith('https://www.bilibili.com/bangumi/play/')) {
@@ -39,7 +38,7 @@ if (gmUnsafeWindow.location.hostname === 'www.iqiyi.com') {
 }
 
 function init () {
-  if (website === 'bilibili') {
+  if (website === WEBSITE.bilibili) {
     if ([
       1, // 动漫
       2, // 电影
@@ -51,7 +50,7 @@ function init () {
   }
 
   // inject iqiyi
-  if (website === 'iqiyi') {
+  if (website === WEBSITE.iqiyi) {
     if (gmUnsafeWindow.Q.PageInfo.playPageInfo.categoryName === '动漫') {
       $('div.qy-player-title ').append(`<div id='bgm_tv_tracker'></div>`)
     }
@@ -61,11 +60,6 @@ function init () {
     getAuth().then(
       auth => {
         if (auth && auth.hasOwnProperty('access_token')) {
-          /* eslint-disable unused-def */
-          /* eslint-enable unused-def */
-          /**
-           * @type {BgmApi}
-           */
           Vue.prototype.$bgmApi = new BgmApi({ accessToken: auth.access_token })
           if (website) {
             Vue.prototype.$website = getWebsiteClass(website)

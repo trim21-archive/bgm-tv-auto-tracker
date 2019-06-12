@@ -14,7 +14,7 @@ let webpackConfig = {
     Buffer: false
   },
   resolve: {
-    extensions: ['.js', '.vue']
+    extensions: ['.js', '.vue', '.ts']
   },
   performance: {
     hints: false
@@ -31,7 +31,6 @@ let webpackConfig = {
     path: path.resolve(__dirname, '../dist')
   },
   externals: {
-    'path-browserify': 'path-browserify',
     'jquery': '$',
     'vue': 'Vue',
     axios: 'axios',
@@ -39,6 +38,14 @@ let webpackConfig = {
   },
   module: {
     rules: [
+      {
+        test: /\.ts?$/,
+        loader: 'ts-loader',
+        exclude: /node_modules/,
+        options: {
+          appendTsSuffixTo: [/\.vue$/]
+        },
+      },
       {
         test: /\.js$/,
         exclude: /node_modules/,
