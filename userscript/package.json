@@ -1,7 +1,7 @@
 {
   "name": "bgm-tv-auto-tracker",
   "description": "auto tracker your bangumi progress",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "author": {
     "name": "Trim21",
     "email": "trim21me@gmail.com"
@@ -73,7 +73,7 @@
     "wrapper-webpack-plugin": "^1.0.0"
   },
   "dependencies": {
-    "axios": "^0.18.0",
+    "axios": "^0.19.0",
     "axios-userscript-adapter": "^0.0.2",
     "jquery": "^3.3.1",
     "vue": "^2.5.16"

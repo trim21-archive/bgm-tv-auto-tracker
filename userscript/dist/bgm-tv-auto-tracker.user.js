@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Bgm.tv auto tracker
 // @namespace   https://trim21.me/
-// @version     1.0.1
+// @version     1.0.2
 // @author      Trim21 <trim21me@gmail.com>
 // @source      https://github.com/Trim21/bilibili-bangumi-tv-auto-tracker
 // @license     MIT
@@ -20,6 +20,7 @@
 // @grant       GM_addStyle
 // @grant       GM_xmlhttpRequest
 // @grant       unsafeWindow
+// @connect     127.0.0.1
 // @connect     localhost
 // @connect     api.bgm.tv
 // @connect     bangumi-auto-tracker.trim21.cn
@@ -154,11 +155,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const jquery_1 = __webpack_require__("xeH2");
-const vue_1 = __webpack_require__("i7/w");
+const externals_1 = __webpack_require__("J10y");
 const vars_1 = __webpack_require__("HKzn");
 const utils_1 = __webpack_require__("j7bY");
-const website_1 = __webpack_require__("As2x");
 let collection = vars_1.gmGetValue('collection', false);
 if (!collection) {
     collection = {};
@@ -166,17 +165,9 @@ if (!collection) {
 else {
     collection = JSON.parse(collection);
 }
-console.log(vue_1.default);
-exports.default = vue_1.default.extend({
+exports.default = externals_1.Vue.extend({
     data() {
-        let website = '';
-        if (vars_1.gmUnsafeWindow.location.href
-            .startsWith('https://www.bilibili.com/bangumi/play/')) {
-            website = vars_1.WEBSITE.bilibili;
-        }
-        else if (vars_1.gmUnsafeWindow.location.hostname === 'www.iqiyi.com') {
-            website = vars_1.WEBSITE.iqiyi;
-        }
+        let website = this.$website.name;
         let config = utils_1.getConfig();
         return {
             episodeNotMatch: false,
@@ -221,7 +212,7 @@ exports.default = vue_1.default.extend({
                 labels: 'bug',
                 body
             };
-            let query = jquery_1.default.param(params);
+            let query = externals_1.$.param(params);
             return baseURL + '?' + query;
         },
     },
@@ -251,45 +242,51 @@ exports.default = vue_1.default.extend({
             if (!this.subjectID)
                 return;
             let vm = this;
-            website_1.getBgmEpisodeID(this.$website).then(res => {
-                this.episodeID = res.data.bgm_ep_id;
-                this.episodeNotMatch = false;
-                vm.$bgmApi.getEps(this.subjectID).then((data) => {
-                    let episode = vm.episode;
-                    let eps = data.eps.filter((val) => val.id === parseInt(vm.episodeID, 10));
-                    try {
-                        this.episodeSort = eps[0].sort;
+            // serverApi.getBgmEpisodeID(this.$website).then(
+            //   data => {
+            //     this.episodeID = data.bgm_ep_id
+            //     this.episodeNotMatch = false
+            //
+            //     vm.$bgmApi.getEps(this.subjectID).then(
+            //       (data: any) => {
+            //         let eps = data.eps.filter((val: { id: number }) => val.id === parseInt(vm.episodeID, 10))
+            //         try {
+            //           this.episodeSort = eps[0].sort
+            //         } catch (e) {
+            //           vm.notify('没找到这集...')
+            //         }
+            //       },
+            //       (error: any) => {
+            //         vm.notify('233')
+            //         vm.notify(JSON.stringify(error))
+            //       }
+            //     )
+            //
+            //   },
+            //   () => {
+            this.episodeNotMatch = true;
+            vm.$bgmApi.getEps(this.subjectID).then((data) => {
+                let episode = vm.episode;
+                let eps = data.eps.filter((val) => Number.isInteger(Number(val.sort)) && (parseInt(val.type, 10) === 0));
+                eps = utils_1.sortEps(eps);
+                try {
+                    this.episodeID = eps[episode - 1].id;
+                    if (this.episodeStartWith) {
+                        this.episodeSort = this.episode + this.episodeStartWith - 1;
                     }
-                    catch (e) {
-                        vm.notify('没找到这集...');
+                    else {
+                        this.episodeSort = this.episode;
                     }
-                }, (error) => {
-                    vm.notify('233');
-                    vm.notify(JSON.stringify(error));
-                });
-            }, err => {
-                this.episodeNotMatch = true;
-                vm.$bgmApi.getEps(this.subjectID).then((data) => {
-                    let episode = vm.episode;
-                    let eps = data.eps.filter((val) => Number.isInteger(Number(val.sort)) && (parseInt(val.type, 10) === 0));
-                    eps = utils_1.sortEps(eps);
-                    try {
-                        this.episodeID = eps[episode - 1].id;
-                        if (this.episodeStartWith) {
-                            this.episodeSort = this.episode + this.episodeStartWith - 1;
-                        }
-                        else {
-                            this.episodeSort = this.episode + 1 - 1;
-                        }
-                    }
-                    catch (e) {
-                        vm.notify('没找到这集...');
-                    }
-                }, (error) => {
-                    vm.notify('233');
-                    vm.notify(JSON.stringify(error));
-                });
+                }
+                catch (e) {
+                    vm.notify('没找到这集...');
+                }
+            }, (error) => {
+                vm.notify('233');
+                vm.notify(JSON.stringify(error));
             });
+            // }
+            // )
         }
     },
     methods: {
@@ -302,32 +299,26 @@ exports.default = vue_1.default.extend({
                     this.tmpSubjectID = pList[pList.length - 1];
                 }
                 this.subjectID = this.tmpSubjectID;
-                utils_1.apiServer.post('/api/v0.1/reportMissingBangumi', {
-                    bangumiID: this.bangumiID,
-                    subjectID: this.subjectID,
-                    title: this.title,
-                    href: vars_1.gmUnsafeWindow.location.href,
-                    website: this.website
-                });
+                utils_1.serverApi.report_missing_bangumi(this.bangumiID, this.subjectID, this.title, this.website);
             }
         },
-        userSubmitEpisodeID() {
-            if (this.tmpEpisodeID) {
-                if (this.tmpEpisodeID.startsWith('http')) {
-                    const myURL = new URL(this.tmpEpisodeID);
-                    const p = myURL.pathname;
-                    const pList = p.split('/');
-                    this.tmpEpisodeID = pList[pList.length - 1];
-                }
-                this.episodeID = this.tmpEpisodeID;
-                utils_1.apiServer.post('/api/v0.1/report_missing_episode', {
-                    bangumiID: this.bangumiID.toString(),
-                    episodeID: this.$website.episodeID.toString(),
-                    bgmEpisodeID: this.episodeID,
-                    website: this.website
-                });
-            }
-        },
+        // userSubmitEpisodeID () {
+        //   if (this.tmpEpisodeID) {
+        //     if (this.tmpEpisodeID.startsWith('http')) {
+        //       const myURL = new URL(this.tmpEpisodeID)
+        //       const p = myURL.pathname
+        //       const pList = p.split('/')
+        //       this.tmpEpisodeID = pList[pList.length - 1]
+        //     }
+        //     this.episodeID = this.tmpEpisodeID
+        //     serverApi.report_missing_episode(
+        //       this.bangumiID.toString(),
+        //       this.$website.episodeID.toString(),
+        //       this.episodeID,
+        //       this.website
+        //     )
+        //   }
+        // },
         notify(message) {
             let now = new Date();
             this.messages.unshift({
@@ -354,11 +345,11 @@ exports.default = vue_1.default.extend({
                         collection[subjectID] = true;
                         vars_1.gmSetValue('collection', JSON.stringify(collection));
                     }
-                }, (error) => vm.notify(error.response.data.error_description));
+                }, (error) => vm.notify(error.response.data.detail));
             }
         },
         trigger() {
-            jquery_1.default('.bgm_tv_tracker_info').toggle('fast');
+            externals_1.$('.bgm_tv_tracker_info').toggle('fast');
         },
         watchEps() {
             return __awaiter(this, void 0, void 0, function* () {
@@ -405,15 +396,24 @@ exports.default = vue_1.default.extend({
         }
     },
     created() {
-        this.$website.getBgmEpisodeID().then((res) => { }, (err) => {
-            this.notify('不能精确定位这是哪一集, 只能根据集数来猜了, 可能猜的不太对.');
-            this.episodeNotMatch = true;
-        });
+        // serverApi.getBgmEpisodeID(this.$website).then(
+        //   (res: any) => {},
+        //   (err: any) => {
+        //     this.notify('不能精确定位这是哪一集, 只能根据集数来猜了, 可能猜的不太对.')
+        this.episodeNotMatch = true;
+        // }
+        // )
         // episode-item
         this.$website.init().then((data) => {
-            let { subjectID, episode, title, bangumiID, episodeStartWith } = data;
-            this.subjectID = subjectID;
-            this.episode = episode;
+            let { episodeID, // todo
+            episodeIndex, title, bangumiID, episodeStartWith } = data;
+            utils_1.serverApi.getBgmSubjectID(this.$website).then(res => {
+                this.subjectID = res.subject_id;
+            }, err => {
+                console.log(err);
+            });
+            this.episode = episodeIndex;
+            this.episodeID = episodeID;
             this.title = title;
             this.bangumiID = bangumiID;
             this.episodeStartWith = episodeStartWith;
@@ -571,79 +571,75 @@ module.exports = function (css) {
 
 "use strict";
 
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const jquery_1 = __webpack_require__("xeH2");
+const externals_1 = __webpack_require__("J10y");
 const vars_1 = __webpack_require__("HKzn");
 const utils_1 = __webpack_require__("j7bY");
-function getBgmEpisodeID(instance) {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            return yield utils_1.apiServer.get('/api/v0.2/querySubjectID', {
-                params: {
-                    bangumiID: instance.bangumiID,
-                    episodeID: instance.episodeID,
-                    website: instance.name,
-                }
-            });
-        }
-        catch (e) {
-            throw e;
-        }
-    });
-}
-exports.getBgmEpisodeID = getBgmEpisodeID;
 class Bilibili {
     constructor() {
         this.name = vars_1.WEBSITE.bilibili;
         this.window = vars_1.gmUnsafeWindow;
-        this.bangumiID = this.window.__INITIAL_STATE__.mediaInfo.season_id;
-        this.episodeID = this.window.__INITIAL_STATE__.epInfo.ep_id;
-        this.title = this.window.__INITIAL_STATE__.mediaInfo.title;
+    }
+    getTitle() {
+        return this.window.__INITIAL_STATE__.mediaInfo.title;
+    }
+    getBangumiID() {
+        return this.window.__INITIAL_STATE__.mediaInfo.media_id;
+    }
+    getEpisodeID() {
+        return this.window.__INITIAL_STATE__.epInfo.ep_id;
     }
     init() {
         const status = this.window.__INITIAL_STATE__;
-        const episode = this.window.__INITIAL_STATE__.epList
-            .filter(val => !val.index.includes('.')).findIndex(val => {
+        const episode = this.window.__INITIAL_STATE__.epList.filter(val => !val.index.includes('.')).findIndex(val => {
             return val.index === this.window.__INITIAL_STATE__.epInfo.index;
         }) + 1;
-        const bangumiID = this.bangumiID;
-        let title = this.title;
-        let episodeStartWith = parseInt(status.epList[0].index);
-        utils_1.apiServer.post('/api/v0.1/collect_episode_info', {
-            mediaInfo: this.window.__INITIAL_STATE__.mediaInfo,
-            epInfo: this.window.__INITIAL_STATE__.epInfo,
-            epList: this.window.__INITIAL_STATE__.epList,
-            pubInfo: this.window.__INITIAL_STATE__.pubInfo,
-        });
-        return utils_1.apiServer.get('/api/v0.2/querySubjectID', {
-            params: { bangumiID, website: 'Bilibili' }
-        }).then((response) => {
-            return {
-                subjectID: response.data.subject_id,
-                episode: episode.toString(),
+        const bangumiID = this.getBangumiID();
+        const title = this.getTitle();
+        const episodeStartWith = parseInt(status.epList[0].index);
+        // apiServer.post('/bgm-tv-auto-tracker/api.v1/collect_episode_info', {
+        //   mediaInfo: this.window.__INITIAL_STATE__.mediaInfo,
+        //   epInfo: this.window.__INITIAL_STATE__.epInfo,
+        //   epList: this.window.__INITIAL_STATE__.epList,
+        // })
+        return new Promise((resolve) => {
+            resolve({
+                episodeID: this.window.__INITIAL_STATE__.epInfo.ep_id,
+                episodeIndex: episode.toString(),
                 title,
                 episodeStartWith,
                 bangumiID
-            };
-        }, error => ({
-            episode: episode.toString(),
-            title,
-            episodeStartWith,
-            bangumiID,
-            error
-        }));
+            });
+        });
+        //
+        // return new Promise((resolve, reject) => {
+        //   apiServer.get('/api/v0.2/querySubjectID', {
+        //     params: { bangumiID, website: 'Bilibili' }
+        //   }).then((response: QuerySubjectIDResponse) => {
+        //       resolve({
+        //         subjectID: response.data.subject_id,
+        //         episode: episode.toString(),
+        //         title,
+        //         episodeStartWith,
+        //         bangumiID
+        //       })
+        //     },
+        //     (error: AxiosError) => {
+        //       // console.log(error)
+        //       reject({
+        //         episode: episode.toString(),
+        //         title,
+        //         episodeStartWith,
+        //         bangumiID,
+        //         error
+        //       })
+        //     }
+        //   )
+        // })
     }
     detectEpisodeChange(cb, notfound) {
         let cls = this;
-        let bangumiID = this.bangumiID;
+        let bangumiID = this.getBangumiID();
         let INNER_EPISODE = this.window.__INITIAL_STATE__.epInfo.index;
         function onEpisodeChange({ season = false, episode = false }) {
             if (season) {
@@ -654,7 +650,8 @@ class Bilibili {
             }
             if (episode) {
                 let ep = cls.window.__INITIAL_STATE__.epList
-                    .filter(val => !val.index.includes('.')).findIndex(val => val.index === cls.window.__INITIAL_STATE__.epInfo.index) + 1;
+                    .filter(val => !val.index.includes('.'))
+                    .findIndex(val => val.index === cls.window.__INITIAL_STATE__.epInfo.index) + 1;
                 if (ep) {
                     cb({
                         episode: ep.toString()
@@ -698,41 +695,32 @@ class Iqiyi {
     constructor() {
         this.name = vars_1.WEBSITE.iqiyi;
         this.window = vars_1.gmUnsafeWindow;
-        this.bangumiID = Iqiyi.get_bangumiID();
-        this.episodeID = Iqiyi.get_episodeID();
-        this.title = Iqiyi.get_title();
     }
-    static get_bangumiID() {
-        let collectionLinkEl = jquery_1.default('#block-C > div.qy-player-detail > div > div > div > div > div.qy-player-title > h1 > a');
+    getBangumiID() {
+        let collectionLinkEl = externals_1.$('#block-C > div.qy-player-detail > div > div > div > div > div.qy-player-title > h1 > a');
         let collectionLink = collectionLinkEl.attr('href');
         let filename = collectionLink.split('/');
         return filename[filename.length - 1].split('.').slice(0, -1).join('.');
     }
-    static get_episodeID() {
+    getEpisodeID() {
         return vars_1.gmUnsafeWindow.location.pathname.split('_')[1].split('.')[0];
     }
-    static get_title() {
+    getTitle() {
         return vars_1.gmUnsafeWindow.document.title;
     }
     init() {
-        let title = this.title;
-        let bangumiID = this.bangumiID;
+        let title = this.getTitle();
+        let bangumiID = this.getBangumiID();
         let episode = utils_1.parseEpisode(title);
-        return utils_1.apiServer.get('/api/v0.2/querySubjectID', {
-            params: { bangumiID, website: 'iqiyi' }
-        }).then(response => ({
-            subjectID: response.data.subject_id,
-            episode,
-            title,
-            bangumiID,
-            episodeStartWith: 1
-        }), error => ({
-            error,
-            episode,
-            title,
-            episodeStartWith: 1,
-            bangumiID,
-        }));
+        return new Promise(resolve => {
+            resolve({
+                title,
+                bangumiID,
+                episodeID: this.getEpisodeID(),
+                episodeIndex: episode.toString(),
+                episodeStartWith: 1
+            });
+        });
     }
     detectEpisodeChange(cb, notfound) {
         function onEpisodeChange() {
@@ -799,40 +787,23 @@ let gmGetValue = GM_getValue;
 exports.gmGetValue = gmGetValue;
 let gmOpenInTab = GM_openInTab;
 exports.gmOpenInTab = gmOpenInTab;
-/**
- * @namespace
- * @property {object} script
- * @property {object} script
- * @property {string} script.version
- */
 let gmInfo = GM_info;
 exports.gmInfo = gmInfo;
 /* eslint-enable no-undef, camelcase */
-/**
- * @namespace
- * @property {string} apiServerURL access token
- * @property {string} callBackUrl
- * @property {number} apiBgmUrl
- * @property {number} authURL
- */
 const URLS = {
     apiServerURL: 'https://bangumi-auto-tracker.trim21.cn',
     callBackUrl: 'https://bangumi-auto-tracker.trim21.cn/oauth_callback',
     apiBgmUrl: 'https://api.bgm.tv',
     authURL: 'https://bangumi-auto-tracker.trim21.cn/oauth',
+    refreshTokenPath: '/api/v0.1/refresh_token',
+    newApiServer: 'https://www.trim21.cn'
 };
 exports.URLS = URLS;
 if (window.TM_ENV === 'dev') {
-    // if (true) {
-    Object.assign(URLS, {
-        apiServerURL: 'http://127.0.0.1:8000',
-        callBackUrl: 'http://127.0.0.1:8000/oauth_callback',
-        apiBgmUrl: 'https://api.bgm.tv',
-        authURL: 'http://127.0.0.1:8000/bgm-tv-auto-tracker/api.v0/auth',
-    });
+    URLS.newApiServer = 'http://localhost:8000/';
 }
 const WEBSITE = {
-    bilibili: 'Bilibili',
+    bilibili: 'bilibili',
     iqiyi: 'iqiyi',
 };
 exports.WEBSITE = WEBSITE;
@@ -847,6 +818,34 @@ exports.WEBSITE = WEBSITE;
 /* harmony import */ var _node_modules_ts_loader_index_js_ref_0_node_modules_vue_loader_lib_index_js_vue_loader_options_App_vue_vue_type_script_lang_ts___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("6/sP");
 /* harmony import */ var _node_modules_ts_loader_index_js_ref_0_node_modules_vue_loader_lib_index_js_vue_loader_options_App_vue_vue_type_script_lang_ts___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_ts_loader_index_js_ref_0_node_modules_vue_loader_lib_index_js_vue_loader_options_App_vue_vue_type_script_lang_ts___WEBPACK_IMPORTED_MODULE_0__);
  /* harmony default export */ __webpack_exports__["default"] = (_node_modules_ts_loader_index_js_ref_0_node_modules_vue_loader_lib_index_js_vue_loader_options_App_vue_vue_type_script_lang_ts___WEBPACK_IMPORTED_MODULE_0___default.a); 
+
+/***/ }),
+
+/***/ "J10y":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("i7/w");
+/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(vue__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (default from non-harmony) */ __webpack_require__.d(__webpack_exports__, "Vue", function() { return vue__WEBPACK_IMPORTED_MODULE_0___default.a; });
+/* harmony import */ var jquery__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("xeH2");
+/* harmony import */ var jquery__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(jquery__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony reexport (default from non-harmony) */ __webpack_require__.d(__webpack_exports__, "$", function() { return jquery__WEBPACK_IMPORTED_MODULE_1___default.a; });
+/* harmony import */ var axios_userscript_adapter__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("CFBl");
+/* harmony import */ var axios_userscript_adapter__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(axios_userscript_adapter__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony reexport (default from non-harmony) */ __webpack_require__.d(__webpack_exports__, "adapter", function() { return axios_userscript_adapter__WEBPACK_IMPORTED_MODULE_2___default.a; });
+/*
+* this js module is a wrapper that don't let ts-loader
+* call `module.var` with `module.default.var` in compiled file
+* But `axios.default` is `axios` itself, so no need to wrap axios.
+* */
+
+
+
+
+
+
 
 /***/ }),
 
@@ -1040,26 +1039,6 @@ function normalizeComponent (
     options: options
   }
 }
-
-
-/***/ }),
-
-/***/ "KtRZ":
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/js/App.vue?vue&type=template&id=517aa88f&
-var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"disable",class:{
-        iqiyi: this.website === 'iqiyi',
-        bilibili: this.website === 'Bilibili',
-     },attrs:{"id":"bgm_tv_tracker"}},[_c('div',{staticClass:"bgm_tv_tracker_btn bgm_tv_tracker bgm_tv_tracker_radius",class:{},attrs:{"id":"bgm_tv_tracker_btn_on_page"},on:{"click":_vm.trigger}},[_vm._v("\n    bgm.tv"+_vm._s(_vm.score)+" "+_vm._s(_vm.episodeMarked?'✓':'')+"\n  ")]),_vm._v(" "),_c('div',{staticClass:"bgm_tv_tracker_info"},[(!_vm.subjectID)?_c('div',{staticClass:"not_found"},[_c('label',[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.tmpSubjectID),expression:"tmpSubjectID"}],staticClass:"subject",attrs:{"placeholder":"条目ID或者对应条目链接","type":"text"},domProps:{"value":(_vm.tmpSubjectID)},on:{"input":function($event){if($event.target.composing){ return; }_vm.tmpSubjectID=$event.target.value}}}),_vm._v(" "),_c('button',{staticClass:"notfound",on:{"click":_vm.userSubmitSubjectID}},[_vm._v("submit subject\n          id\n        ")])])]):_vm._e(),_vm._v(" "),_c('br'),_vm._v(" "),_c('div',[_c('p',[_vm._v("你正在看:\n        "),_c('span',{attrs:{"id":"bgm_tv_tracker_title"}},[_vm._v(_vm._s(_vm.bangumiName))])]),_vm._v(" "),_c('p',[_vm._v("第 "),_c('span',{attrs:{"id":"bgm_tv_tracker_episode"}},[_vm._v("\n        "+_vm._s(_vm.episodeSort)+"\n      ")]),_vm._v("\n        集")])]),_vm._v(" "),_c('br'),_vm._v(" "),_c('div',{attrs:{"id":"bgm_tv_tracker_link"}},[(_vm.episodeID)?_c('a',{attrs:{"href":("https://bgm.tv/ep/" + _vm.episodeID),"rel":"noopener noreferrer","target":"_blank"}},[_vm._v("吐槽本集")]):_vm._e(),_vm._v(" "),_c('br'),_vm._v(" "),_c('br'),_vm._v(" "),(_vm.subjectID)?_c('a',{attrs:{"href":("https://bgm.tv/subject/" + _vm.subjectID),"rel":"noopener noreferrer","target":"_blank"}},[_vm._v("subject/"+_vm._s(_vm.subjectID))]):_c('a',{attrs:{"href":("https://bgm.tv/subject_search/" + _vm.title + "?cat=2"),"rel":"noopener noreferrer","target":"_blank"}},[_vm._v("search in bgm.tv")])]),_vm._v(" "),_c('br'),_vm._v(" "),(_vm.subjectID)?_c('div',[_c('button',{staticClass:"bgm_tv_tracker_radius",attrs:{"id":"bgm_tv_tracker_mark_watch"},on:{"click":_vm.watchEps}},[_vm._v("标记本集为看过\n      ")]),_vm._v(" "),_c('button',{staticClass:"bgm_tv_tracker_radius",attrs:{"id":"bgm_tv_tracker_mark_watched"},on:{"click":_vm.setWatchProgress}},[_vm._v("看到本集\n      ")])]):_vm._e(),_vm._v(" "),_c('br'),_vm._v(" "),(_vm.episodeNotMatch)?_c('div',{staticClass:"not_found"},[_c('label',[_vm._v("填写本集对应的bgm单集网址来帮助我们精确定位这是哪一集\n        "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.tmpEpisodeID),expression:"tmpEpisodeID"}],staticClass:"subject",attrs:{"placeholder":"https://bgm.tv/ep/12345","type":"text"},domProps:{"value":(_vm.tmpEpisodeID)},on:{"input":function($event){if($event.target.composing){ return; }_vm.tmpEpisodeID=$event.target.value}}}),_vm._v(" "),_c('button',{staticClass:"notfound",on:{"click":_vm.userSubmitEpisodeID}},[_vm._v("submit")])])]):_vm._e(),_vm._v(" "),_c('br'),_vm._v(" "),_c('a',{staticStyle:{"color":"red"},attrs:{"href":_vm.reportUrl,"rel":"noopener noreferrer","target":"_blank"}},[_c('p',[_vm._v("报告问题")])]),_vm._v(" "),_vm._m(0),_vm._v(" "),(!_vm.subjectID)?_c('p',[_vm._v("\"bangumi_id\" : \""+_vm._s(_vm.bangumiID)+"\",")]):_vm._e(),_vm._v(" "),(!_vm.subjectID)?_c('p',[_vm._v("\"title\" : \""+_vm._s(_vm.title)+"\",")]):_vm._e(),_vm._v(" "),(!_vm.subjectID)?_c('p',[_vm._v("\"website\" : \""+_vm._s(_vm.website)+"\",")]):_vm._e(),_vm._v(" "),(!_vm.subjectID)?_c('p',[_vm._v("\"subject\" : \"\",")]):_vm._e(),_vm._v(" "),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.config.autoMarkWatched),expression:"config.autoMarkWatched"}],attrs:{"id":"bgm_tv_tracker_auto_mark_watched","type":"checkbox"},domProps:{"checked":Array.isArray(_vm.config.autoMarkWatched)?_vm._i(_vm.config.autoMarkWatched,null)>-1:(_vm.config.autoMarkWatched)},on:{"change":function($event){var $$a=_vm.config.autoMarkWatched,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(_vm.config, "autoMarkWatched", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(_vm.config, "autoMarkWatched", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(_vm.config, "autoMarkWatched", $$c)}}}}),_vm._v(" "),_c('label',{attrs:{"for":"bgm_tv_tracker_auto_mark_watched"}},[_vm._v("\n      播放进度大于80%时自动标记为看过\n    ")]),_vm._v(" "),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.config.collectionSubjectWhenMarkStatus),expression:"config.collectionSubjectWhenMarkStatus"}],attrs:{"id":"bgm_tv_tracker_collection_status_when_watch_status","type":"checkbox"},domProps:{"checked":Array.isArray(_vm.config.collectionSubjectWhenMarkStatus)?_vm._i(_vm.config.collectionSubjectWhenMarkStatus,null)>-1:(_vm.config.collectionSubjectWhenMarkStatus)},on:{"change":function($event){var $$a=_vm.config.collectionSubjectWhenMarkStatus,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(_vm.config, "collectionSubjectWhenMarkStatus", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(_vm.config, "collectionSubjectWhenMarkStatus", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(_vm.config, "collectionSubjectWhenMarkStatus", $$c)}}}}),_vm._v(" "),_c('label',{attrs:{"for":"bgm_tv_tracker_collection_status_when_watch_status"}},[_vm._v("\n      标记播放进度时把条目标记为在看\n    ")]),_vm._v(" "),_c('br'),_vm._v(" "),_c('div',{attrs:{"id":"bgm_tv_tracker_notification"}},_vm._l((_vm.messages),function(message,index){return _c('div',{key:index},[_c('hr'),_vm._v(" "),_c('div',[_c('p',[_vm._v("\n          "+_vm._s(message.time.getHours())+":"+_vm._s(message.time.getMinutes())+":\n          "+_vm._s(message.time.getSeconds())+"\n        ")]),_vm._v(" "),_c('p',[_vm._v(_vm._s(message.text))])])])}),0)])])}
-var staticRenderFns = [function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('a',{staticStyle:{"color":"red"},attrs:{"href":"https://github.com/Trim21/\n      bgm-tv-auto-tracker/blob/master/docs/user_info_collection.md","rel":"noopener noreferrer","target":"_blank"}},[_c('p',[_vm._v("\n      关于信息收集")])])}]
-
-
-// CONCATENATED MODULE: ./src/js/App.vue?vue&type=template&id=517aa88f&
-/* concated harmony reexport render */__webpack_require__.d(__webpack_exports__, "a", function() { return render; });
-/* concated harmony reexport staticRenderFns */__webpack_require__.d(__webpack_exports__, "b", function() { return staticRenderFns; });
 
 
 /***/ }),
@@ -1500,7 +1479,6 @@ __webpack_require__.r(__webpack_exports__);
 if (_vars__WEBPACK_IMPORTED_MODULE_2__["gmUnsafeWindow"].location.href.startsWith(_vars__WEBPACK_IMPORTED_MODULE_2__["URLS"].callBackUrl)) {
   if (_vars__WEBPACK_IMPORTED_MODULE_2__["gmUnsafeWindow"].data) {
     Object(_utils__WEBPACK_IMPORTED_MODULE_3__["saveAuth"])(_vars__WEBPACK_IMPORTED_MODULE_2__["gmUnsafeWindow"].data)
-    // gmSetValue('auth', JSON.stringify(gmUnsafeWindow.data))
     let child = _vars__WEBPACK_IMPORTED_MODULE_2__["gmUnsafeWindow"].document.createElement('h1')
     child.innerText = '成功授权 请关闭网页 授权后不要忘记刷新已经打开的视频网页'
     _vars__WEBPACK_IMPORTED_MODULE_2__["gmUnsafeWindow"].document.body.appendChild(child)
@@ -1530,7 +1508,7 @@ if (_vars__WEBPACK_IMPORTED_MODULE_2__["gmUnsafeWindow"].location.hostname === '
 }
 
 function init () {
-  if (website === 'Bilibili') {
+  if (website === _vars__WEBPACK_IMPORTED_MODULE_2__["WEBSITE"].bilibili) {
     if ([
       1, // 动漫
       2, // 电影
@@ -1542,7 +1520,7 @@ function init () {
   }
 
   // inject iqiyi
-  if (website === 'iqiyi') {
+  if (website === _vars__WEBPACK_IMPORTED_MODULE_2__["WEBSITE"].iqiyi) {
     if (_vars__WEBPACK_IMPORTED_MODULE_2__["gmUnsafeWindow"].Q.PageInfo.playPageInfo.categoryName === '动漫') {
       jquery__WEBPACK_IMPORTED_MODULE_1___default()('div.qy-player-title ').append(`<div id='bgm_tv_tracker'></div>`)
     }
@@ -1594,12 +1572,20 @@ module.exports = Vue;
 
 "use strict";
 
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const vars_1 = __webpack_require__("HKzn");
 const axios_1 = __webpack_require__("zr5I");
 exports.axios = axios_1.default;
-const axios_userscript_adapter_1 = __webpack_require__("CFBl");
-axios_1.default.defaults.adapter = axios_userscript_adapter_1.default;
+const externals_1 = __webpack_require__("J10y");
+axios_1.default.defaults.adapter = externals_1.adapter;
 function getScriptUserAgent() {
     return vars_1.gmUnsafeWindow.navigator.userAgent +
         ` Extension/${vars_1.gmInfo.version} ` +
@@ -1619,6 +1605,7 @@ class BgmApi {
         this.access_token = accessToken;
         this.http = axios_1.default.create({
             baseURL: serverRoot,
+            adapter: externals_1.adapter,
             headers: {
                 Authorization: 'Bearer ' + this.access_token,
                 'User-Agent': getScriptUserAgent(),
@@ -1694,11 +1681,6 @@ class BgmApi {
             });
         });
     }
-    /**
-     *
-     * @param subjectID
-     * @returns {Promise<SubjectResponse, AxiosError>}
-     */
     getSubject(subjectID) {
         return new Promise((resolve, reject) => {
             this.http.get(`/subject/${subjectID}`).then(response => {
@@ -1713,7 +1695,9 @@ class BgmApi {
     }
     setSubjectCollectionStatus({ subjectID, status }) {
         return new Promise((resolve, reject) => {
-            this.http.post(`/collection/${subjectID}/update`, `status=${status}`, { headers: { 'content-type': 'application/x-www-form-urlencoded' } }).then(response => {
+            this.http.post(`/collection/${subjectID}/update`, `status=${status}`, {
+                headers: { 'content-type': 'application/x-www-form-urlencoded' }
+            }).then(response => {
                 if (response.data.code >= 300) {
                     reject({ response });
                 }
@@ -1727,19 +1711,19 @@ class BgmApi {
 exports.BgmApi = BgmApi;
 let apiServer = axios_1.default.create({
     baseURL: vars_1.URLS.apiServerURL,
+    adapter: externals_1.adapter,
     headers: {
-        'User-Agent': getScriptUserAgent(),
-    },
+        'User-Agent': getScriptUserAgent()
+    }
 });
 exports.apiServer = apiServer;
-apiServer.interceptors.response.use(response => {
-    return response;
-}, error => {
-    if (error.response.status === 401) {
-        vars_1.gmOpenInTab(vars_1.URLS.authURL, { active: true });
-    }
-    return Promise.reject(error);
-});
+//
+// apiServer.interceptors.request.use(
+//   config => {
+//     console.log(config)
+//     return config
+//   }
+// )
 function parseEpisode(title) {
     let re = /第(\d+)集/g;
     let result = re.exec(title);
@@ -1755,7 +1739,6 @@ exports.parseEpisode = parseEpisode;
 class Auth {
 }
 function saveAuth(auth) {
-    auth.auth_time = parseInt((new Date().getTime() / 1000).toString(), 10);
     vars_1.gmSetValue('auth', JSON.stringify(auth));
 }
 exports.saveAuth = saveAuth;
@@ -1763,24 +1746,15 @@ function ifAuthExpires(auth) {
     /* auth_time 2d  expires in 9d */
     /*            2d + 7d - 1d < 6d => false */
     /*            2d + 7d - 1d < 8d => true */
-    return (auth.auth_time + auth.expires_in - 2 * 24 * 60 * 60) < Math.round(new Date().getTime() / 1000);
+    return (parseInt(auth.auth_time, 10) + auth.expires_in - 2 * 24 * 60 * 60) < Math.round(new Date().getTime() / 1000);
 }
 function getAuth() {
     let auth = vars_1.gmGetValue('auth', false);
     if (auth) {
         auth = JSON.parse(auth);
         if (ifAuthExpires(auth)) {
-            // if (true) {
-            console.log('refresh token');
-            return apiServer.post('/api/v0.1/refresh_token', auth)
-                .then(response => {
-                if (response.data.hasOwnProperty('error')) {
-                    // alert('续期token失败,请手动重新授权')
-                    console.log(response.data);
-                }
-                saveAuth(response.data);
-                return response.data;
-            });
+            console.debug('refresh token');
+            return serverApi.refreshToken();
         }
     }
     return Promise.resolve(auth);
@@ -1802,6 +1776,73 @@ function getConfig() {
     return rawConfig;
 }
 exports.getConfig = getConfig;
+class ServerApi {
+    constructor() {
+        this.http = apiServer;
+        this.newHttpServer = axios_1.default.create({
+            baseURL: vars_1.URLS.newApiServer,
+            adapter: externals_1.adapter,
+            headers: {
+                'User-Agent': getScriptUserAgent()
+            }
+        });
+    }
+    refreshToken() {
+        return new Promise((resolve, reject) => {
+            this.http.post(vars_1.URLS.refreshTokenPath)
+                .then((response) => {
+                if (response.data.hasOwnProperty('error')) {
+                    console.error(response.data);
+                    reject(false);
+                }
+                saveAuth(response.data);
+                resolve(response.data);
+            }, () => {
+                vars_1.gmOpenInTab(vars_1.URLS.authURL);
+                reject(false);
+            });
+        });
+    }
+    report_missing_episode(bangumiID, episodeID, bgmEpisodeID, website) {
+        this.http.post('/api/v0.1/report_missing_episode', {
+            bangumiID,
+            episodeID,
+            bgmEpisodeID,
+            website
+        });
+    }
+    report_missing_bangumi(bangumiID, subjectID, title, website) {
+        return this.http.post('/api/v0.1/reportMissingBangumi', {
+            bangumiID,
+            subjectID,
+            title,
+            href: vars_1.gmUnsafeWindow.location.href,
+            website,
+        });
+    }
+    getBgmSubjectID(instance) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let response = yield this.newHttpServer.get('/bgm-tv-auto-tracker/api.v1/subject_id', {
+                params: {
+                    source: instance.name,
+                    bangumi_id: instance.getBangumiID()
+                }
+            });
+            return {
+                bangumi_id: response.data.bangumi_id,
+                subject_id: response.data.subject_id,
+            };
+        });
+    }
+    getBgmEpisodeID(instance) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let res = yield this.http.get(`/ep_id/${instance.name}/${instance.getEpisodeID()}`);
+            return { bgm_ep_id: res.data.bgm_ep_id };
+        });
+    }
+}
+const serverApi = new ServerApi();
+exports.serverApi = serverApi;
 
 
 /***/ }),
@@ -1810,7 +1851,7 @@ exports.getConfig = getConfig;
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var _App_vue_vue_type_template_id_517aa88f___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("KtRZ");
+/* harmony import */ var _App_vue_vue_type_template_id_7caffd40___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("x+YN");
 /* harmony import */ var _App_vue_vue_type_script_lang_ts___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("IrU1");
 /* harmony import */ var _App_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("SwRH");
 /* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("KHd+");
@@ -1824,8 +1865,8 @@ exports.getConfig = getConfig;
 
 var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__[/* default */ "a"])(
   _App_vue_vue_type_script_lang_ts___WEBPACK_IMPORTED_MODULE_1__["default"],
-  _App_vue_vue_type_template_id_517aa88f___WEBPACK_IMPORTED_MODULE_0__[/* render */ "a"],
-  _App_vue_vue_type_template_id_517aa88f___WEBPACK_IMPORTED_MODULE_0__[/* staticRenderFns */ "b"],
+  _App_vue_vue_type_template_id_7caffd40___WEBPACK_IMPORTED_MODULE_0__[/* render */ "a"],
+  _App_vue_vue_type_template_id_7caffd40___WEBPACK_IMPORTED_MODULE_0__[/* staticRenderFns */ "b"],
   false,
   null,
   null,
@@ -1834,6 +1875,26 @@ var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_
 )
 
 /* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "x+YN":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+
+// CONCATENATED MODULE: ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/js/App.vue?vue&type=template&id=7caffd40&
+var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"disable",class:{
+        iqiyi: this.website === 'iqiyi',
+        bilibili: this.website === 'bilibili',
+     },attrs:{"id":"bgm_tv_tracker"}},[_c('div',{staticClass:"bgm_tv_tracker_btn bgm_tv_tracker bgm_tv_tracker_radius",class:{},attrs:{"id":"bgm_tv_tracker_btn_on_page"},on:{"click":_vm.trigger}},[_vm._v("\n    bgm.tv"+_vm._s(_vm.score)+" "+_vm._s(_vm.episodeMarked?'✓':'')+"\n  ")]),_vm._v(" "),_c('div',{staticClass:"bgm_tv_tracker_info"},[(!_vm.subjectID)?_c('div',{staticClass:"not_found"},[_c('label',[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.tmpSubjectID),expression:"tmpSubjectID"}],staticClass:"subject",attrs:{"placeholder":"条目ID或者对应条目链接","type":"text"},domProps:{"value":(_vm.tmpSubjectID)},on:{"input":function($event){if($event.target.composing){ return; }_vm.tmpSubjectID=$event.target.value}}}),_vm._v(" "),_c('button',{staticClass:"notfound",on:{"click":_vm.userSubmitSubjectID}},[_vm._v("submit subject\n          id\n        ")])])]):_vm._e(),_vm._v(" "),_c('br'),_vm._v(" "),_c('div',[_c('p',[_vm._v("你正在看:\n        "),_c('span',{attrs:{"id":"bgm_tv_tracker_title"}},[_vm._v(_vm._s(_vm.bangumiName))])]),_vm._v(" "),_c('p',[_vm._v("第 "),_c('span',{attrs:{"id":"bgm_tv_tracker_episode"}},[_vm._v("\n        "+_vm._s(_vm.episodeSort)+"\n      ")]),_vm._v("\n        集")])]),_vm._v(" "),_c('br'),_vm._v(" "),_c('div',{attrs:{"id":"bgm_tv_tracker_link"}},[(_vm.episodeID)?_c('a',{attrs:{"href":("https://bgm.tv/ep/" + _vm.episodeID),"rel":"noopener noreferrer","target":"_blank"}},[_vm._v("吐槽本集")]):_vm._e(),_vm._v(" "),_c('br'),_vm._v(" "),_c('br'),_vm._v(" "),(_vm.subjectID)?_c('a',{attrs:{"href":("https://bgm.tv/subject/" + _vm.subjectID),"rel":"noopener noreferrer","target":"_blank"}},[_vm._v("subject/"+_vm._s(_vm.subjectID))]):_c('a',{attrs:{"href":("https://bgm.tv/subject_search/" + _vm.title + "?cat=2"),"rel":"noopener noreferrer","target":"_blank"}},[_vm._v("search in bgm.tv")])]),_vm._v(" "),_c('br'),_vm._v(" "),(_vm.subjectID)?_c('div',[_c('button',{staticClass:"bgm_tv_tracker_radius",attrs:{"id":"bgm_tv_tracker_mark_watch"},on:{"click":_vm.watchEps}},[_vm._v("标记本集为看过\n      ")]),_vm._v(" "),_c('button',{staticClass:"bgm_tv_tracker_radius",attrs:{"id":"bgm_tv_tracker_mark_watched"},on:{"click":_vm.setWatchProgress}},[_vm._v("看到本集\n      ")])]):_vm._e(),_vm._v(" "),_c('br'),_vm._v(" "),_c('a',{staticStyle:{"color":"red"},attrs:{"href":_vm.reportUrl,"rel":"noopener noreferrer","target":"_blank"}},[_c('p',[_vm._v("报告问题")])]),_vm._v(" "),_vm._m(0),_vm._v(" "),(!_vm.subjectID)?_c('p',[_vm._v("\"bangumi_id\" : \""+_vm._s(_vm.bangumiID)+"\",")]):_vm._e(),_vm._v(" "),(!_vm.subjectID)?_c('p',[_vm._v("\"title\" : \""+_vm._s(_vm.title)+"\",")]):_vm._e(),_vm._v(" "),(!_vm.subjectID)?_c('p',[_vm._v("\"website\" : \""+_vm._s(_vm.website)+"\",")]):_vm._e(),_vm._v(" "),(!_vm.subjectID)?_c('p',[_vm._v("\"subject\" : \"\",")]):_vm._e(),_vm._v(" "),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.config.autoMarkWatched),expression:"config.autoMarkWatched"}],attrs:{"id":"bgm_tv_tracker_auto_mark_watched","type":"checkbox"},domProps:{"checked":Array.isArray(_vm.config.autoMarkWatched)?_vm._i(_vm.config.autoMarkWatched,null)>-1:(_vm.config.autoMarkWatched)},on:{"change":function($event){var $$a=_vm.config.autoMarkWatched,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(_vm.config, "autoMarkWatched", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(_vm.config, "autoMarkWatched", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(_vm.config, "autoMarkWatched", $$c)}}}}),_vm._v(" "),_c('label',{attrs:{"for":"bgm_tv_tracker_auto_mark_watched"}},[_vm._v("\n      播放进度大于80%时自动标记为看过\n    ")]),_vm._v(" "),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.config.collectionSubjectWhenMarkStatus),expression:"config.collectionSubjectWhenMarkStatus"}],attrs:{"id":"bgm_tv_tracker_collection_status_when_watch_status","type":"checkbox"},domProps:{"checked":Array.isArray(_vm.config.collectionSubjectWhenMarkStatus)?_vm._i(_vm.config.collectionSubjectWhenMarkStatus,null)>-1:(_vm.config.collectionSubjectWhenMarkStatus)},on:{"change":function($event){var $$a=_vm.config.collectionSubjectWhenMarkStatus,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(_vm.config, "collectionSubjectWhenMarkStatus", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(_vm.config, "collectionSubjectWhenMarkStatus", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(_vm.config, "collectionSubjectWhenMarkStatus", $$c)}}}}),_vm._v(" "),_c('label',{attrs:{"for":"bgm_tv_tracker_collection_status_when_watch_status"}},[_vm._v("\n      标记播放进度时把条目标记为在看\n    ")]),_vm._v(" "),_c('br'),_vm._v(" "),_c('div',{attrs:{"id":"bgm_tv_tracker_notification"}},_vm._l((_vm.messages),function(message,index){return _c('div',{key:index},[_c('hr'),_vm._v(" "),_c('div',[_c('p',[_vm._v("\n          "+_vm._s(message.time.getHours())+":"+_vm._s(message.time.getMinutes())+":\n          "+_vm._s(message.time.getSeconds())+"\n        ")]),_vm._v(" "),_c('p',[_vm._v(_vm._s(message.text))])])])}),0)])])}
+var staticRenderFns = [function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('a',{staticStyle:{"color":"red"},attrs:{"href":"https://github.com/Trim21/\n      bgm-tv-auto-tracker/blob/master/docs/user_info_collection.md","rel":"noopener noreferrer","target":"_blank"}},[_c('p',[_vm._v("\n      关于信息收集")])])}]
+
+
+// CONCATENATED MODULE: ./src/js/App.vue?vue&type=template&id=7caffd40&
+/* concated harmony reexport render */__webpack_require__.d(__webpack_exports__, "a", function() { return render; });
+/* concated harmony reexport staticRenderFns */__webpack_require__.d(__webpack_exports__, "b", function() { return staticRenderFns; });
+
 
 /***/ }),
 
