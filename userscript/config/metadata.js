@@ -10,8 +10,7 @@ module.exports = {
   'match': [
     'https://www.bilibili.com/bangumi/play/*',
     'http*://www.iqiyi.com/*_*.html',
-    'https://bangumi-auto-tracker.trim21.cn/oauth_callback*',
-    'https://bangumi-auto-tracker.trim21.cn/userscript/options*'
+    'https://www.trim21.cn/bgm-tv-auto-tracker/api.v1/oauth_callback*',
   ],
   'require': [
     'https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js',
@@ -30,7 +29,6 @@ module.exports = {
   ],
   'connect': [
     '127.0.0.1',
-    'localhost',
     'api.bgm.tv',
     'bangumi-auto-tracker.trim21.cn',
     'www.trim21.cn',

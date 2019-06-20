@@ -1,14 +1,13 @@
 // ==UserScript==
 // @name        Bgm.tv auto tracker
 // @namespace   https://trim21.me/
-// @version     1.0.6
+// @version     1.0.7
 // @author      Trim21 <trim21me@gmail.com>
 // @source      https://github.com/Trim21/bilibili-bangumi-tv-auto-tracker
 // @license     MIT
 // @match       https://www.bilibili.com/bangumi/play/*
 // @match       http*://www.iqiyi.com/*_*.html
-// @match       https://bangumi-auto-tracker.trim21.cn/oauth_callback*
-// @match       https://bangumi-auto-tracker.trim21.cn/userscript/options*
+// @match       https://www.trim21.cn/bgm-tv-auto-tracker/api.v1/oauth_callback*
 // @require     https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js
 // @require     https://cdn.jsdelivr.net/npm/axios@0.19.0/dist/axios.min.js
 // @require     https://cdn.jsdelivr.net/npm/axios-userscript-adapter@0.0.3/dist/axiosGmxhrAdapter.min.js
@@ -21,7 +20,6 @@
 // @grant       GM_xmlhttpRequest
 // @grant       unsafeWindow
 // @connect     127.0.0.1
-// @connect     localhost
 // @connect     api.bgm.tv
 // @connect     bangumi-auto-tracker.trim21.cn
 // @connect     www.trim21.cn
