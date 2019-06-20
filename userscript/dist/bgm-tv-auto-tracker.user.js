@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Bgm.tv auto tracker
 // @namespace   https://trim21.me/
-// @version     1.0.4
+// @version     1.0.5
 // @author      Trim21 <trim21me@gmail.com>
 // @source      https://github.com/Trim21/bilibili-bangumi-tv-auto-tracker
 // @license     MIT
@@ -793,15 +793,17 @@ exports.gmInfo = gmInfo;
 /* eslint-enable no-undef, camelcase */
 const URLS = {
     apiServerURL: 'https://bangumi-auto-tracker.trim21.cn',
-    callBackUrl: 'https://bangumi-auto-tracker.trim21.cn/oauth_callback',
     apiBgmUrl: 'https://api.bgm.tv',
-    authURL: 'https://bangumi-auto-tracker.trim21.cn/auth',
     refreshTokenPath: '/api/v0.1/refresh_token',
-    newApiServer: 'https://www.trim21.cn'
+    newApiServer: 'https://www.trim21.cn',
+    authURL: 'https://www.trim21.cn/bgm-tv-auto-tracker/api.v1/auth',
+    callBackUrl: 'https://www.trim21.cn/bgm-tv-auto-tracker/api.v1/oauth_callback',
 };
 exports.URLS = URLS;
 if (window.TM_ENV === 'dev') {
-    URLS.newApiServer = 'http://localhost:8000/';
+    URLS.newApiServer = 'http://127.0.0.1:8000/';
+    URLS.authURL = 'http://127.0.0.1:8000/bgm-tv-auto-tracker/api.v1/auth';
+    URLS.callBackUrl = 'http://127.0.0.1:8000/bgm-tv-auto-tracker/api.v1/oauth_callback';
 }
 const WEBSITE = {
     bilibili: 'bilibili',
@@ -1587,6 +1589,9 @@ const axios_1 = __webpack_require__("zr5I");
 exports.axios = axios_1.default;
 const externals_1 = __webpack_require__("J10y");
 axios_1.default.defaults.adapter = externals_1.adapter;
+function openAuthPage() {
+    vars_1.gmOpenInTab(vars_1.URLS.authURL, { active: true });
+}
 function getScriptUserAgent() {
     return vars_1.gmUnsafeWindow.navigator.userAgent +
         ` Extension/${vars_1.gmInfo.version} ` +
@@ -1718,6 +1723,21 @@ let apiServer = axios_1.default.create({
     }
 });
 exports.apiServer = apiServer;
+const newApiServer = axios_1.default.create({
+    baseURL: vars_1.URLS.newApiServer,
+    adapter: externals_1.adapter,
+    headers: {
+        'User-Agent': getScriptUserAgent()
+    }
+});
+newApiServer.interceptors.response.use((res) => {
+    return res;
+}, (err) => {
+    if (err.response.status == 403) {
+        openAuthPage();
+    }
+    return Promise.reject(err);
+});
 //
 // apiServer.interceptors.request.use(
 //   config => {
@@ -1780,13 +1800,7 @@ exports.getConfig = getConfig;
 class ServerApi {
     constructor() {
         this.http = apiServer;
-        this.newHttpServer = axios_1.default.create({
-            baseURL: vars_1.URLS.newApiServer,
-            adapter: externals_1.adapter,
-            headers: {
-                'User-Agent': getScriptUserAgent()
-            }
-        });
+        this.newHttpServer = newApiServer;
     }
     refreshToken() {
         return new Promise((resolve, reject) => {
@@ -1799,7 +1813,7 @@ class ServerApi {
                 saveAuth(response.data);
                 resolve(response.data);
             }, () => {
-                vars_1.gmOpenInTab(vars_1.URLS.authURL);
+                openAuthPage();
                 reject(false);
             });
         });
@@ -1813,12 +1827,12 @@ class ServerApi {
         });
     }
     report_missing_bangumi(bangumiID, subjectID, title, website) {
-        return this.http.post('/api/v0.1/reportMissingBangumi', {
-            bangumiID,
-            subjectID,
+        return this.newHttpServer.post('/bgm-tv-auto-tracker/api.v1/submit/subject_id', {
+            bangumi_id: bangumiID,
+            subject_id: subjectID,
             title,
             href: vars_1.gmUnsafeWindow.location.href,
-            website,
+            source: website,
         });
     }
     getBgmSubjectID(instance) {
@@ -1827,7 +1841,8 @@ class ServerApi {
                 params: {
                     source: instance.name,
                     bangumi_id: instance.getBangumiID()
-                }
+                },
+                withCredentials: true,
             });
             return {
                 bangumi_id: response.data.bangumi_id,
