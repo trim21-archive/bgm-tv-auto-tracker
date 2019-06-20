@@ -6,12 +6,21 @@ import {
   gmUnsafeWindow,
   URLS
 } from './vars'
-import axios, { AxiosAdapter, AxiosInstance, AxiosResponse, } from 'axios'
+import axios, {
+  AxiosAdapter,
+  AxiosError,
+  AxiosInstance,
+  AxiosResponse,
+} from 'axios'
 import { adapter } from './externals'
 import { AuthResponse, BaseResponse, SubjectResponse } from '../lib/responses'
 import { AbstractWebsite } from './website'
 
 axios.defaults.adapter = adapter
+
+function openAuthPage () {
+  gmOpenInTab(URLS.authURL, { active: true })
+}
 
 function getScriptUserAgent (): string {
   return gmUnsafeWindow.navigator.userAgent +
@@ -180,6 +189,21 @@ let apiServer = axios.create({
   }
 })
 
+const newApiServer = axios.create({
+  baseURL: URLS.newApiServer,
+  adapter,
+  headers: {
+    'User-Agent': getScriptUserAgent()
+  }
+})
+newApiServer.interceptors.response.use((res: AxiosResponse) => {
+  return res
+}, (err: AxiosError) => {
+  if (err.response.status == 403) {
+    openAuthPage()
+  }
+  return Promise.reject(err)
+})
 //
 // apiServer.interceptors.request.use(
 //   config => {
@@ -265,13 +289,7 @@ class ServerApi {
 
   constructor () {
     this.http = apiServer
-    this.newHttpServer = axios.create({
-      baseURL: URLS.newApiServer,
-      adapter,
-      headers: {
-        'User-Agent': getScriptUserAgent()
-      }
-    })
+    this.newHttpServer = newApiServer
   }
 
   refreshToken (): Promise<AuthResponse> {
@@ -285,14 +303,14 @@ class ServerApi {
           saveAuth(response.data)
           resolve(response.data)
         }, () => {
-          gmOpenInTab(URLS.authURL)
+          openAuthPage()
           reject(false)
         })
     })
   }
 
   report_missing_episode (bangumiID: string, episodeID: string,
-                          bgmEpisodeID: string, website: string) {
+                          bgmEpisodeID: string, website: string): void {
     this.http.post('/api/v0.1/report_missing_episode',
       {
         bangumiID,
@@ -305,13 +323,13 @@ class ServerApi {
 
   report_missing_bangumi (bangumiID: string, subjectID: number,
                           title: string, website: string) {
-    return this.http.post('/api/v0.1/reportMissingBangumi',
+    return this.newHttpServer.post('/bgm-tv-auto-tracker/api.v1/submit/subject_id',
       {
-        bangumiID,
-        subjectID,
+        bangumi_id: bangumiID,
+        subject_id: subjectID,
         title,
         href: gmUnsafeWindow.location.href,
-        website,
+        source: website,
       })
   }
 
@@ -327,7 +345,8 @@ class ServerApi {
       params: {
         source: instance.name,
         bangumi_id: instance.getBangumiID()
-      }
+      },
+      withCredentials: true,
     })
     return {
       bangumi_id: response.data.bangumi_id,
@@ -349,6 +368,7 @@ class ServerApi {
 }
 
 const serverApi = new ServerApi()
+
 export {
   BgmApi,
   axios,

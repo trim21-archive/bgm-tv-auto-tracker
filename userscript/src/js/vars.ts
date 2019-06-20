@@ -14,16 +14,18 @@ let gmInfo = GM_info
 
 const URLS = {
   apiServerURL: 'https://bangumi-auto-tracker.trim21.cn',
-  callBackUrl: 'https://bangumi-auto-tracker.trim21.cn/oauth_callback',
   apiBgmUrl: 'https://api.bgm.tv',
-  authURL: 'https://bangumi-auto-tracker.trim21.cn/auth',
   refreshTokenPath: '/api/v0.1/refresh_token',
-  newApiServer: 'https://www.trim21.cn'
+  newApiServer: 'https://www.trim21.cn',
+  authURL: 'https://www.trim21.cn/bgm-tv-auto-tracker/api.v1/auth',
+  callBackUrl: 'https://www.trim21.cn/bgm-tv-auto-tracker/api.v1/oauth_callback',
 
 }
 
 if (window.TM_ENV === 'dev') {
-  URLS.newApiServer = 'http://localhost:8000/'
+  URLS.newApiServer = 'http://127.0.0.1:8000/'
+  URLS.authURL = 'http://127.0.0.1:8000/bgm-tv-auto-tracker/api.v1/auth'
+  URLS.callBackUrl = 'http://127.0.0.1:8000/bgm-tv-auto-tracker/api.v1/oauth_callback'
 }
 
 const WEBSITE = {
