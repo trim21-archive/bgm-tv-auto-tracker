@@ -294,7 +294,7 @@ class ServerApi {
 
   refreshToken (): Promise<AuthResponse> {
     return new Promise((resolve, reject) => {
-      this.http.post(URLS.refreshTokenPath)
+      this.newHttpServer.post(URLS.refreshTokenPath)
         .then((response: BaseResponse<AuthResponse>) => {
           if (response.data.hasOwnProperty('error')) {
             console.error(response.data)

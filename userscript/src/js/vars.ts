@@ -15,7 +15,7 @@ let gmInfo = GM_info
 const URLS = {
   apiServerURL: 'https://bangumi-auto-tracker.trim21.cn',
   apiBgmUrl: 'https://api.bgm.tv',
-  refreshTokenPath: '/api/v0.1/refresh_token',
+  refreshTokenPath: '/bgm-tv-auto-tracker/api.v1/refresh',
   newApiServer: 'https://www.trim21.cn',
   authURL: 'https://www.trim21.cn/bgm-tv-auto-tracker/api.v1/auth',
   callBackUrl: 'https://www.trim21.cn/bgm-tv-auto-tracker/api.v1/oauth_callback',
