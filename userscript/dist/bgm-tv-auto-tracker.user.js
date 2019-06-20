@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Bgm.tv auto tracker
 // @namespace   https://trim21.me/
-// @version     1.0.5
+// @version     1.0.6
 // @author      Trim21 <trim21me@gmail.com>
 // @source      https://github.com/Trim21/bilibili-bangumi-tv-auto-tracker
 // @license     MIT
@@ -794,7 +794,7 @@ exports.gmInfo = gmInfo;
 const URLS = {
     apiServerURL: 'https://bangumi-auto-tracker.trim21.cn',
     apiBgmUrl: 'https://api.bgm.tv',
-    refreshTokenPath: '/api/v0.1/refresh_token',
+    refreshTokenPath: '/bgm-tv-auto-tracker/api.v1/refresh',
     newApiServer: 'https://www.trim21.cn',
     authURL: 'https://www.trim21.cn/bgm-tv-auto-tracker/api.v1/auth',
     callBackUrl: 'https://www.trim21.cn/bgm-tv-auto-tracker/api.v1/oauth_callback',
@@ -1804,7 +1804,7 @@ class ServerApi {
     }
     refreshToken() {
         return new Promise((resolve, reject) => {
-            this.http.post(vars_1.URLS.refreshTokenPath)
+            this.newHttpServer.post(vars_1.URLS.refreshTokenPath)
                 .then((response) => {
                 if (response.data.hasOwnProperty('error')) {
                     console.error(response.data);
