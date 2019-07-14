@@ -33,7 +33,7 @@ class Bilibili implements AbstractWebsite {
   }
 
   getBangumiID (): string {
-    return this.window.__INITIAL_STATE__.mediaInfo.media_id
+    return this.window.__INITIAL_STATE__.mediaInfo.season_id
   }
 
   getEpisodeID (): string {
