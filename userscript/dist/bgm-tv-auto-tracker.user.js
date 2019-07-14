@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Bgm.tv auto tracker
 // @namespace   https://trim21.me/
-// @version     1.0.7
+// @version     1.0.8
 // @author      Trim21 <trim21me@gmail.com>
 // @source      https://github.com/Trim21/bilibili-bangumi-tv-auto-tracker
 // @license     MIT
@@ -583,7 +583,7 @@ class Bilibili {
         return this.window.__INITIAL_STATE__.mediaInfo.title;
     }
     getBangumiID() {
-        return this.window.__INITIAL_STATE__.mediaInfo.media_id;
+        return this.window.__INITIAL_STATE__.mediaInfo.season_id;
     }
     getEpisodeID() {
         return this.window.__INITIAL_STATE__.epInfo.ep_id;
@@ -808,6 +808,26 @@ const WEBSITE = {
     iqiyi: 'iqiyi',
 };
 exports.WEBSITE = WEBSITE;
+
+
+/***/ }),
+
+/***/ "Ij0+":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+
+// CONCATENATED MODULE: ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/js/App.vue?vue&type=template&id=65592b54&
+var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"disable",class:{
+        iqiyi: this.website === 'iqiyi',
+        bilibili: this.website === 'bilibili',
+     },attrs:{"id":"bgm_tv_tracker"}},[_c('div',{staticClass:"bgm_tv_tracker_btn bgm_tv_tracker bgm_tv_tracker_radius",class:{},attrs:{"id":"bgm_tv_tracker_btn_on_page"},on:{"click":_vm.trigger}},[_vm._v("\n    bgm.tv"+_vm._s(_vm.score)+" "+_vm._s(_vm.episodeMarked?'✓':'')+"\n  ")]),_vm._v(" "),_c('div',{staticClass:"bgm_tv_tracker_info"},[(!_vm.subjectID)?_c('div',{staticClass:"not_found"},[_c('label',[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.tmpSubjectID),expression:"tmpSubjectID"}],staticClass:"subject",attrs:{"placeholder":"条目ID或者对应条目链接","type":"text"},domProps:{"value":(_vm.tmpSubjectID)},on:{"input":function($event){if($event.target.composing){ return; }_vm.tmpSubjectID=$event.target.value}}}),_vm._v(" "),_c('button',{staticClass:"notfound",on:{"click":_vm.userSubmitSubjectID}},[_vm._v("submit subject\n          id\n        ")])])]):_vm._e(),_vm._v(" "),_c('br'),_vm._v(" "),_c('div',[_c('p',[_vm._v("你正在看:\n        "),_c('span',{attrs:{"id":"bgm_tv_tracker_title"}},[_vm._v(_vm._s(_vm.bangumiName))])]),_vm._v(" "),_c('p',[_vm._v("第 "),_c('span',{attrs:{"id":"bgm_tv_tracker_episode"}},[_vm._v("\n        "+_vm._s(_vm.episodeSort)+"\n      ")]),_vm._v("\n        集")])]),_vm._v(" "),_c('br'),_vm._v(" "),_c('div',{attrs:{"id":"bgm_tv_tracker_link"}},[(_vm.episodeID)?_c('a',{attrs:{"href":("https://bgm.tv/ep/" + _vm.episodeID),"rel":"noopener noreferrer","target":"_blank"}},[_vm._v("吐槽本集")]):_vm._e(),_vm._v(" "),_c('br'),_vm._v(" "),_c('br'),_vm._v(" "),(_vm.subjectID)?_c('a',{attrs:{"href":("https://bgm.tv/subject/" + _vm.subjectID),"rel":"noopener noreferrer","target":"_blank"}},[_vm._v("subject/"+_vm._s(_vm.subjectID))]):_c('a',{attrs:{"href":("https://bgm.tv/subject_search/" + _vm.title + "?cat=2"),"rel":"noopener noreferrer","target":"_blank"}},[_vm._v("search in bgm.tv")])]),_vm._v(" "),_c('br'),_vm._v(" "),(_vm.subjectID)?_c('div',[_c('button',{staticClass:"bgm_tv_tracker_radius",attrs:{"id":"bgm_tv_tracker_mark_watch"},on:{"click":_vm.watchEps}},[_vm._v("标记本集为看过\n      ")]),_vm._v(" "),_c('button',{staticClass:"bgm_tv_tracker_radius",attrs:{"id":"bgm_tv_tracker_mark_watched"},on:{"click":_vm.setWatchProgress}},[_vm._v("看到本集\n      ")])]):_vm._e(),_vm._v(" "),_c('br'),_vm._v(" "),_c('a',{staticStyle:{"color":"red"},attrs:{"href":_vm.reportUrl,"rel":"noopener noreferrer","target":"_blank"}},[_c('p',[_vm._v("报告问题")])]),_vm._v(" "),_vm._m(0),_vm._v(" "),(!_vm.subjectID)?_c('p',[_vm._v("\"bangumi_id\" : \""+_vm._s(_vm.bangumiID)+"\",")]):_vm._e(),_vm._v(" "),(!_vm.subjectID)?_c('p',[_vm._v("\"title\" : \""+_vm._s(_vm.title)+"\",")]):_vm._e(),_vm._v(" "),(!_vm.subjectID)?_c('p',[_vm._v("\"website\" : \""+_vm._s(_vm.website)+"\",")]):_vm._e(),_vm._v(" "),(!_vm.subjectID)?_c('p',[_vm._v("\"subject\" : \"\",")]):_vm._e(),_vm._v(" "),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.config.autoMarkWatched),expression:"config.autoMarkWatched"}],attrs:{"id":"bgm_tv_tracker_auto_mark_watched","type":"checkbox"},domProps:{"checked":Array.isArray(_vm.config.autoMarkWatched)?_vm._i(_vm.config.autoMarkWatched,null)>-1:(_vm.config.autoMarkWatched)},on:{"change":function($event){var $$a=_vm.config.autoMarkWatched,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(_vm.config, "autoMarkWatched", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(_vm.config, "autoMarkWatched", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(_vm.config, "autoMarkWatched", $$c)}}}}),_vm._v(" "),_c('label',{attrs:{"for":"bgm_tv_tracker_auto_mark_watched"}},[_vm._v("\n      播放进度大于80%时自动标记为看过\n    ")]),_vm._v(" "),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.config.collectionSubjectWhenMarkStatus),expression:"config.collectionSubjectWhenMarkStatus"}],attrs:{"id":"bgm_tv_tracker_collection_status_when_watch_status","type":"checkbox"},domProps:{"checked":Array.isArray(_vm.config.collectionSubjectWhenMarkStatus)?_vm._i(_vm.config.collectionSubjectWhenMarkStatus,null)>-1:(_vm.config.collectionSubjectWhenMarkStatus)},on:{"change":function($event){var $$a=_vm.config.collectionSubjectWhenMarkStatus,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(_vm.config, "collectionSubjectWhenMarkStatus", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(_vm.config, "collectionSubjectWhenMarkStatus", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(_vm.config, "collectionSubjectWhenMarkStatus", $$c)}}}}),_vm._v(" "),_c('label',{attrs:{"for":"bgm_tv_tracker_collection_status_when_watch_status"}},[_vm._v("\n      标记播放进度时把条目标记为在看\n    ")]),_vm._v(" "),_c('br'),_vm._v(" "),_c('div',{attrs:{"id":"bgm_tv_tracker_notification"}},_vm._l((_vm.messages),function(message,index){return _c('div',{key:index},[_c('hr'),_vm._v(" "),_c('div',[_c('p',[_vm._v("\n          "+_vm._s(message.time.getHours())+":"+_vm._s(message.time.getMinutes())+":\n          "+_vm._s(message.time.getSeconds())+"\n        ")]),_vm._v(" "),_c('p',[_vm._v(_vm._s(message.text))])])])}),0)])])}
+var staticRenderFns = [function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('a',{staticStyle:{"color":"red"},attrs:{"href":"https://github.com/Trim21/\n      bgm-tv-auto-tracker/blob/master/docs/user_info_collection.md","rel":"noopener noreferrer","target":"_blank"}},[_c('p',[_vm._v("\n      关于信息收集")])])}]
+
+
+// CONCATENATED MODULE: ./src/js/App.vue?vue&type=template&id=65592b54&
+/* concated harmony reexport render */__webpack_require__.d(__webpack_exports__, "a", function() { return render; });
+/* concated harmony reexport staticRenderFns */__webpack_require__.d(__webpack_exports__, "b", function() { return staticRenderFns; });
 
 
 /***/ }),
@@ -1865,7 +1885,7 @@ exports.serverApi = serverApi;
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var _App_vue_vue_type_template_id_7caffd40___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("x+YN");
+/* harmony import */ var _App_vue_vue_type_template_id_65592b54___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("Ij0+");
 /* harmony import */ var _App_vue_vue_type_script_lang_ts___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("IrU1");
 /* harmony import */ var _App_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("SwRH");
 /* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("KHd+");
@@ -1879,8 +1899,8 @@ exports.serverApi = serverApi;
 
 var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__[/* default */ "a"])(
   _App_vue_vue_type_script_lang_ts___WEBPACK_IMPORTED_MODULE_1__["default"],
-  _App_vue_vue_type_template_id_7caffd40___WEBPACK_IMPORTED_MODULE_0__[/* render */ "a"],
-  _App_vue_vue_type_template_id_7caffd40___WEBPACK_IMPORTED_MODULE_0__[/* staticRenderFns */ "b"],
+  _App_vue_vue_type_template_id_65592b54___WEBPACK_IMPORTED_MODULE_0__[/* render */ "a"],
+  _App_vue_vue_type_template_id_65592b54___WEBPACK_IMPORTED_MODULE_0__[/* staticRenderFns */ "b"],
   false,
   null,
   null,
@@ -1889,26 +1909,6 @@ var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_
 )
 
 /* harmony default export */ __webpack_exports__["default"] = (component.exports);
-
-/***/ }),
-
-/***/ "x+YN":
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/js/App.vue?vue&type=template&id=7caffd40&
-var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"disable",class:{
-        iqiyi: this.website === 'iqiyi',
-        bilibili: this.website === 'bilibili',
-     },attrs:{"id":"bgm_tv_tracker"}},[_c('div',{staticClass:"bgm_tv_tracker_btn bgm_tv_tracker bgm_tv_tracker_radius",class:{},attrs:{"id":"bgm_tv_tracker_btn_on_page"},on:{"click":_vm.trigger}},[_vm._v("\n    bgm.tv"+_vm._s(_vm.score)+" "+_vm._s(_vm.episodeMarked?'✓':'')+"\n  ")]),_vm._v(" "),_c('div',{staticClass:"bgm_tv_tracker_info"},[(!_vm.subjectID)?_c('div',{staticClass:"not_found"},[_c('label',[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.tmpSubjectID),expression:"tmpSubjectID"}],staticClass:"subject",attrs:{"placeholder":"条目ID或者对应条目链接","type":"text"},domProps:{"value":(_vm.tmpSubjectID)},on:{"input":function($event){if($event.target.composing){ return; }_vm.tmpSubjectID=$event.target.value}}}),_vm._v(" "),_c('button',{staticClass:"notfound",on:{"click":_vm.userSubmitSubjectID}},[_vm._v("submit subject\n          id\n        ")])])]):_vm._e(),_vm._v(" "),_c('br'),_vm._v(" "),_c('div',[_c('p',[_vm._v("你正在看:\n        "),_c('span',{attrs:{"id":"bgm_tv_tracker_title"}},[_vm._v(_vm._s(_vm.bangumiName))])]),_vm._v(" "),_c('p',[_vm._v("第 "),_c('span',{attrs:{"id":"bgm_tv_tracker_episode"}},[_vm._v("\n        "+_vm._s(_vm.episodeSort)+"\n      ")]),_vm._v("\n        集")])]),_vm._v(" "),_c('br'),_vm._v(" "),_c('div',{attrs:{"id":"bgm_tv_tracker_link"}},[(_vm.episodeID)?_c('a',{attrs:{"href":("https://bgm.tv/ep/" + _vm.episodeID),"rel":"noopener noreferrer","target":"_blank"}},[_vm._v("吐槽本集")]):_vm._e(),_vm._v(" "),_c('br'),_vm._v(" "),_c('br'),_vm._v(" "),(_vm.subjectID)?_c('a',{attrs:{"href":("https://bgm.tv/subject/" + _vm.subjectID),"rel":"noopener noreferrer","target":"_blank"}},[_vm._v("subject/"+_vm._s(_vm.subjectID))]):_c('a',{attrs:{"href":("https://bgm.tv/subject_search/" + _vm.title + "?cat=2"),"rel":"noopener noreferrer","target":"_blank"}},[_vm._v("search in bgm.tv")])]),_vm._v(" "),_c('br'),_vm._v(" "),(_vm.subjectID)?_c('div',[_c('button',{staticClass:"bgm_tv_tracker_radius",attrs:{"id":"bgm_tv_tracker_mark_watch"},on:{"click":_vm.watchEps}},[_vm._v("标记本集为看过\n      ")]),_vm._v(" "),_c('button',{staticClass:"bgm_tv_tracker_radius",attrs:{"id":"bgm_tv_tracker_mark_watched"},on:{"click":_vm.setWatchProgress}},[_vm._v("看到本集\n      ")])]):_vm._e(),_vm._v(" "),_c('br'),_vm._v(" "),_c('a',{staticStyle:{"color":"red"},attrs:{"href":_vm.reportUrl,"rel":"noopener noreferrer","target":"_blank"}},[_c('p',[_vm._v("报告问题")])]),_vm._v(" "),_vm._m(0),_vm._v(" "),(!_vm.subjectID)?_c('p',[_vm._v("\"bangumi_id\" : \""+_vm._s(_vm.bangumiID)+"\",")]):_vm._e(),_vm._v(" "),(!_vm.subjectID)?_c('p',[_vm._v("\"title\" : \""+_vm._s(_vm.title)+"\",")]):_vm._e(),_vm._v(" "),(!_vm.subjectID)?_c('p',[_vm._v("\"website\" : \""+_vm._s(_vm.website)+"\",")]):_vm._e(),_vm._v(" "),(!_vm.subjectID)?_c('p',[_vm._v("\"subject\" : \"\",")]):_vm._e(),_vm._v(" "),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.config.autoMarkWatched),expression:"config.autoMarkWatched"}],attrs:{"id":"bgm_tv_tracker_auto_mark_watched","type":"checkbox"},domProps:{"checked":Array.isArray(_vm.config.autoMarkWatched)?_vm._i(_vm.config.autoMarkWatched,null)>-1:(_vm.config.autoMarkWatched)},on:{"change":function($event){var $$a=_vm.config.autoMarkWatched,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(_vm.config, "autoMarkWatched", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(_vm.config, "autoMarkWatched", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(_vm.config, "autoMarkWatched", $$c)}}}}),_vm._v(" "),_c('label',{attrs:{"for":"bgm_tv_tracker_auto_mark_watched"}},[_vm._v("\n      播放进度大于80%时自动标记为看过\n    ")]),_vm._v(" "),_c('br'),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.config.collectionSubjectWhenMarkStatus),expression:"config.collectionSubjectWhenMarkStatus"}],attrs:{"id":"bgm_tv_tracker_collection_status_when_watch_status","type":"checkbox"},domProps:{"checked":Array.isArray(_vm.config.collectionSubjectWhenMarkStatus)?_vm._i(_vm.config.collectionSubjectWhenMarkStatus,null)>-1:(_vm.config.collectionSubjectWhenMarkStatus)},on:{"change":function($event){var $$a=_vm.config.collectionSubjectWhenMarkStatus,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(_vm.config, "collectionSubjectWhenMarkStatus", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(_vm.config, "collectionSubjectWhenMarkStatus", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(_vm.config, "collectionSubjectWhenMarkStatus", $$c)}}}}),_vm._v(" "),_c('label',{attrs:{"for":"bgm_tv_tracker_collection_status_when_watch_status"}},[_vm._v("\n      标记播放进度时把条目标记为在看\n    ")]),_vm._v(" "),_c('br'),_vm._v(" "),_c('div',{attrs:{"id":"bgm_tv_tracker_notification"}},_vm._l((_vm.messages),function(message,index){return _c('div',{key:index},[_c('hr'),_vm._v(" "),_c('div',[_c('p',[_vm._v("\n          "+_vm._s(message.time.getHours())+":"+_vm._s(message.time.getMinutes())+":\n          "+_vm._s(message.time.getSeconds())+"\n        ")]),_vm._v(" "),_c('p',[_vm._v(_vm._s(message.text))])])])}),0)])])}
-var staticRenderFns = [function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('a',{staticStyle:{"color":"red"},attrs:{"href":"https://github.com/Trim21/\n      bgm-tv-auto-tracker/blob/master/docs/user_info_collection.md","rel":"noopener noreferrer","target":"_blank"}},[_c('p',[_vm._v("\n      关于信息收集")])])}]
-
-
-// CONCATENATED MODULE: ./src/js/App.vue?vue&type=template&id=7caffd40&
-/* concated harmony reexport render */__webpack_require__.d(__webpack_exports__, "a", function() { return render; });
-/* concated harmony reexport staticRenderFns */__webpack_require__.d(__webpack_exports__, "b", function() { return staticRenderFns; });
-
 
 /***/ }),
 
