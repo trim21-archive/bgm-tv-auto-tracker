@@ -24,7 +24,7 @@ class Bilibili implements AbstractWebsite {
   name = WEBSITE.bilibili
   window: BiliWindow
 
-  constructor () {
+  constructor() {
     this.window = <BiliWindow>gmUnsafeWindow
   }
 
@@ -33,7 +33,7 @@ class Bilibili implements AbstractWebsite {
   }
 
   getBangumiID (): string {
-    return this.window.__INITIAL_STATE__.mediaInfo.season_id
+    return this.window.__INITIAL_STATE__.mediaInfo.media_id
   }
 
   getEpisodeID (): string {
@@ -59,14 +59,14 @@ class Bilibili implements AbstractWebsite {
     // })
 
     return new Promise((resolve) => {
-        resolve({
-          episodeID: this.window.__INITIAL_STATE__.epInfo.ep_id,
-          episodeIndex: episode.toString(),
-          title,
-          episodeStartWith,
-          bangumiID
-        })
-      },
+      resolve({
+        episodeID: this.window.__INITIAL_STATE__.epInfo.ep_id,
+        episodeIndex: episode.toString(),
+        title,
+        episodeStartWith,
+        bangumiID
+      })
+    },
     )
     //
     // return new Promise((resolve, reject) => {
@@ -103,9 +103,9 @@ class Bilibili implements AbstractWebsite {
     function onEpisodeChange ({ season = false, episode = false }) {
       if (season) {
         cls.init().then(data => {
-            cb(data)
-            return data
-          },
+          cb(data)
+          return data
+        },
           notfound
         )
       }
@@ -161,7 +161,7 @@ class Iqiyi implements AbstractWebsite {
   name = WEBSITE.iqiyi
   window: IqiyiWindow
 
-  constructor () {
+  constructor() {
     this.window = <IqiyiWindow>gmUnsafeWindow
   }
 

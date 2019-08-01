@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Bgm.tv auto tracker
 // @namespace   https://trim21.me/
-// @version     1.0.8
+// @version     1.0.9
 // @author      Trim21 <trim21me@gmail.com>
 // @source      https://github.com/Trim21/bilibili-bangumi-tv-auto-tracker
 // @license     MIT
@@ -583,7 +583,7 @@ class Bilibili {
         return this.window.__INITIAL_STATE__.mediaInfo.title;
     }
     getBangumiID() {
-        return this.window.__INITIAL_STATE__.mediaInfo.season_id;
+        return this.window.__INITIAL_STATE__.mediaInfo.media_id;
     }
     getEpisodeID() {
         return this.window.__INITIAL_STATE__.epInfo.ep_id;
