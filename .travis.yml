@@ -1,30 +1,13 @@
 os: linux
-
-services:
-- mongodb
-
-env:
-    global:
-    - MONGO_USERNAME="travis"
-    - MONGO_PASSWORD="test"
-    - APP_ID=APP_ID
-    - APP_SECRET=APP_SECRET
-
-language: python
-
-python:
-- 3.6
-#- 3.7
+language: node_js
+node_js:
+  - 'lts/*'
+cache: npm
 
 install:
-- pip install -r server/requirements.txt
-- pip install pytest-aiohttp pytest-mock codecov
-before_script:
-#- sleep 15
-- mongo bilibili_bangumi --eval 'db.createUser({user:"travis",pwd:"test",roles:["readWrite"]});'
-
+    - npm i
 script:
-- coverage run -m pytest server_tests
+    - npm run build
 
-after_success:
-- codecov
+# after_success:
+    # - codecov
