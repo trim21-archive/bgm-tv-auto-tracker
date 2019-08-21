@@ -7,17 +7,17 @@ import { AxiosError } from 'axios'
 interface AbstractWebsite {
   readonly name: string
 
-  getBangumiID (): string
+  getBangumiID(): string
 
-  getEpisodeID (): string
+  getEpisodeID(): string
 
-  getTitle (): string
+  getTitle(): string
 
-  detectEpisodeChange (cb: Function, notfound: Function): void
+  detectEpisodeChange(cb: Function, notfound: Function): void
 
-  getPlayerInfo (): Promise<any>
+  getPlayerInfo(): Promise<any>
 
-  init (): Promise<InitResult>
+  init(): Promise<InitResult>
 }
 
 class Bilibili implements AbstractWebsite {
@@ -28,19 +28,19 @@ class Bilibili implements AbstractWebsite {
     this.window = <BiliWindow>gmUnsafeWindow
   }
 
-  getTitle (): string {
+  getTitle(): string {
     return this.window.__INITIAL_STATE__.mediaInfo.title
   }
 
-  getBangumiID (): string {
+  getBangumiID(): string {
     return this.window.__INITIAL_STATE__.mediaInfo.media_id
   }
 
-  getEpisodeID (): string {
+  getEpisodeID(): string {
     return this.window.__INITIAL_STATE__.epInfo.ep_id
   }
 
-  init (): Promise<InitResult> {
+  init(): Promise<InitResult> {
     const status = this.window.__INITIAL_STATE__
     const episode = this.window.__INITIAL_STATE__.epList.filter(
       val => !val.index.includes('.')
@@ -95,12 +95,12 @@ class Bilibili implements AbstractWebsite {
     // })
   }
 
-  detectEpisodeChange (cb: EpisodeChangeCallback, notfound: EpisodeChangeCallback) {
+  detectEpisodeChange(cb: EpisodeChangeCallback, notfound: EpisodeChangeCallback) {
     let cls = this
     let bangumiID = this.getBangumiID()
     let INNER_EPISODE = this.window.__INITIAL_STATE__.epInfo.index
 
-    function onEpisodeChange ({ season = false, episode = false }) {
+    function onEpisodeChange({ season = false, episode = false }) {
       if (season) {
         cls.init().then(data => {
           cb(data)
@@ -115,7 +115,7 @@ class Bilibili implements AbstractWebsite {
           .findIndex(val => val.index === cls.window.__INITIAL_STATE__.epInfo.index) + 1
         if (ep) {
           cb({
-            episode: ep.toString()
+            episode: ep
           })
         } else {
           cb({
@@ -145,7 +145,7 @@ class Bilibili implements AbstractWebsite {
     setTimeout(detectHrefChange, 5000)
   }
 
-  getPlayerInfo () {
+  getPlayerInfo() {
     return Promise.resolve(
       {
         current: this.window.player.getCurrentTime(),
@@ -165,22 +165,22 @@ class Iqiyi implements AbstractWebsite {
     this.window = <IqiyiWindow>gmUnsafeWindow
   }
 
-  getBangumiID (): string {
+  getBangumiID(): string {
     let collectionLinkEl = $('#block-C > div.qy-player-detail > div > div > div > div > div.qy-player-title > h1 > a')
     let collectionLink = collectionLinkEl.attr('href')
     let filename = collectionLink.split('/')
     return filename[filename.length - 1].split('.').slice(0, -1).join('.')
   }
 
-  getEpisodeID () {
+  getEpisodeID() {
     return gmUnsafeWindow.location.pathname.split('_')[1].split('.')[0]
   }
 
-  getTitle () {
+  getTitle() {
     return gmUnsafeWindow.document.title
   }
 
-  init (): Promise<InitResult> {
+  init(): Promise<InitResult> {
     let title = this.getTitle()
     let bangumiID = this.getBangumiID()
     let episode = parseEpisode(title)
@@ -195,8 +195,8 @@ class Iqiyi implements AbstractWebsite {
     })
   }
 
-  detectEpisodeChange (cb: EpisodeChangeCallback, notfound: EpisodeChangeCallback) {
-    function onEpisodeChange () {
+  detectEpisodeChange(cb: EpisodeChangeCallback, notfound: EpisodeChangeCallback) {
+    function onEpisodeChange() {
       console.log('href change')
       let title = gmUnsafeWindow.document.title
       let episode = parseEpisode(title)
@@ -223,7 +223,7 @@ class Iqiyi implements AbstractWebsite {
     setTimeout(detectHrefChange, 5000)
   }
 
-  getPlayerInfo () {
+  getPlayerInfo() {
     return new Promise((resolve) => {
       this.window.player.getPlayInfo(resolve)
     }).then(function (info: iQiyiVideoInfo) {

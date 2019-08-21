@@ -23,9 +23,9 @@ const URLS = {
 }
 
 if (window.TM_ENV === 'dev') {
-  URLS.newApiServer = 'http://127.0.0.1:8000/'
-  URLS.authURL = 'http://127.0.0.1:8000/bgm-tv-auto-tracker/api.v1/auth'
-  URLS.callBackUrl = 'http://127.0.0.1:8000/bgm-tv-auto-tracker/api.v1/oauth_callback'
+  // URLS.newApiServer = 'http://127.0.0.1:8000/'
+  // URLS.authURL = 'http://127.0.0.1:8000/bgm-tv-auto-tracker/api.v1/auth'
+  // URLS.callBackUrl = 'http://127.0.0.1:8000/bgm-tv-auto-tracker/api.v1/oauth_callback'
 }
 
 const WEBSITE = {

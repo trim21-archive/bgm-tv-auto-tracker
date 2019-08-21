@@ -9,7 +9,7 @@ import App from './App.vue'
 if (gmUnsafeWindow.location.href.startsWith(URLS.callBackUrl)) {
   if (gmUnsafeWindow.data) {
     saveAuth(gmUnsafeWindow.data)
-    let child = gmUnsafeWindow.document.createElement('h1')
+    const child = gmUnsafeWindow.document.createElement('h1')
     child.innerText = '成功授权 请关闭网页 授权后不要忘记刷新已经打开的视频网页'
     gmUnsafeWindow.document.body.appendChild(child)
   }
@@ -45,21 +45,21 @@ function init () {
       4, // 国创
       5, // 电视剧
     ].includes(gmUnsafeWindow.__INITIAL_STATE__.mediaInfo.season_type)) {
-      $('#bangumi_detail div.func-module.clearfix').prepend(`<div id='bgm_tv_tracker'></div>`)
+      $('#bangumi_detail div.func-module.clearfix').prepend('<div id=\'bgm_tv_tracker\'></div>')
     }
   }
 
   // inject iqiyi
   if (website === WEBSITE.iqiyi) {
     if (gmUnsafeWindow.Q.PageInfo.playPageInfo.categoryName === '动漫') {
-      $('div.qy-player-title ').append(`<div id='bgm_tv_tracker'></div>`)
+      $('div.qy-player-title ').append('<div id=\'bgm_tv_tracker\'></div>')
     }
   }
 
   if ($('#bgm_tv_tracker').length) {
     getAuth().then(
       auth => {
-        if (auth && auth.hasOwnProperty('access_token')) {
+        if (auth && Object.prototype.hasOwnProperty.call(auth, 'access_token')) {
           Vue.prototype.$bgmApi = new BgmApi({ accessToken: auth.access_token })
           if (website) {
             Vue.prototype.$website = getWebsiteClass(website)
