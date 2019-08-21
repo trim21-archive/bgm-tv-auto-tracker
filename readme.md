@@ -17,8 +17,8 @@ https://greasyfork.org/zh-CN/scripts/369643-bgm-tv-auto-tracker
 
 效果图
 
-![](./screenshot/bilibili.png)
-![](./screenshot/iqiyi.png)
+![bilibili](./screenshot/bilibili.png)
+![iqiyi](./screenshot/iqiyi.png)
 
 ## 开发
 
@@ -26,7 +26,7 @@ https://greasyfork.org/zh-CN/scripts/369643-bgm-tv-auto-tracker
 
 欢迎贡献代码
 
-正在前移到新的api server，见https://www.trim21.cn/
+api server见https://www.trim21.cn/
 
 用户脚本使用TypeScript和JavaScript
 
@@ -39,10 +39,8 @@ npm run dev # 检测文件变动,自动重新编译
 
 使用`webpack`打包
 
-
 ## 已知问题
 
 在同一集内重复点击`看到本集`会报错 这是api的设定
 
 如果bgm的某个番没有对应条目(比如柯南的900+集),`看过本集会报错`
-
