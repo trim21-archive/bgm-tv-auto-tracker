@@ -31,13 +31,11 @@ https://greasyfork.org/zh-CN/scripts/369643-bgm-tv-auto-tracker
 用户脚本使用TypeScript和JavaScript
 
 ```bash
-cd userscript
-
 npm i #安装依赖
 npm run dev # 检测文件变动,自动重新编译
 ```
 
-入口是`userscript/src/js/index.ts`
+入口是`src/js/index.ts`
 
 使用`webpack`打包
 
