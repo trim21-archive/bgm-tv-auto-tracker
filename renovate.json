@@ -2,7 +2,5 @@
   "extends": [
     "config:base"
   ],
-  "schedule": [
-    "weekly"
-  ]
+  "schedule": "on sunday"
 }
