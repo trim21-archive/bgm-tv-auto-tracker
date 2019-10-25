@@ -1,4 +1,4 @@
-FROM python:3.7.2-alpine
+FROM python:3.8.0b1-alpine
 EXPOSE 6003
 
 COPY server/requirements.txt /server/requirements.txt
