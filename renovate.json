@@ -1,6 +1,5 @@
 {
   "extends": [
-    "config:base",
-    "schedule:weekly"
+    "config:base", "schedule:weekly"
   ]
 }
