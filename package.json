@@ -42,7 +42,7 @@
   "devDependencies": {
     "@types/jquery": "3.3.31",
     "autoprefixer": "9.7.0",
-    "cross-env": "5.2.1",
+    "cross-env": "6.0.3",
     "css-loader": "2.1.1",
     "cssnano": "4.1.10",
     "eslint": "6.6.0",
