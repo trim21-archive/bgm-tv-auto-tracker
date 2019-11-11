@@ -5,7 +5,6 @@ __pycache__
 tmp
 node_modules
 userscript/dist/bgm-tv-auto-tracker.dev.user.js
-package-lock.json
 .pytest_cache
 htmlcov
 .coverage
