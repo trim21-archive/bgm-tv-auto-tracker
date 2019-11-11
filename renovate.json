@@ -1,5 +1,21 @@
 {
   "extends": [
-    "config:base", "schedule:weekly"
+    "config:base",
+    "schedule:weekly"
+  ],
+  "prHourlyLimit": 6,
+  "packageRules": [
+    {
+      "groupName": "deps-prod",
+      "depTypeList": [
+        "dependencies"
+      ]
+    },
+    {
+      "groupName": "deps-dev",
+      "depTypeList": [
+        "devDependencies"
+      ]
+    }
   ]
 }
