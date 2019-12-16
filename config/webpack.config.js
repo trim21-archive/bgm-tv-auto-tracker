@@ -10,9 +10,6 @@ const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPl
 const production = process.env.NODE_ENV === 'production'
 
 let webpackConfig = {
-  node: {
-    Buffer: false
-  },
   resolve: {
     extensions: ['.js', '.vue', '.ts']
   },
@@ -22,7 +19,7 @@ let webpackConfig = {
   optimization: {
     minimize: false,
     removeEmptyChunks: true,
-    namedChunks: true,
+    chunkIds: 'named',
     removeAvailableModules: false,
     mergeDuplicateChunks: false,
   },
@@ -31,8 +28,8 @@ let webpackConfig = {
     path: path.resolve(__dirname, '../dist')
   },
   externals: {
-    'jquery': '$',
-    'vue': 'Vue',
+    jquery: '$',
+    vue: 'Vue',
     axios: 'axios',
     'axios-userscript-adapter': 'axiosGmxhrAdapter',
   },
@@ -62,7 +59,7 @@ let webpackConfig = {
       },
       {
         test: /\.scss$/,
-        loaders: [
+        loader: [
           'style-loader',
           'css-loader',
           'postcss-loader',
@@ -73,10 +70,10 @@ let webpackConfig = {
   },
   plugins: [
     new webpack.DefinePlugin({
-      'PRODUCTION': JSON.stringify(production),
+      PRODUCTION: JSON.stringify(production),
       'process.env': {
-        'version': JSON.stringify(pkg.version),
-        'PRODUCTION': JSON.stringify(production),
+        version: JSON.stringify(pkg.version),
+        PRODUCTION: JSON.stringify(production),
         NODE_ENV: JSON.stringify(process.env.NODE_ENV)
       }
     }),

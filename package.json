@@ -61,7 +61,6 @@
     "to-string-loader": "1.1.6",
     "ts-loader": "6.2.1",
     "typescript": "3.7.3",
-    "uglifyjs-webpack-plugin": "2.2.0",
     "userscript-metadata-webpack-plugin": "0.0.3",
     "vue-loader": "15.8.3",
     "vue-style-loader": "4.1.2",
