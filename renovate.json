@@ -1,6 +1,6 @@
 {
   "extends": [
-    "github>Trim21/renovate-config:poetry"
+    "github>Trim21/renovate-config"
   ],
   "packageRules": [
     {
