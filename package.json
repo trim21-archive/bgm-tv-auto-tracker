@@ -65,7 +65,7 @@
     "userscript-metadata-webpack-plugin": "0.0.3",
     "vue-loader": "15.7.2",
     "vue-style-loader": "4.1.2",
-    "vue-template-compiler": "2.6.10",
+    "vue-template-compiler": "2.6.11",
     "webpack": "4.41.3",
     "webpack-bundle-analyzer": "3.6.0",
     "webpack-cli": "3.3.10",
@@ -77,6 +77,6 @@
     "axios": "0.19.0",
     "axios-userscript-adapter": "0.0.3",
     "jquery": "3.4.1",
-    "vue": "2.6.10"
+    "vue": "2.6.11"
   }
 }
