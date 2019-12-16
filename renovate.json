@@ -2,19 +2,5 @@
   "extends": [
     "github>Trim21/renovate-config",
     "config:js-app"
-  ],
-  "packageRules": [
-    {
-      "groupName": "deps-prod",
-      "depTypeList": [
-        "dependencies"
-      ]
-    },
-    {
-      "groupName": "deps-dev",
-      "depTypeList": [
-        "devDependencies"
-      ]
-    }
   ]
 }
