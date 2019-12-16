@@ -1,6 +1,7 @@
 {
   "extends": [
-    "github>Trim21/renovate-config"
+    "github>Trim21/renovate-config",
+    "config:js-app"
   ],
   "packageRules": [
     {
