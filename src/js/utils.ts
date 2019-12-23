@@ -48,7 +48,7 @@ class BgmApi {
   readonly http: AxiosInstance
 
   constructor ({ accessToken, serverRoot = 'https://api.bgm.tv' }: {
-    accessToken: string; serverRoot: string;
+    accessToken: string; serverRoot?: string;
   }) {
     this.access_token = accessToken
     this.http = axios.create({
@@ -242,7 +242,8 @@ function ifAuthExpires (auth: Auth): boolean {
   /* auth_time 2d  expires in 9d */
   /*            2d + 7d - 1d < 6d => false */
   /*            2d + 7d - 1d < 8d => true */
-  return (parseInt(auth.auth_time, 10) + auth.expires_in - 2 * 24 * 60 * 60) < Math.round(new Date().getTime() / 1000)
+  return (parseInt(auth.auth_time, 10) + auth.expires_in - 2 * 24 * 60 * 60)
+    < Math.round(new Date().getTime() / 1000)
 }
 
 function getAuth (): Promise<Auth | boolean> {

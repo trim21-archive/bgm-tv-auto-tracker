@@ -4,10 +4,10 @@ env
 __pycache__
 tmp
 node_modules
-userscript/dist/bgm-tv-auto-tracker.dev.user.js
 .pytest_cache
 htmlcov
 .coverage
 bangumi-data
 .env
 tmp.py
+dist/bgm-tv-auto-tracker.dev.user.js

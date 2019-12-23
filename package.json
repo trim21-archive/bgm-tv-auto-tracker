@@ -9,8 +9,8 @@
   "scripts": {
     "postversion": "npm run build && git add .",
     "anylize": "cross-env npm_config_report=true npm run build",
-    "build": "cross-env NODE_ENV=production webpack --mode production --config config/webpack.config.js",
-    "dev": "webpack --mode development --watch --config config/webpack.config.js",
+    "build": "cross-env NODE_ENV=production webpack --mode production --config config/webpack.config.prod.js",
+    "dev": "webpack --mode development --config config/webpack.config.dev.js",
     "lint": "eslint -c package.json src"
   },
   "browserslist": [
@@ -54,11 +54,11 @@
     "eslint-plugin-standard": "4.0.1",
     "hoek": "6.1.3",
     "html-loader": "0.5.5",
-    "node-sass": "4.13.0",
     "postcss-loader": "3.0.0",
-    "sass-loader": "8.0.0",
     "style-loader": "1.0.2",
     "to-string-loader": "1.1.6",
+    "less": "3.10.3",
+    "less-loader": "5.0.0",
     "ts-loader": "6.2.1",
     "typescript": "3.7.3",
     "userscript-metadata-webpack-plugin": "0.0.3",

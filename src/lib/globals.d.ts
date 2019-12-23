@@ -1,12 +1,14 @@
 interface BiliWindow extends Window {
   __INITIAL_STATE__: {
     mediaInfo: {
-      media_id: string
-      season_type: string
-      season_id: string
+      id: number
       title: string
     },
-    epList: Array<{ index: string }>
+    epList: Array<{
+      index: string
+      i: number
+      title: string
+    }>
     epInfo: {
       index: string
       ep_id: string

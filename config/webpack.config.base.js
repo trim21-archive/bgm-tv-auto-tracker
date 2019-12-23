@@ -1,20 +1,13 @@
 const path = require('path')
 const webpack = require('webpack')
-const merge = require('webpack-merge')
 const VueLoaderPlugin = require('vue-loader/lib/plugin')
-
+const production = process.env.NODE_ENV === 'production'
 const pkg = require('../package.json')
-const config = require('./config')
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
 
-const production = process.env.NODE_ENV === 'production'
-
-let webpackConfig = {
+const webpackConfig = {
   resolve: {
-    extensions: ['.js', '.vue', '.ts']
-  },
-  performance: {
-    hints: false
+    extensions: ['.js', '.vue', '.ts', '.less']
   },
   optimization: {
     minimize: false,
@@ -46,7 +39,24 @@ let webpackConfig = {
       {
         test: /\.js$/,
         exclude: /node_modules/,
-        loader: 'eslint-loader',
+        loader: 'eslint-loader'
+      },
+      {
+        test: /\.less$/,
+        loader: [
+          'style-loader',
+          'css-loader',
+          'postcss-loader',
+          'less-loader', // 将 Less 编译为 CSS
+        ]
+      },
+      {
+        test: /\.css$/,
+        loader: [
+          'style-loader',
+          'css-loader',
+          'postcss-loader'
+        ]
       },
       {
         test: /\.vue$/,
@@ -57,18 +67,10 @@ let webpackConfig = {
           }
         }
       },
-      {
-        test: /\.scss$/,
-        loader: [
-          'style-loader',
-          'css-loader',
-          'postcss-loader',
-          'sass-loader'
-        ]
-      }
     ]
   },
   plugins: [
+    new VueLoaderPlugin(),
     new webpack.DefinePlugin({
       PRODUCTION: JSON.stringify(production),
       'process.env': {
@@ -77,15 +79,7 @@ let webpackConfig = {
         NODE_ENV: JSON.stringify(process.env.NODE_ENV)
       }
     }),
-    new VueLoaderPlugin(),
-    new webpack.HashedModuleIdsPlugin(),
   ]
-}
-
-if (production) {
-  webpackConfig = merge(webpackConfig, config.production)
-} else {
-  webpackConfig = merge(webpackConfig, config.development)
 }
 
 if (process.env.npm_config_report) {

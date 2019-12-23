@@ -44,8 +44,8 @@ function init () {
       2, // 电影
       4, // 国创
       5, // 电视剧
-    ].includes(gmUnsafeWindow.__INITIAL_STATE__.mediaInfo.season_type)) {
-      $('#bangumi_detail div.func-module.clearfix').prepend('<div id=\'bgm_tv_tracker\'></div>')
+    ].includes(gmUnsafeWindow.__INITIAL_STATE__.mediaInfo.ssType)) {
+      $('.media-tool-bar.clearfix').prepend('<div id=\'bgm_tv_tracker\'></div>')
     }
   }
 
