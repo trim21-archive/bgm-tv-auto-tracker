@@ -17,8 +17,8 @@ https://greasyfork.org/zh-CN/scripts/369643-bgm-tv-auto-tracker
 
 效果图
 
-![bilibili](./screenshot/bilibili.png)
-![iqiyi](./screenshot/iqiyi.png)
+![bilibili](docs/screenshot/bilibili.png)
+![iqiyi](docs/screenshot/iqiyi.png)
 
 ## 开发
 

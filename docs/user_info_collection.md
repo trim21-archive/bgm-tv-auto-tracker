@@ -1,17 +1,1 @@
-在任何情况下, 不会收集你的播放记录, 不会把收集到的信息与你的个人身份对应起来.
-
-bgm.tv auto tracker将会在如下的情况下收集如下的信息: 
-
-1. 在没有找到对应的番剧的下, 当你手动填写条目id或者条目链接时, 会收集当前番剧的 `网址`, `标题`, `番剧id`, 你所填写的`条目id`
-2. 当查询某个番剧的条目id时, 如果对应的条目id不存在, 会记录所查询的`网站`和`番剧id`
-
-收集到的信息可在[statistics_missing_bangumi](https://bangumi-auto-tracker.trim21.cn/statistics_missing_bangumi)看到
-
-- 网站: `bilibili`或者`iqiyi`
-- 番剧id: 参考[bangumi-data](https://github.com/bangumi-data/bangumi-data/blob/master/CONTRIBUTING.md#%E7%AB%99%E7%82%B9-url-%E6%8B%BC%E6%8E%A5). b站的`番剧id`为`window.__INITIAL_STATE__.mediaInfo.season_id`
-- 条目id: bgm.tv网页中, 对应条目网址最后的数字. example: [https://bgm.tv/subject/`226677`](https://bgm.tv/subject/226677)
-
-
-2019.1.8新增:
-因为b站和bgm.tv的许多剧集不是完全对应的 (比如许多sp剧集), 所以为了提高标记的准确性, 需要知道b站番剧具体的分集信息.
-现在bgm会在你观看b站番剧的时候收集b站的番剧和分集信息, 具体为`__INITIAL_STATE__.mediaInfo`, `__INITIAL_STATE__.epInfo`, `__INITIAL_STATE__.pubInfo`和`__INITIAL_STATE__.epList`.
+现在除了查询用户当前观看动画在bgm.tv上的对应条目外没有收集任何数据
