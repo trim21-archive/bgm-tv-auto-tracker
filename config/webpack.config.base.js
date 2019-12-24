@@ -7,10 +7,11 @@ const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPl
 
 const webpackConfig = {
   resolve: {
-    extensions: ['.js', '.vue', '.ts', '.less']
+    extensions: ['.js', '.vue', '.ts', '.less'],
+    alias: { '@': path.resolve(__dirname, '../src/') },
   },
   optimization: {
-    minimize: false,
+    minimize: true,
     removeEmptyChunks: true,
     chunkIds: 'named',
     removeAvailableModules: false,
@@ -21,10 +22,10 @@ const webpackConfig = {
     path: path.resolve(__dirname, '../dist')
   },
   externals: {
-    jquery: '$',
-    vue: 'Vue',
-    axios: 'axios',
-    'axios-userscript-adapter': 'axiosGmxhrAdapter',
+    // jquery: '$',
+    // vue: 'Vue',
+    // axios: 'axios',
+    // 'axios-userscript-adapter': 'axiosGmxhrAdapter',
   },
   module: {
     rules: [
@@ -38,8 +39,7 @@ const webpackConfig = {
       },
       {
         test: /\.js$/,
-        exclude: /node_modules/,
-        loader: 'eslint-loader'
+        exclude: /node_modules/
       },
       {
         test: /\.less$/,

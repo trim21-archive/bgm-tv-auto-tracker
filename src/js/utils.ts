@@ -7,13 +7,12 @@ import {
   URLS
 } from './vars'
 import axios, {
-  AxiosAdapter,
   AxiosError,
   AxiosInstance,
   AxiosResponse,
 } from 'axios'
 import { adapter } from './externals'
-import { AuthResponse, BaseResponse, SubjectResponse } from '../lib/responses'
+import { AuthResponse, BaseResponse, SubjectResponse } from '@/lib/responses'
 import { AbstractWebsite } from './website'
 
 axios.defaults.adapter = adapter
@@ -276,14 +275,6 @@ function getConfig (): Config {
   return rawConfig
 }
 
-type EpsMap = {
-  subject_id: number
-  source: string
-  source_ep_id: string
-  bgm_ep_id: number
-  episode: number
-}[]
-
 class ServerApi {
   readonly http: AxiosInstance
   readonly newHttpServer: AxiosInstance
@@ -311,16 +302,7 @@ class ServerApi {
   }
 
   report_missing_episode (bangumiID: string, episodeID: string,
-                          bgmEpisodeID: string, website: string): void {
-    this.http.post('/api/v0.1/report_missing_episode',
-      {
-        bangumiID,
-        episodeID,
-        bgmEpisodeID,
-        website
-      }
-    )
-  }
+                          bgmEpisodeID: string, website: string): void { }
 
   report_missing_bangumi (bangumiID: string, subjectID: number,
                           title: string, website: string) {

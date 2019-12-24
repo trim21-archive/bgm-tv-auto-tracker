@@ -4,7 +4,7 @@ import $ from 'jquery'
 import { gmOpenInTab, gmUnsafeWindow, URLS, WEBSITE } from './vars'
 import { BgmApi, getAuth, saveAuth } from './utils'
 import { Bilibili, Iqiyi } from './website'
-import App from './App.vue'
+import App from '@/js/App.vue'
 
 if (gmUnsafeWindow.location.href.startsWith(URLS.callBackUrl)) {
   if (gmUnsafeWindow.data) {
@@ -83,6 +83,7 @@ function initWrapper () {
   }
 }
 
-$(gmUnsafeWindow).ready(function () {
+$(function () {
+  console.log('start init bgm.tv auto tracker script')
   initWrapper()
 })

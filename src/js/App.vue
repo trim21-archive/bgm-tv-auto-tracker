@@ -149,7 +149,7 @@ import {
   URLS
 } from './vars'
 import { getConfig, serverApi, sortEps } from './utils'
-import { SubjectResponse } from '../lib/responses'
+import { SubjectResponse } from '@/lib/responses'
 
 let collection = gmGetValue('collection', false)
 

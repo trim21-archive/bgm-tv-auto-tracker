@@ -1,6 +1,7 @@
 interface BiliWindow extends Window {
   __INITIAL_STATE__: {
     mediaInfo: {
+      ssType: number
       id: number
       title: string
     },

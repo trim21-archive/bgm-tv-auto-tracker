@@ -12,12 +12,6 @@ module.exports = {
     'http*://www.iqiyi.com/*_*.html*',
     'https://www.trim21.cn/bgm-tv-auto-tracker/api.v1/oauth_callback*',
   ],
-  require: [
-    'https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js',
-    'https://cdn.jsdelivr.net/npm/axios@0.19.0/dist/axios.min.js',
-    'https://cdn.jsdelivr.net/npm/axios-userscript-adapter@0.0.3/dist/axiosGmxhrAdapter.min.js',
-    'https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.min.js'
-  ],
   grant: [
     'GM_addStyle',
     'GM_setValue',

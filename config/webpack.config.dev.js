@@ -7,12 +7,20 @@ const LiveReloadPlugin = require('webpack-livereload-plugin')
 
 const webpackConfig = require('./webpack.config.base')
 
-metadata.require.push('file://' + path.resolve(__dirname, '../dist', 'bgm-tv-auto-tracker.prod.user.js'))
+if (Object.prototype.hasOwnProperty.call(metadata, 'require')) {
+  metadata.require.push('file://' + path.resolve(__dirname, '../dist', 'bgm-tv-auto-tracker.prod.user.js'))
+} else {
+  metadata.require = ['file://' + path.resolve(__dirname, '../dist', 'bgm-tv-auto-tracker.prod.user.js')]
+}
+
 metadata.name = 'dev ' + metadata.name
 const cfg = merge(webpackConfig, {
   entry: {
     prod: webpackConfig.entry,
     dev: path.resolve(__dirname, './empty.js'),
+  },
+  optimization: {
+    minimize: false,
   },
   output: {
     filename: 'bgm-tv-auto-tracker.[name].user.js',

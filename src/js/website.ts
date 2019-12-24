@@ -1,8 +1,6 @@
 import { $ } from './externals'
 import { gmUnsafeWindow, WEBSITE } from './vars'
-import { apiServer, parseEpisode } from './utils'
-import { QuerySubjectIDResponse } from '../lib/responses'
-import { AxiosError } from 'axios'
+import { parseEpisode } from './utils'
 
 interface AbstractWebsite {
   readonly name: string
