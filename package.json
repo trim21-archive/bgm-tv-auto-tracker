@@ -60,7 +60,7 @@
     "less": "3.10.3",
     "less-loader": "5.0.0",
     "ts-loader": "6.2.1",
-    "typescript": "3.7.3",
+    "typescript": "3.7.4",
     "userscript-metadata-webpack-plugin": "0.0.3",
     "vue-loader": "15.8.3",
     "vue-style-loader": "4.1.2",
