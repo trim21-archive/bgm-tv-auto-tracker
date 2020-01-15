@@ -4,6 +4,7 @@
 // @version     0.0.1
 // @author      Trim21 <trim21me@gmail.com>
 // @source      https://github.com/Trim21/bgm-tv-auto-tracker
+// @description show link of video website
 // @license     MIT
 // @include     /https?:\/\/(bgm\.tv|bangumi\.tv|chii\.in)\/[subject|ep]/.*/
 // @match       https?://bgm.tv/subject/*
