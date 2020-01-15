@@ -1,12 +1,12 @@
 // ==UserScript==
 // @name        Show Player Url On Bgm.tv
 // @namespace   https://trim21.me/
-// @version     0.0.1
+// @version     0.0.2
 // @author      Trim21 <trim21me@gmail.com>
 // @source      https://github.com/Trim21/bgm-tv-auto-tracker
 // @description show link of video website
 // @license     MIT
-// @include     /https?:\/\/(bgm\.tv|bangumi\.tv|chii\.in)\/[subject|ep]/.*/
+// @include     /https?:\/\/(bgm\.tv|bangumi\.tv|chii\.in)\/subject/.*/
 // @match       https?://bgm.tv/subject/*
 // @match       https?://bangumi.tv/subject/*
 // @match       https?://chii.in/subject/*
