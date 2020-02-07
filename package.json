@@ -41,7 +41,7 @@
   "private": true,
   "devDependencies": {
     "@types/jquery": "3.3.31",
-    "autoprefixer": "9.7.3",
+    "autoprefixer": "9.7.4",
     "cross-env": "6.0.3",
     "css-loader": "3.4.0",
     "cssnano": "4.1.10",
